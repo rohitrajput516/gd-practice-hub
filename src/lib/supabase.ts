@@ -1,0 +1,331 @@
+import { createClient } from '@supabase/supabase-js';
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+
+export const isCloudEnabled = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
+export const supabase = isCloudEnabled ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+export const isValidHttps = (url?: string) => {
+  if (!url) return false;
+  try {
+    return new URL(url).protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
+const SEED_DATA: Record<string, any> = {
+  website_settings: {
+    id: 1,
+    website_name: 'GD Practice Hub',
+    website_tagline: 'Practice. Discuss. Lead.',
+    mission_statement: 'A premier web platform designed for students to practice, discuss, and improve their Group Discussion (GD) and communication skills through guided live interactive sessions.',
+    logo_url: '/logo.png',
+    telegram_url: '',
+    default_timezone: 'IST (UTC+5:30)',
+    contact_email: 'admin@gdpractice.com',
+    footer_text: '© 2026 GD Practice Hub',
+    session_policy: 'Starting this Monday, please register at least 2 hours before any scheduled GD session to get the Zoom meeting credentials.'
+  },
+  sessions: [
+    {
+      id: '1',
+      title: 'Tech & Society GD: Is Privacy Dead in the Age of AI & Social Media?',
+      topic: 'Is Social Media Killing Privacy?',
+      category: 'AI & Tech',
+      scheduled_date: '29 Jan, 2026',
+      start_time: '7:00 PM',
+      timezone: 'IST (UTC+5:30)',
+      platform: 'Zoom Room',
+      zoom_url: 'https://zoom.us/j/9876543210',
+      meeting_id: '987 654 3210',
+      passcode: 'GD2026',
+      status: 'Live',
+      is_published: true,
+      is_featured: true,
+      participants: '12–15',
+      description: 'A fast-paced interactive discussion on how AI algorithms, data mining, and social media platforms handle our personal data. Who should join? Students preparing for campus placements, interviews, and anyone keen on digital privacy.',
+      preparation_points: 'Pros: AI improves personalized experiences, security, and automates repetitive tasks\nCons: Leads to data misuse, invasion of personal space, and constant surveillance\nData points to research: Case studies on major data leaks, privacy regulations like GDPR, and the role of tech giants in monitoring public opinion.',
+      special_instructions: 'Be respectful to other candidates\nNo interruptions while someone is speaking\nSupport your opinions with factual data\nAdhere to the 3-minute speaking limit'
+    },
+    {
+      id: '2',
+      title: 'Business & Economy GD',
+      topic: 'Economic Impact of Artificial Intelligence',
+      category: 'Business & Economy',
+      scheduled_date: '30 Jan, 2026',
+      start_time: '6:00 PM',
+      timezone: 'IST (UTC+5:30)',
+      platform: 'Zoom Room',
+      zoom_url: 'https://zoom.us/j/9876543211',
+      status: 'Upcoming',
+      is_published: true,
+      is_featured: false,
+      participants: '8 Participants',
+      description: 'Group discussion on macroeconomic trends, inflation, and AI corporate shifts.',
+      preparation_points: 'Analyze wealth distribution.\nExamine labor displacement.\nGlobal market competition.',
+      special_instructions: 'Be respectful to other candidates\nAdhere to the 3-minute speaking limit'
+    },
+    {
+      id: '3',
+      title: 'Placement Special GD',
+      topic: 'AI & The Future of Work',
+      category: 'Interview and Placement GD',
+      scheduled_date: '31 Jan, 2026',
+      start_time: '5:00 PM',
+      timezone: 'IST (UTC+5:30)',
+      platform: 'Zoom Room',
+      zoom_url: '',
+      status: 'Upcoming',
+      is_published: true,
+      is_featured: false,
+      participants: '15 Participants',
+      description: 'Special mock placement session focused on campus interview readiness.',
+      preparation_points: 'Understand the timeline of AI automation.\nSynthesize solutions for workforce reskilling.',
+      special_instructions: 'Join 5 minutes early.'
+    },
+    {
+      id: '4',
+      title: 'Corporate Case Study GD',
+      topic: 'Startup Governance',
+      category: 'Business & Economy',
+      scheduled_date: '22 Jan, 2026',
+      start_time: '6:00 PM',
+      timezone: 'IST (UTC+5:30)',
+      platform: 'Zoom Room',
+      zoom_url: '',
+      status: 'Completed',
+      is_published: true,
+      is_featured: false,
+      participants: '14 Participants',
+      description: 'Completed session on corporate ethics.',
+      preparation_points: 'Case study breakdown.',
+      special_instructions: 'Completed.'
+    }
+  ],
+  topics: [
+    {
+      id: 't1',
+      title: 'Impact of AI on Modern Jobs',
+      category: 'AI & Tech',
+      description: 'Analyze the threat of automation, digital tracking, and AI on human labor.',
+      preparation_points: '• Understand the timeline of AI automation.\n• Discuss industries most affected (e.g., manufacturing, finance).\n• Examine new roles and skills in demand.\n• Synthesize solutions for workforce reskilling.',
+      difficulty: 'Medium',
+      est_time: '45m',
+      badge: 'POPULAR',
+      image_url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80',
+      is_featured: true,
+      is_published: true
+    },
+    {
+      id: 't2',
+      title: 'Is Social Media Killing Privacy?',
+      category: 'Social Issues',
+      description: 'Discuss the impact of algorithms and social media on human dignity.',
+      preparation_points: '• Algorithmic tracking.\n• GDPR and privacy laws.\n• Mental health impacts.',
+      difficulty: 'Hard',
+      est_time: '40m',
+      badge: 'RECOMMENDED',
+      image_url: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&w=800&q=80',
+      is_featured: true,
+      is_published: true
+    },
+    {
+      id: 't3',
+      title: 'Economic Impact of Artificial Intelligence',
+      category: 'Business',
+      description: 'Analyzing AI-driven growth, wealth distribution, and labor displacement.',
+      preparation_points: '• Productivity gains vs job loss.\n• Universal basic income debate.',
+      difficulty: 'Hard',
+      est_time: '50m',
+      badge: 'POPULAR',
+      image_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=80',
+      is_featured: true,
+      is_published: true
+    },
+    {
+      id: 't4',
+      title: 'Can AI & Tech Replace Human Creativity?',
+      category: 'AI & Tech',
+      description: 'Explore whether generative AI can replicate authentic human emotion and art.',
+      preparation_points: '• Originality vs training data.\n• Future of creative professions.',
+      difficulty: 'Medium',
+      est_time: '45m',
+      badge: 'POPULAR',
+      image_url: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=800&q=80',
+      is_featured: false,
+      is_published: true
+    },
+    {
+      id: 't5',
+      title: 'The Role of Social Media in Pandemic Awareness',
+      category: 'Social Issues',
+      description: 'Rapid information sharing vs misinformation during public health crises.',
+      preparation_points: '• Verified health advisories.\n• Combating fake news.',
+      difficulty: 'Easy',
+      est_time: '30m',
+      badge: 'POPULAR',
+      image_url: 'https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?auto=format&fit=crop&w=800&q=80',
+      is_featured: false,
+      is_published: true
+    },
+    {
+      id: 't6',
+      title: 'Impact of Autonomous Vehicles',
+      category: 'AI & Tech',
+      description: 'Safety, legal liability, and urban transport transformation.',
+      preparation_points: '• Reduction in human error.\n• Infrastructure readiness in India.',
+      difficulty: 'Medium',
+      est_time: '45m',
+      badge: 'POPULAR',
+      image_url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80',
+      is_featured: false,
+      is_published: true
+    }
+  ],
+  announcements: [
+    {
+      id: 'a1',
+      title: 'IMPORTANT: GD Registration Policy Update',
+      message: 'Starting this Monday, please register at least 2 hours before any scheduled GD session to get the Zoom meeting credentials. Late registrations will not be accommodated to avoid disruptions.',
+      category: 'Priority',
+      is_important: true,
+      is_published: true,
+      image_url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=900&q=80',
+      created_at: '2026-03-15'
+    },
+    {
+      id: 'a2',
+      title: 'Live Practice Session with Mock Judges',
+      message: 'Join our weekend evaluation panel for personalized speaking feedback.',
+      category: 'Sessions',
+      is_important: false,
+      is_published: true,
+      created_at: '2026-03-14'
+    },
+    {
+      id: 'a3',
+      title: 'New Feature: GD Prep Resources Added',
+      message: 'Structured preparation points are now live inside the Topics Library.',
+      category: 'Update',
+      is_important: false,
+      is_published: true,
+      created_at: '2026-03-12'
+    },
+    {
+      id: 'a4',
+      title: 'Scheduled Server Maintenance',
+      message: 'Brief 15-minute database upgrade completed smoothly.',
+      category: 'System',
+      is_important: false,
+      is_published: true,
+      created_at: '2026-03-10'
+    }
+  ],
+  feedback: [
+    {
+      id: 'f1',
+      name: 'Aman Sharma',
+      email: 'aman.sharma@example.com',
+      session_title: 'Tech & Society GD',
+      subject: 'Awesome GD Sessions!',
+      message: 'Really enjoying the live GD practice sessions on Zoom! The mentors are great and help everyone speak.',
+      rating: 5,
+      is_reviewed: false,
+      is_starred: false,
+      created_at: '10:42 AM'
+    },
+    {
+      id: 'f2',
+      name: 'Pooja Patel',
+      email: 'pooja.p@example.com',
+      session_title: 'Business & Economy GD',
+      subject: 'Suggestion for Schedule Page',
+      message: 'The current GD Schedule page is very informative, but could you please show which Zoom session will use which exact topic beforehand? Right now, some users get confused about what to prepare because the schedules just say "Next Session" instead of linking to specific prep points in the Library. Thanks for this amazing tool!',
+      rating: 5,
+      is_reviewed: false,
+      is_starred: false,
+      created_at: 'Yesterday'
+    },
+    {
+      id: 'f3',
+      name: 'Sneha Roy',
+      email: 'sneha.roy9@example.com',
+      session_title: 'Session 12',
+      subject: 'Technical issue joining Zoom',
+      message: "Hey Admin, I tried joining the Session 12 yesterday, but the link showed 'Session expired'. Please check.",
+      rating: 4,
+      is_reviewed: true,
+      is_starred: true,
+      created_at: 'Nov 1, 2026'
+    }
+  ]
+};
+
+const readLocal = (key: string) => {
+  const raw = localStorage.getItem(`gdhub_${key}`);
+  if (!raw) {
+    localStorage.setItem(`gdhub_${key}`, JSON.stringify(SEED_DATA[key]));
+    return SEED_DATA[key];
+  }
+  return JSON.parse(raw);
+};
+
+const writeLocal = (key: string, val: any) => {
+  localStorage.setItem(`gdhub_${key}`, JSON.stringify(val));
+};
+
+export const api = {
+  async getSettings() {
+    if (isCloudEnabled && supabase) {
+      const { data } = await supabase.from('website_settings').select('*').single();
+      if (data) return data;
+    }
+    return readLocal('website_settings');
+  },
+  async updateSettings(payload: any) {
+    if (isCloudEnabled && supabase) {
+      await supabase.from('website_settings').upsert({ id: 1, ...payload });
+    }
+    const next = { ...readLocal('website_settings'), ...payload };
+    writeLocal('website_settings', next);
+    return next;
+  },
+  async list(table: string, onlyPublished = false) {
+    if (isCloudEnabled && supabase) {
+      let q = supabase.from(table).select('*');
+      if (onlyPublished) q = q.eq('is_published', true);
+      const { data } = await q;
+      if (data) return data;
+    }
+    const rows = readLocal(table) || [];
+    return onlyPublished ? rows.filter((r: any) => r.is_published !== false) : rows;
+  },
+  async save(table: string, record: any) {
+    if (isCloudEnabled && supabase) {
+      const { data, error } = await supabase.from(table).upsert(record).select().single();
+      if (error) throw error;
+      return data;
+    }
+    const rows = readLocal(table) || [];
+    if (record.id) {
+      const idx = rows.findIndex((r: any) => r.id === record.id);
+      if (idx > -1) rows[idx] = { ...rows[idx], ...record };
+      else rows.unshift(record);
+    } else {
+      record.id = `${Date.now()}`;
+      record.created_at = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      rows.unshift(record);
+    }
+    writeLocal(table, rows);
+    return record;
+  },
+  async remove(table: string, id: string) {
+    if (isCloudEnabled && supabase) {
+      await supabase.from(table).delete().eq('id', id);
+    }
+    const rows = (readLocal(table) || []).filter((r: any) => r.id !== id);
+    writeLocal(table, rows);
+  }
+};
