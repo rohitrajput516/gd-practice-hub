@@ -989,119 +989,156 @@ export const SchedulePage: React.FC = () => {
           </p>
         </div>
 
-               {featured && (
-          <div className="relative overflow-hidden rounded-2xl bg-[#040B22] text-white p-6 sm:p-8 shadow-[0_14px_35px_rgba(6,18,50,0.28)] border border-blue-500/30 mb-7 grid md:grid-cols-12 gap-6 items-center">
-            {/* Exact Background Theme: Diagonal Royal Blue Ribbons + Top-Right Halftone Dots */}
+        {featured && (
+          <div className="relative overflow-hidden rounded-[20px] bg-[#04091E] text-white px-6 py-7 sm:px-9 sm:py-8 shadow-[0_18px_40px_rgba(4,9,30,0.28)] mb-7">
+            {/* 100% Exact Background Artwork: Deep Navy Left + Smooth Glowing Blue Diagonal Waves + Radial Halftone Dots */}
             <svg
               className="absolute inset-0 w-full h-full pointer-events-none"
-              viewBox="0 0 1000 300"
+              viewBox="0 0 1000 290"
               preserveAspectRatio="none"
             >
               <defs>
-                <linearGradient id="bgBase" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#040A1E" />
-                  <stop offset="55%" stopColor="#081A4B" />
-                  <stop offset="100%" stopColor="#0A2463" />
+                <linearGradient id="cardBg" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#040817" />
+                  <stop offset="45%" stopColor="#061233" />
+                  <stop offset="78%" stopColor="#0A2364" />
+                  <stop offset="100%" stopColor="#051340" />
                 </linearGradient>
-                <linearGradient id="beam1" x1="0%" y1="100%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#0D47A1" stopOpacity="0.85" />
-                  <stop offset="100%" stopColor="#1D6BF3" stopOpacity="0.25" />
+                <linearGradient id="softWave1" x1="0%" y1="100%" x2="80%" y2="0%">
+                  <stop offset="0%" stopColor="#0E48B5" stopOpacity="0.95" />
+                  <stop offset="55%" stopColor="#123C94" stopOpacity="0.55" />
+                  <stop offset="100%" stopColor="#091E54" stopOpacity="0" />
                 </linearGradient>
-                <linearGradient id="beam2" x1="0%" y1="100%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#1E88E5" stopOpacity="0.9" />
-                  <stop offset="100%" stopColor="#0052CC" stopOpacity="0.4" />
+                <linearGradient id="softWave2" x1="0%" y1="100%" x2="100%" y2="20%">
+                  <stop offset="0%" stopColor="#1D7AFC" stopOpacity="0.95" />
+                  <stop offset="60%" stopColor="#0E4FD6" stopOpacity="0.65" />
+                  <stop offset="100%" stopColor="#07194B" stopOpacity="0" />
                 </linearGradient>
-                <pattern id="halftoneDots" x="0" y="0" width="14" height="14" patternUnits="userSpaceOnUse">
-                  <circle cx="3" cy="3" r="1.6" fill="#3B82F6" fillOpacity="0.35" />
+                <filter id="waveBlur" x="-10%" y="-10%" width="120%" height="120%">
+                  <feGaussianBlur stdDeviation="8" />
+                </filter>
+                <radialGradient id="dotMask" cx="88%" cy="18%" r="36%">
+                  <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.55" />
+                  <stop offset="65%" stopColor="#FFFFFF" stopOpacity="0.2" />
+                  <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
+                </radialGradient>
+                <pattern id="cornerDots" x="0" y="0" width="12" height="12" patternUnits="userSpaceOnUse">
+                  <circle cx="3" cy="3" r="1.7" fill="#38BDF8" />
                 </pattern>
+                <mask id="fadeDotsMask">
+                  <rect width="1000" height="290" fill="url(#dotMask)" />
+                </mask>
               </defs>
-              <rect width="1000" height="300" fill="url(#bgBase)" />
-              {/* Diagonal Glowing Blue Stripes matching Reference Photo */}
-              <polygon points="480,300 730,0 920,0 670,300" fill="url(#beam1)" />
-              <polygon points="690,300 940,0 1000,0 1000,190 860,300" fill="url(#beam2)" />
-              {/* Top-Right Dotted Pattern */}
-              <rect x="740" y="0" width="260" height="150" fill="url(#halftoneDots)" />
+
+              {/* Base Dark Navy */}
+              <rect width="1000" height="290" fill="url(#cardBg)" />
+
+              {/* Smooth Diagonal Royal-Blue Light Waves (Bottom-Right to Upper-Middle) */}
+              <path
+                d="M 470,290 C 560,200 660,95 790,0 L 960,0 C 850,110 740,210 660,290 Z"
+                fill="url(#softWave1)"
+                filter="url(#waveBlur)"
+              />
+              <path
+                d="M 675,290 C 745,220 835,145 945,75 L 1000,130 L 845,290 Z"
+                fill="url(#softWave2)"
+                filter="url(#waveBlur)"
+              />
+
+              {/* Radial Faded Halftone Dots in Top-Right Corner */}
+              <rect width="1000" height="290" fill="url(#cornerDots)" mask="url(#fadeDotsMask)" />
             </svg>
 
-            {/* Left Column: Badges, Title, Date/Time & Description */}
-            <div className="md:col-span-6 space-y-2.5 relative z-10">
-              <div className="flex flex-wrap items-center gap-2.5">
-                <span className="px-3.5 py-1 rounded-full bg-[#12D6B5] text-[#032B24] text-[11px] font-extrabold uppercase tracking-wide shadow-sm">
-                  FEATURED UPCOMING GD
-                </span>
-                <span className="px-3.5 py-1 rounded-full border border-cyan-400/60 bg-[#071C3F]/80 text-white text-[11px] font-bold flex items-center gap-1.5">
-                  <Radio className="w-3.5 h-3.5 text-cyan-400" /> LIVE COUNTDOWN
-                </span>
-              </div>
-              <h2 className="text-2xl sm:text-[32px] font-extrabold tracking-tight text-white pt-1">
-                {featured.title.split(':')[0]}
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-200 font-medium">
-                {featured.scheduled_date}, {featured.start_time} | {featured.platform || 'Zoom Room'}
-              </p>
-              <p className="text-xs sm:text-[13px] text-slate-300 leading-relaxed max-w-lg">
-                {featured.description}
-              </p>
-            </div>
+            {/* Card Content Grid (Exact 3-Part Alignment matching Source 56) */}
+            <div className="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+              
+              {/* Left Section (6 Cols): Badges, Big Title, Date | Platform, Description */}
+              <div className="md:col-span-6 space-y-2.5">
+                <div className="flex flex-wrap items-center gap-2.5 mb-1">
+                  <span className="px-3.5 py-1 rounded-full bg-[#15DEC2] text-[#032520] text-[11px] font-extrabold uppercase tracking-wide">
+                    FEATURED UPCOMING GD
+                  </span>
+                  <span className="px-3.5 py-1 rounded-full border border-[#2E7CF6]/80 bg-[#081B44]/90 text-white text-[11px] font-bold flex items-center gap-1.5">
+                    <Radio className="w-3.5 h-3.5 text-[#38BDF8]" /> LIVE COUNTDOWN
+                  </span>
+                </div>
 
-            {/* Center Column: STARTS IN + 3 Frosted Glass Countdown Boxes */}
-            <div className="md:col-span-3 text-center relative z-10">
-              <p className="text-xs uppercase tracking-widest text-slate-200 font-semibold mb-2.5">
-                STARTS IN
-              </p>
-              <div className="flex items-center justify-center gap-2 font-extrabold text-lg sm:text-xl">
-                <span className="bg-[#1E3A6D]/75 backdrop-blur-md border border-blue-300/40 px-3.5 py-2.5 rounded-xl min-w-[60px] shadow-inner">
-                  {hrs}h
-                </span>
-                <span className="text-blue-200">:</span>
-                <span className="bg-[#1E3A6D]/75 backdrop-blur-md border border-blue-300/40 px-3.5 py-2.5 rounded-xl min-w-[60px] shadow-inner">
-                  {mins}m
-                </span>
-                <span className="text-blue-200">:</span>
-                <span className="bg-[#1E3A6D]/75 backdrop-blur-md border border-blue-300/40 px-3.5 py-2.5 rounded-xl min-w-[60px] shadow-inner">
-                  {secs}s
-                </span>
-              </div>
-            </div>
+                <h2 className="text-[28px] sm:text-[36px] font-extrabold tracking-tight text-white leading-[1.12]">
+                  {featured.title.split(':')[0]}
+                </h2>
 
-            {/* Right Column: Join Session & View Details Buttons */}
-            <div className="md:col-span-3 flex flex-col gap-3 relative z-10">
-              <button
-                onClick={() => joinZoomSession(featured.zoom_url, featured.status)}
-                className="w-full py-3 rounded-xl bg-[#1D7AFC] hover:bg-blue-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-600/35 transition"
-              >
-                <Video className="w-4 h-4 fill-white" /> Join Session
-              </button>
-              <Link
-                to={`/session?id=${featured.id}`}
-                className="w-full py-2.5 rounded-xl bg-[#0B2559]/70 border border-blue-300/60 hover:bg-white/10 text-white text-center font-bold text-xs sm:text-sm transition"
-              >
-                View Details
-              </Link>
+                <p className="text-xs sm:text-[15px] text-white/95 font-medium flex items-center gap-2 pt-0.5">
+                  <span>{featured.scheduled_date}, {featured.start_time}</span>
+                  <span className="text-white/60 font-light">|</span>
+                  <span>{featured.platform || 'Zoom Room'}</span>
+                </p>
+
+                <p className="text-xs sm:text-[13.5px] text-slate-200/90 leading-relaxed max-w-md pt-0.5">
+                  {featured.description}
+                </p>
+              </div>
+
+              {/* Middle Section (3 Cols): STARTS IN + 3 Glassmorphic Boxes */}
+              <div className="md:col-span-3 flex flex-col items-center justify-center pt-2">
+                <p className="text-xs sm:text-[13px] uppercase tracking-wider text-white/90 font-medium mb-2.5">
+                  STARTS IN
+                </p>
+                <div className="flex items-center justify-center gap-1.5 sm:gap-2">
+                  <div className="bg-[#244380]/70 backdrop-blur-md border border-[#6094F8]/55 rounded-[10px] px-3 py-2.5 min-w-[54px] sm:min-w-[60px] text-center shadow-inner">
+                    <span className="text-lg sm:text-[21px] font-bold text-white tracking-tight">{hrs}h</span>
+                  </div>
+                  <span className="text-white font-bold text-lg">:</span>
+                  <div className="bg-[#244380]/70 backdrop-blur-md border border-[#6094F8]/55 rounded-[10px] px-3 py-2.5 min-w-[54px] sm:min-w-[60px] text-center shadow-inner">
+                    <span className="text-lg sm:text-[21px] font-bold text-white tracking-tight">{mins}m</span>
+                  </div>
+                  <span className="text-white font-bold text-lg">:</span>
+                  <div className="bg-[#244380]/70 backdrop-blur-md border border-[#6094F8]/55 rounded-[10px] px-3 py-2.5 min-w-[54px] sm:min-w-[60px] text-center shadow-inner">
+                    <span className="text-lg sm:text-[21px] font-bold text-white tracking-tight">{secs}s</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Section (3 Cols): Join Session & View Details Buttons */}
+              <div className="md:col-span-3 flex flex-col gap-3 md:pl-2">
+                <button
+                  onClick={() => joinZoomSession(featured.zoom_url, featured.status)}
+                  className="w-full py-3 px-4 rounded-[10px] bg-[#1677FF] hover:bg-[#0958D9] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30 transition"
+                >
+                  <Video className="w-4 h-4 fill-white" />
+                  <span>Join Session</span>
+                </button>
+                <Link
+                  to={`/session?id=${featured.id}`}
+                  className="w-full py-2.5 px-4 rounded-[10px] bg-[#0B2358]/60 border border-[#5487F5]/75 hover:bg-white/10 text-white text-center font-semibold text-sm transition"
+                >
+                  View Details
+                </Link>
+              </div>
+
             </div>
           </div>
         )}
 
-        {/* Filter Bar: Search + All Statuses + All Topics + Grid/List Toggle */}
+        {/* Filter Bar: Clean Non-Overlapping Search + Dropdowns + Grid/List Toggle */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-7">
-          <div className="relative flex-1 min-w-[220px] max-w-xs">
+          <div className="relative w-full sm:w-64">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search sessions..."
-              className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-800 outline-none focus:border-blue-500 shadow-sm"
+              className="w-full pl-9 pr-3.5 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-800 outline-none focus:border-blue-500"
             />
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex items-center gap-2.5 flex-wrap">
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 outline-none shadow-sm"
+              className="px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-medium text-slate-800 outline-none min-w-[125px]"
             >
-              <option>All Statuses</option>
+              <option value="All Statuses">All Statuses</option>
               <option value="Live">Live</option>
               <option value="Upcoming">Upcoming</option>
               <option value="Completed">Completed</option>
@@ -1109,7 +1146,7 @@ export const SchedulePage: React.FC = () => {
 
             <select
               onChange={(e) => setSearch(e.target.value === 'All Topics' ? '' : e.target.value)}
-              className="px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 outline-none shadow-sm"
+              className="px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-medium text-slate-800 outline-none min-w-[115px]"
             >
               <option value="All Topics">All Topics</option>
               <option value="Tech">Tech &amp; Society</option>
@@ -1118,11 +1155,11 @@ export const SchedulePage: React.FC = () => {
               <option value="AI">AI &amp; Future</option>
             </select>
 
-            <div className="flex border border-slate-300 rounded-lg bg-white overflow-hidden p-0.5 shadow-sm">
-              <button className="p-2 rounded-md bg-[#0A1128] text-white">
+            <div className="flex items-center border border-slate-300 rounded-lg bg-white overflow-hidden">
+              <button className="p-2 bg-slate-100 text-slate-900 border-r border-slate-300">
                 <LayoutGrid className="w-3.5 h-3.5" />
               </button>
-              <button className="p-2 rounded-md text-slate-500 hover:text-slate-800">
+              <button className="p-2 text-slate-500 hover:text-slate-800">
                 <List className="w-3.5 h-3.5" />
               </button>
             </div>
