@@ -2,14 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  Video, Send, Search, Calendar, Clock, AlertCircle,
-  LayoutGrid, List, Flame, Star, Radio
+  Video, Send, Search, Calendar, AlertCircle,
+  LayoutGrid, List, Flame, Star, Radio, Mic, PhoneOff
 } from 'lucide-react';
 import { PublicLayout, openTelegramSupport, joinZoomSession } from '../components/Layout';
 import { api, isValidHttps } from '../lib/supabase';
 
 /* ============================================================================
-   PAGE 1: HOME PAGE (Design 6 - Video-Call Centric - Image 1000085022.png)
+   PAGE 1: HOME PAGE (100% Exact Match to Image 1000085022_2.png)
    ============================================================================ */
 export const HomePage: React.FC = () => {
   const [sessions, setSessions] = useState<any[]>([]);
@@ -18,102 +18,235 @@ export const HomePage: React.FC = () => {
     api.list('sessions', true).then((rows) => setSessions(rows.slice(0, 3)));
   }, []);
 
+  const participants = [
+    { name: 'Aarav', img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&q=80' },
+    { name: 'Rohan', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&q=80' },
+    { name: 'Ananya', img: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300&q=80' },
+    { name: 'Priya', img: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&q=80' },
+    { name: 'Neha', img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&q=80' },
+    { name: 'Sneha', img: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=300&q=80' },
+    { name: 'Vikram', img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&q=80' },
+    { name: 'Kabir', img: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&q=80' },
+    { name: 'Aditi', img: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=300&q=80' },
+  ];
+
   return (
     <PublicLayout>
-      {/* Hero Section with Connected Dots & Tilted 3D Laptop Zoom Frame */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#EBF2FF] via-[#F3F7FF] to-[#E6F0FF] border-b border-slate-200/70 py-14 lg:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 grid lg:grid-cols-12 gap-10 items-center">
+      {/* HERO SECTION WITH CONSTELLATION MESH, DOTTED RINGS & 3D SILVER LAPTOP */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#EDF3FC] via-[#F2F6FD] to-[#E5EEFB] border-b border-slate-200/60 pt-10 pb-16 lg:py-20">
+        
+        {/* Bottom-Left Constellation Network Mesh SVG (Exact match to Image 2) */}
+        <svg
+          className="absolute bottom-0 left-0 w-72 sm:w-96 h-56 text-slate-400/35 pointer-events-none"
+          viewBox="0 0 320 220"
+          fill="none"
+        >
+          <path
+            d="M10 190 L65 140 L130 165 L195 120 L260 185 L310 210 M65 140 L95 75 L165 100 L130 165 M10 110 L65 140 M95 75 L40 45"
+            stroke="currentColor"
+            strokeWidth="1.2"
+          />
+          {[
+            [10, 190], [65, 140], [130, 165], [195, 120], [260, 185],
+            [95, 75], [165, 100], [10, 110], [40, 45]
+          ].map(([cx, cy], idx) => (
+            <circle key={idx} cx={cx} cy={cy} r="3.5" fill="#94A3B8" fillOpacity="0.5" />
+          ))}
+        </svg>
+
+        <div className="max-w-6xl mx-auto px-4 sm:px-8 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center relative z-10">
+          
+          {/* Left Column: Headline, Description & Pill Buttons */}
           <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45 }}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
             className="lg:col-span-6 space-y-5"
           >
-            <h1 className="text-4xl sm:text-5xl font-extrabold text-[#0A1128] leading-[1.12] tracking-tight">
-              Master Group Discussions, Speak with Absolute Confidence.
+            <h1 className="text-[34px] sm:text-[46px] font-extrabold text-[#0A1128] leading-[1.12] tracking-tight">
+              Master Group<br />
+              Discussions, Speak<br />
+              with Absolute<br />
+              Confidence.
             </h1>
-            <p className="text-slate-600 text-base sm:text-lg max-w-xl leading-relaxed">
+
+            <p className="text-slate-700 text-sm sm:text-base max-w-lg leading-relaxed">
               Join real-time online Group Discussions, improve your communication skills, and prepare for interviews on India’s premier GD practice platform.
             </p>
-            <div className="flex flex-wrap gap-3.5 pt-1">
+
+            <div className="flex flex-wrap items-center gap-3.5 pt-1">
               <Link
                 to="/schedule"
-                className="px-6 py-3 rounded-full bg-[#2563EB] hover:bg-blue-700 text-white font-semibold text-sm shadow-lg shadow-blue-600/25 transition"
+                className="px-7 py-3 rounded-full bg-[#1D6BF3] hover:bg-blue-700 text-white font-bold text-sm shadow-lg shadow-blue-500/30 transition"
               >
                 Explore GD Sessions
               </Link>
               <Link
                 to="/topics"
-                className="px-6 py-3 rounded-full bg-white hover:bg-blue-50 text-blue-600 border border-blue-500 font-semibold text-sm transition"
+                className="px-7 py-3 rounded-full bg-white/90 hover:bg-white text-[#1D6BF3] border-[1.5px] border-[#3B82F6] font-bold text-sm shadow-sm transition"
               >
                 Browse GD Topics
               </Link>
             </div>
+
             <p className="text-xs sm:text-sm font-bold text-[#0A1128] pt-1">
               No experience required • Live Mock GDs
             </p>
           </motion.div>
 
-          {/* Right 3D Laptop Zoom Mockup (Exact match to Image 1) */}
+          {/* Right Column: 3D Isometric Silver Laptop + Dotted Rings + Floating Badges */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.94 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-            className="lg:col-span-6 relative flex justify-center"
+            transition={{ duration: 0.55 }}
+            className="lg:col-span-6 relative flex items-center justify-center py-6"
           >
-            <div className="relative w-full max-w-lg bg-[#111827] rounded-2xl p-3 shadow-2xl border-4 border-slate-700 transform lg:-rotate-2">
-              {/* Floating Red Live Pill */}
-              <div className="absolute -top-4 -left-4 z-20 flex items-center gap-2 bg-[#E11D48] text-white px-4 py-1.5 rounded-full text-xs font-bold shadow-lg">
-                <Video className="w-3.5 h-3.5" />
+            {/* Background Dotted Concentric Circles & Radar Waves SVG */}
+            <svg
+              className="absolute inset-0 w-full h-full max-w-[520px] max-h-[520px] m-auto pointer-events-none"
+              viewBox="0 0 500 500"
+              fill="none"
+            >
+              {/* Outer & Inner Dashed Orbit Circles */}
+              <circle cx="255" cy="245" r="215" stroke="#60A5FA" strokeWidth="1.5" strokeDasharray="4 6" opacity="0.55" />
+              <circle cx="255" cy="245" r="182" stroke="#3B82F6" strokeWidth="1.3" strokeDasharray="3 5" opacity="0.45" />
+              <circle cx="255" cy="245" r="148" stroke="#93C5FD" strokeWidth="1.2" opacity="0.4" />
+
+              {/* Top-Right Radar Wave Rings */}
+              <circle cx="395" cy="95" r="18" stroke="#93C5FD" strokeWidth="1.5" opacity="0.6" />
+              <circle cx="395" cy="95" r="32" stroke="#93C5FD" strokeWidth="1.5" opacity="0.45" />
+              <circle cx="395" cy="95" r="46" stroke="#93C5FD" strokeWidth="1.5" opacity="0.3" />
+              <circle cx="395" cy="95" r="60" stroke="#93C5FD" strokeWidth="1.2" opacity="0.18" />
+
+              {/* Floating Blue Orbit Dots */}
+              <circle cx="155" cy="60" r="4" fill="#2563EB" opacity="0.7" />
+              <circle cx="290" cy="34" r="3.5" fill="#60A5FA" opacity="0.8" />
+              <circle cx="70" cy="170" r="3" fill="#3B82F6" opacity="0.5" />
+              <circle cx="445" cy="195" r="4.5" fill="#60A5FA" opacity="0.7" />
+              <circle cx="465" cy="225" r="3" fill="#93C5FD" opacity="0.7" />
+              <circle cx="110" cy="395" r="3.5" fill="#60A5FA" opacity="0.6" />
+              <circle cx="365" cy="435" r="5" fill="#1D4ED8" opacity="0.85" />
+            </svg>
+
+            {/* 3D Tilted Laptop Container */}
+            <div
+              className="relative w-full max-w-[460px] select-none"
+              style={{ perspective: '1200px' }}
+            >
+              {/* Floating Red "Live GD Session" Pill (Top-Left of Screen) */}
+              <motion.div
+                animate={{ y: [0, -4, 0] }}
+                transition={{ duration: 3, repeat: Infinity }}
+                className="absolute -top-3 left-0 sm:-left-4 z-30 flex items-center gap-2 bg-gradient-to-r from-[#E11D48] to-[#F43F5E] text-white px-4 py-2 rounded-full text-xs font-bold shadow-xl shadow-rose-600/30"
+              >
+                <Video className="w-3.5 h-3.5 fill-white" />
                 <span>Live GD Session</span>
+              </motion.div>
+
+              {/* Floating Blue "Join Zoom Meeting ->" Pill (Right of Screen) */}
+              <motion.div
+                animate={{ y: [0, 4, 0] }}
+                transition={{ duration: 3.2, repeat: Infinity }}
+                className="absolute right-0 sm:-right-5 bottom-24 z-30"
+              >
+                <Link
+                  to="/schedule"
+                  className="flex items-center gap-2 bg-gradient-to-r from-[#1D6BF3] to-[#2563EB] hover:from-blue-600 hover:to-blue-700 text-white px-5 py-2.5 rounded-full text-xs font-extrabold shadow-xl shadow-blue-600/40 border border-blue-400/40"
+                >
+                  <span>Join Zoom Meeting</span>
+                  <span>→</span>
+                </Link>
+              </motion.div>
+
+              {/* Floating Frosted Glass "zoom" Card (Bottom-Right) */}
+              <div className="absolute -bottom-3 right-2 sm:right-0 z-30 bg-white/90 backdrop-blur-md px-4 py-2.5 rounded-2xl shadow-xl border border-white flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-full bg-[#1D6BF3] text-white flex items-center justify-center shadow-sm">
+                  <Video className="w-4 h-4 fill-white" />
+                </div>
+                <span className="font-extrabold text-[#1D6BF3] text-base tracking-tight">
+                  zoom
+                </span>
               </div>
 
-              {/* 3x3 Video Call Participant Grid */}
-              <div className="grid grid-cols-3 gap-2 bg-slate-900 p-2 rounded-xl">
-                {[
-                  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&q=80',
-                  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&q=80',
-                  'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300&q=80',
-                  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&q=80',
-                  'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&q=80',
-                  'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&q=80',
-                  'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&q=80',
-                  'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&q=80',
-                  'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=300&q=80',
-                ].map((src, i) => (
-                  <div key={i} className="relative h-20 sm:h-24 rounded-lg overflow-hidden bg-slate-800">
-                    <img src={src} alt="Student" className="w-full h-full object-cover" />
-                    <span className="absolute bottom-1 left-1.5 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded">
-                      Student {i + 1}
+              {/* 3D Tilted Laptop Assembly */}
+              <div
+                className="relative mx-auto transition-transform duration-500"
+                style={{
+                  transform: 'rotateY(-18deg) rotateX(8deg) rotateZ(-2deg)',
+                  transformStyle: 'preserve-3d',
+                }}
+              >
+                {/* Laptop Lid / Dark Bezel Screen */}
+                <div className="bg-[#0F172A] rounded-t-2xl p-2.5 pb-2 border-[3px] border-[#334155] shadow-2xl relative">
+                  {/* Top Camera Notch & Window Dots */}
+                  <div className="flex items-center justify-between px-2 pb-1.5">
+                    <div className="flex gap-1">
+                      <span className="w-2 h-2 rounded-full bg-rose-500/80" />
+                      <span className="w-2 h-2 rounded-full bg-amber-400/80" />
+                      <span className="w-2 h-2 rounded-full bg-emerald-500/80" />
+                    </div>
+                    <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
+                    <span className="text-[8px] text-slate-400 font-semibold">REC ●</span>
+                  </div>
+
+                  {/* 3x3 Video Call Grid inside Laptop Screen */}
+                  <div className="grid grid-cols-3 gap-1.5 bg-[#1E293B] p-1.5 rounded-lg">
+                    {participants.map((p, i) => (
+                      <div
+                        key={i}
+                        className={`relative h-16 sm:h-20 rounded overflow-hidden bg-slate-800 ${
+                          i === 4 ? 'ring-2 ring-emerald-400' : ''
+                        }`}
+                      >
+                        <img
+                          src={p.img}
+                          alt={p.name}
+                          className="w-full h-full object-cover"
+                        />
+                        <span className="absolute bottom-1 left-1 bg-black/65 text-white text-[9px] font-medium px-1.5 py-0.5 rounded">
+                          {p.name}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Laptop Bottom Call Control Bar */}
+                  <div className="mt-1.5 px-3 py-1 bg-[#090D16] rounded flex items-center justify-center gap-4 text-slate-300">
+                    <Mic className="w-3 h-3 text-emerald-400" />
+                    <Video className="w-3 h-3 text-blue-400" />
+                    <span className="px-2 py-0.5 rounded bg-rose-600 text-white text-[8px] font-bold flex items-center gap-1">
+                      <PhoneOff className="w-2.5 h-2.5" /> End
                     </span>
                   </div>
-                ))}
-              </div>
-
-              {/* Floating Blue Join Zoom Pill */}
-              <Link
-                to="/schedule"
-                className="absolute -right-4 bottom-14 z-20 bg-[#2563EB] hover:bg-blue-700 text-white px-5 py-2.5 rounded-full text-xs font-bold shadow-xl flex items-center gap-2"
-              >
-                <span>Join Zoom Meeting →</span>
-              </Link>
-
-              {/* Floating White Zoom Badge */}
-              <div className="absolute -bottom-5 right-4 bg-white px-4 py-2 rounded-xl shadow-lg border border-slate-100 flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center">
-                  <Video className="w-3.5 h-3.5" />
                 </div>
-                <span className="font-extrabold text-blue-600 text-sm tracking-wide">zoom</span>
+
+                {/* 3D Silver Metallic Keyboard Deck & Trackpad Base */}
+                <div
+                  className="relative mx-auto w-[108%] -left-[4%] h-14 bg-gradient-to-b from-[#E2E8F0] via-[#CBD5E1] to-[#94A3B8] rounded-b-2xl shadow-[0_22px_35px_rgba(15,23,42,0.35)] border-t border-white px-5 pt-2 flex flex-col justify-between"
+                  style={{
+                    transform: 'rotateX(58deg)',
+                    transformOrigin: 'top center',
+                  }}
+                >
+                  {/* Dark Keyboard Key Rows */}
+                  <div className="w-full h-6 bg-[#1E293B] rounded p-1 grid grid-cols-12 gap-0.5 shadow-inner">
+                    {Array.from({ length: 24 }).map((_, k) => (
+                      <span key={k} className="bg-[#334155] rounded-[1px] h-1.5" />
+                    ))}
+                  </div>
+                  {/* Silver Trackpad */}
+                  <div className="w-20 h-3.5 mx-auto mb-1 bg-[#B8C4D4] border border-slate-400/70 rounded-sm shadow-inner" />
+                </div>
               </div>
             </div>
           </motion.div>
         </div>
       </section>
 
-      {/* Upcoming Video GD Sessions (3-Column Cards matching Image 1) */}
-      <section className="bg-white py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-8">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-center text-[#0A1128] mb-10">
+      {/* UPCOMING VIDEO GD SESSIONS (Exact match to Image 2) */}
+      <section className="bg-white py-14">
+        <div className="max-w-5xl mx-auto px-4 sm:px-8">
+          <h2 className="text-2xl sm:text-[28px] font-extrabold text-center text-[#0A1128] mb-10">
             Upcoming Video GD Sessions
           </h2>
 
@@ -122,28 +255,32 @@ export const HomePage: React.FC = () => {
               <motion.div
                 key={s.id}
                 whileHover={{ y: -4 }}
-                className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between"
+                className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-[0_4px_20px_rgba(10,17,40,0.05)] flex flex-col justify-between"
               >
                 <div>
-                  <h3 className="text-xl font-extrabold text-[#0A1128] leading-snug mb-2">
+                  <h3 className="text-xl font-extrabold text-[#0A1128] leading-snug mb-1.5">
                     {s.title.split(':')[0]}
                   </h3>
                   <p className="text-xs font-medium text-slate-500 mb-4">
                     {s.scheduled_date} • {s.start_time}
                   </p>
-                  <div className="bg-[#EAF2FF] text-[#1D4ED8] px-3.5 py-2.5 rounded-xl flex items-center justify-between text-xs font-semibold mb-6">
+
+                  {/* Light Blue Zoom Room Bar */}
+                  <div className="bg-[#E9F2FF] text-[#0A1128] px-3.5 py-2.5 rounded-xl flex items-center justify-between text-xs font-bold mb-6">
                     <span className="flex items-center gap-2">
-                      <Video className="w-4 h-4" />
-                      {s.platform || 'Zoom Room'}
+                      <span className="w-6 h-6 rounded-full bg-[#1D6BF3] text-white flex items-center justify-center">
+                        <Video className="w-3.5 h-3.5 fill-white" />
+                      </span>
+                      <span>{s.platform || 'Zoom Room'}</span>
                     </span>
-                    <Video className="w-4 h-4" />
+                    <Video className="w-4 h-4 text-[#1D6BF3] fill-[#1D6BF3]" />
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2.5">
                   <Link
                     to={`/session?id=${s.id}`}
-                    className="flex-1 text-center py-2.5 rounded-full border border-slate-400 text-xs font-bold text-slate-800 hover:bg-slate-50"
+                    className="flex-1 text-center py-2.5 rounded-full border border-slate-500 text-xs font-bold text-[#0A1128] hover:bg-slate-50 transition"
                   >
                     View Details
                   </Link>
@@ -160,30 +297,36 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Bottom Telegram Support Section (Exact 2-column layout from Image 1) */}
-      <section className="py-14 bg-[#EDF3FC]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-8 grid md:grid-cols-2 gap-8 items-center">
-          <div>
-            <h2 className="text-3xl font-extrabold text-[#0A1128] mb-2">Telegram Support</h2>
-            <p className="text-slate-600 text-base">Have a doubt? Ask Owner for Any Doubt</p>
+      {/* TELEGRAM SUPPORT SECTION (Exact match to Image 2) */}
+      <section className="py-14 bg-[#EBF1FA]">
+        <div className="max-w-5xl mx-auto px-4 sm:px-8 grid md:grid-cols-12 gap-8 items-center">
+          <div className="md:col-span-6">
+            <h2 className="text-3xl font-extrabold text-[#0A1128] mb-2">
+              Telegram Support
+            </h2>
+            <p className="text-slate-700 text-base">
+              Have a doubt? Ask Owner for Any Doubt
+            </p>
           </div>
 
-          <div className="bg-white rounded-2xl p-8 shadow-md border border-slate-100 text-center max-w-md mx-auto w-full">
-            <div className="w-12 h-12 rounded-full bg-[#2AABEE] text-white flex items-center justify-center mx-auto mb-3 shadow">
-              <Send className="w-5 h-5" />
+          <div className="md:col-span-6">
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-100 text-center max-w-md mx-auto">
+              <div className="w-14 h-14 rounded-full bg-[#2AABEE] text-white flex items-center justify-center mx-auto mb-3.5 shadow-md">
+                <Send className="w-6 h-6 -ml-0.5" />
+              </div>
+              <h3 className="text-xl font-extrabold text-[#0A1128] mb-1">
+                Ask Owner for Any Doubt 👋
+              </h3>
+              <p className="text-xs text-slate-600 mb-6">
+                Get 1-on-1 support directly from the founder.
+              </p>
+              <button
+                onClick={openTelegramSupport}
+                className="w-full py-3.5 rounded-xl bg-[#0A142F] hover:bg-blue-700 text-white font-bold text-xs tracking-wide transition"
+              >
+                Message on Telegram
+              </button>
             </div>
-            <h3 className="text-xl font-extrabold text-[#0A1128] mb-1">
-              Ask Owner for Any Doubt 👋
-            </h3>
-            <p className="text-xs text-slate-500 mb-5">
-              Get 1-on-1 support directly from the founder.
-            </p>
-            <button
-              onClick={openTelegramSupport}
-              className="w-full py-3 rounded-xl bg-[#0A142F] hover:bg-blue-600 text-white font-bold text-xs transition"
-            >
-              Ask Owner for Any Doubt
-            </button>
           </div>
         </div>
       </section>
@@ -192,7 +335,7 @@ export const HomePage: React.FC = () => {
 };
 
 /* ============================================================================
-   PAGE 2: GD SCHEDULE PAGE (Design 6 - Featured Next Session + List - Image 2)
+   PAGE 2: GD SCHEDULE PAGE
    ============================================================================ */
 export const SchedulePage: React.FC = () => {
   const [sessions, setSessions] = useState<any[]>([]);
@@ -232,7 +375,6 @@ export const SchedulePage: React.FC = () => {
           </p>
         </div>
 
-        {/* Dark Glowing Featured Next Session Card with Countdown (Image 2) */}
         {featured && (
           <div className="rounded-2xl bg-gradient-to-r from-[#040B24] via-[#0B1E54] to-[#0D3B9E] text-white p-7 sm:p-8 shadow-xl mb-7 grid md:grid-cols-12 gap-6 items-center">
             <div className="md:col-span-6 space-y-2.5">
@@ -281,7 +423,6 @@ export const SchedulePage: React.FC = () => {
           </div>
         )}
 
-        {/* Search & Filter Row */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <div className="relative flex-1 min-w-[220px] max-w-xs">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
@@ -312,7 +453,6 @@ export const SchedulePage: React.FC = () => {
           </div>
         </div>
 
-        {/* Other Upcoming Sessions */}
         <h3 className="text-lg font-extrabold text-[#0A1128] mb-3">Other Upcoming Sessions</h3>
         <div className="space-y-3 mb-8">
           {upcoming.map((s) => (
@@ -352,7 +492,6 @@ export const SchedulePage: React.FC = () => {
           ))}
         </div>
 
-        {/* Past Sessions */}
         <h3 className="text-lg font-extrabold text-[#0A1128] mb-3">Past Sessions</h3>
         <div className="space-y-3 mb-10">
           {past.map((s) => (
@@ -384,7 +523,6 @@ export const SchedulePage: React.FC = () => {
           ))}
         </div>
 
-        {/* Light Blue Telegram Banner (Exact match to Image 2) */}
         <div className="bg-[#D8EAFF] border border-blue-200 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
             <h3 className="text-lg font-extrabold text-[#0A1128]">Ask Owner for Any Doubt 💬</h3>
@@ -405,7 +543,7 @@ export const SchedulePage: React.FC = () => {
 };
 
 /* ============================================================================
-   PAGE 3: SESSION DETAILS PAGE (Design 2 - Full-Width Banner - Image 3)
+   PAGE 3: SESSION DETAILS PAGE
    ============================================================================ */
 export const SessionDetailsPage: React.FC = () => {
   const [params] = useSearchParams();
@@ -428,7 +566,6 @@ export const SessionDetailsPage: React.FC = () => {
           <span className="text-slate-900 font-semibold">{session.title.split(':')[0]}</span>
         </div>
 
-        {/* Full-Width Photo Header Banner matching Image 3 */}
         <div
           className="relative rounded-2xl overflow-hidden bg-cover bg-center p-7 sm:p-10 text-white shadow-lg mb-8"
           style={{
@@ -462,7 +599,6 @@ export const SessionDetailsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* 2-Column Content Layout matching Image 3 */}
         <div className="grid md:grid-cols-12 gap-8">
           <div className="md:col-span-8 space-y-6">
             <div>
@@ -538,7 +674,7 @@ export const SessionDetailsPage: React.FC = () => {
 };
 
 /* ============================================================================
-   PAGE 4: GD TOPICS LIBRARY (Design 9 - Featured Topics + Grid - Image 4)
+   PAGE 4: GD TOPICS LIBRARY
    ============================================================================ */
 export const TopicsPage: React.FC = () => {
   const [topics, setTopics] = useState<any[]>([]);
@@ -629,7 +765,6 @@ export const TopicsPage: React.FC = () => {
           ))}
         </div>
 
-        {/* Search & Filter Pills matching Image 4 */}
         <div className="flex flex-wrap items-center gap-2.5 mb-6">
           <div className="relative w-full sm:w-64">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
@@ -663,7 +798,6 @@ export const TopicsPage: React.FC = () => {
           ))}
         </div>
 
-        {/* Solid Blue Bottom Telegram Banner matching Image 4 */}
         <div className="bg-[#155EEF] text-white rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-md">
           <h3 className="text-xl font-extrabold">Ask Owner for Any Doubt</h3>
           <button

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutGrid, Users, BookOpen, Megaphone, MessageSquare,
-  FileText, Settings, LogOut, Send, Menu, X
+  FileText, Settings, LogOut, Menu, X, ChevronRight, ShieldCheck
 } from 'lucide-react';
 import { api, isValidHttps } from '../lib/supabase';
 
@@ -29,7 +29,7 @@ export const joinZoomSession = (url?: string, status?: string) => {
 
 export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { pathname } = useLocation();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [settings, setSettings] = useState<any>({});
 
   useEffect(() => {
@@ -42,13 +42,15 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
     { label: 'Topics Library', to: '/topics' },
     { label: 'Rules & Guidelines', to: '/guidelines' },
     { label: 'Announcements', to: '/announcements' },
-    { label: 'Contact', to: '/contact' },
+    { label: 'Contact & FAQs', to: '/contact' },
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F5F8FF] text-slate-900 font-sans">
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between">
+    <div className="min-h-screen flex flex-col bg-[#F4F7FE] text-slate-900 font-sans">
+      {/* Top Navbar with Single Collapsible Menu Section */}
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between relative">
+          {/* Original Brand Logo */}
           <Link to="/" className="flex items-center gap-2.5">
             <img
               src={settings.logo_url || '/logo.png'}
@@ -60,77 +62,90 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
             </span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-7">
-            {navItems.map((item) => {
-              const active = pathname === item.to;
-              return (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  className={`text-sm font-medium py-5 border-b-2 transition-colors ${
-                    active
-                      ? 'text-blue-600 border-blue-600 font-semibold'
-                      : 'text-slate-600 border-transparent hover:text-blue-600'
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-
-          <div className="hidden md:flex items-center gap-3">
+          {/* Right Side: Unified Menu Button + Admin Login */}
+          <div className="flex items-center gap-2.5">
             <Link
               to="/admin/login"
-              className="px-4 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-800 hover:bg-slate-100 transition"
+              className="hidden sm:inline-flex px-4 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-800 hover:bg-slate-100 transition"
             >
               Admin Login
             </Link>
+
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0A1128] hover:bg-[#1E3A8A] text-white text-xs font-bold shadow-sm transition"
+              aria-label="Toggle Navigation Menu"
+            >
+              {menuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+              <span>Menu</span>
+            </button>
           </div>
 
-          <button
-            className="md:hidden p-2 rounded-lg border border-slate-200"
-            onClick={() => setMobileOpen(!mobileOpen)}
-          >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          {/* Dropdown Menu Drawer containing all options */}
+          {menuOpen && (
+            <>
+              <div
+                className="fixed inset-0 top-16 bg-slate-900/20 backdrop-blur-[1px] z-40"
+                onClick={() => setMenuOpen(false)}
+              />
+              <div className="absolute right-4 sm:right-8 top-[68px] w-72 bg-white rounded-2xl shadow-2xl border border-slate-200/90 p-3 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="px-3 py-2 border-b border-slate-100 mb-1.5">
+                  <p className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+                    Navigation Menu
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  {navItems.map((item) => {
+                    const active = pathname === item.to;
+                    return (
+                      <Link
+                        key={item.to}
+                        to={item.to}
+                        onClick={() => setMenuOpen(false)}
+                        className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold transition ${
+                          active
+                            ? 'bg-[#2563EB] text-white shadow-sm'
+                            : 'text-slate-700 hover:bg-[#EEF4FF] hover:text-[#2563EB]'
+                        }`}
+                      >
+                        <span>{item.label}</span>
+                        <ChevronRight className={`w-4 h-4 ${active ? 'text-white' : 'text-slate-400'}`} />
+                      </Link>
+                    );
+                  })}
+                </div>
+
+                <div className="mt-3 pt-2.5 border-t border-slate-100">
+                  <Link
+                    to="/admin/login"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-slate-100 hover:bg-[#0A1128] text-slate-800 hover:text-white text-xs font-bold transition"
+                  >
+                    <ShieldCheck className="w-4 h-4" />
+                    <span>Admin Login</span>
+                  </Link>
+                </div>
+              </div>
+            </>
+          )}
         </div>
-
-        {mobileOpen && (
-          <div className="md:hidden bg-white border-b border-slate-200 px-4 py-3 space-y-2">
-            {navItems.map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                onClick={() => setMobileOpen(false)}
-                className="block py-2 text-sm font-medium text-slate-700"
-              >
-                {item.label}
-              </Link>
-            ))}
-            <Link
-              to="/admin/login"
-              className="block text-center py-2 rounded-lg bg-[#0A1128] text-white text-sm font-semibold"
-            >
-              Admin Login
-            </Link>
-          </div>
-        )}
       </header>
 
       <main className="flex-1">{children}</main>
 
-      <footer className="bg-[#EEF3FB] border-t border-slate-200/80 py-6 mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-600">
+      {/* Footer matching Image 2 */}
+      <footer className="bg-[#EBF1FA] border-t border-slate-200/80 py-6">
+        <div className="max-w-6xl mx-auto px-4 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-600">
           <div className="flex items-center gap-2">
-            <img src={settings.logo_url || '/logo.png'} alt="Logo" className="w-6 h-6 rounded" />
-            <span>{settings.footer_text || '© 2026 GD Practice Hub'}</span>
+            <span className="font-medium text-slate-700">
+              {settings.footer_text || '© 2026 GD Practice Hub'}
+            </span>
           </div>
           <div className="flex flex-wrap gap-6 font-medium text-slate-700">
-            <Link to="/">Home</Link>
-            <Link to="/schedule">GD Schedule</Link>
-            <Link to="/announcements">Announcements</Link>
-            <Link to="/contact">Contact</Link>
+            <Link to="/" className="hover:text-blue-600">Home</Link>
+            <Link to="/schedule" className="hover:text-blue-600">GD Schedule</Link>
+            <Link to="/announcements" className="hover:text-blue-600">Announcements</Link>
+            <Link to="/contact" className="hover:text-blue-600">Contact</Link>
           </div>
         </div>
       </footer>
@@ -160,7 +175,6 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
 
   return (
     <div className="min-h-screen flex bg-[#F4F7FC] text-slate-900">
-      {/* Fixed Dark Navy Sidebar matching Image 9 */}
       <aside className="w-64 bg-[#0B1223] text-white flex flex-col justify-between shrink-0 min-h-screen">
         <div>
           <div className="p-5 flex items-center gap-3 border-b border-slate-800">
