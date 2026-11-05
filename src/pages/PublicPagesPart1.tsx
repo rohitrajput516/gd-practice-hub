@@ -770,7 +770,7 @@ export const HomePage: React.FC = () => {
                       {ann.title}
                     </h3>
                     {ann.is_important && (
-                      <span className="px-2.5 py-0.5 rounded-full bg-[#DC3545] text-white text-[10px] font-extrabold uppercase">
+                      <span className="px-2.5 py-0.5 rounded-full bg-[#1D63EB] text-white text-[10px] font-extrabold uppercase">
                         PRIORITY
                       </span>
                     )}
