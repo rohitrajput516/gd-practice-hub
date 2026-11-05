@@ -423,70 +423,107 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* LIVE SESSION INDICATOR & NEXT GD COUNTDOWN BAR (Sirf valid data hone par dikhega) */}
+      {/* LIVE SESSION INDICATOR & NEXT GD COUNTDOWN BAR (Updated Navy/Royal Blue & 4-Box Glowing Timer) */}
       {(liveSessions.length > 0 || (nextGdSession && countdownText)) && (
         <section className="bg-white pt-8 pb-2">
-          <div className="max-w-5xl mx-auto px-4 sm:px-8 space-y-3">
-            {/* 1. Live Session Indicator */}
+          <div className="max-w-5xl mx-auto px-4 sm:px-8 space-y-5">
+            
+            {/* 1. Live GD Banner: Navy Blue + Royal Blue Gradient with Small Red LIVE NOW Badge */}
             {liveSessions.map((live) => (
               <div
                 key={live.id}
-                className="rounded-2xl bg-gradient-to-r from-[#881337] via-[#BE123C] to-[#E11D48] text-white p-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg shadow-rose-600/20 border border-rose-400/40"
+                className="rounded-2xl bg-gradient-to-r from-[#070E26] via-[#0F2557] to-[#1D4ED8] text-white p-5 sm:px-7 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl shadow-blue-950/20 border border-blue-400/30"
               >
-                <div className="flex items-center gap-3.5">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-rose-700 text-xs font-extrabold uppercase tracking-wider shadow-sm animate-pulse">
+                <div className="flex items-center gap-4">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E11D48] text-white text-xs font-extrabold uppercase tracking-wider shadow-md shadow-rose-600/40 animate-pulse shrink-0">
                     <Radio className="w-3.5 h-3.5" /> LIVE NOW
                   </span>
                   <div>
-                    <h3 className="font-extrabold text-sm sm:text-base leading-snug">
+                    <h3 className="font-extrabold text-base sm:text-lg leading-snug text-white">
                       {live.title}
                     </h3>
-                    <p className="text-xs text-rose-100">
+                    <p className="text-xs text-blue-200 mt-0.5">
                       Topic: {live.topic || live.category} • {live.platform || 'Zoom Room'}
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={() => joinZoomSession(live.zoom_url, live.status)}
-                  className="px-5 py-2.5 rounded-full bg-white hover:bg-rose-50 text-rose-700 font-extrabold text-xs shrink-0 shadow transition"
+                  className="px-6 py-2.5 rounded-full bg-white hover:bg-blue-50 text-[#0A1128] font-extrabold text-xs shrink-0 shadow-md transition"
                 >
                   Join Live GD Now →
                 </button>
               </div>
             ))}
 
-            {/* 2. Next GD Countdown Banner */}
-            {nextGdSession && countdownText && (
-              <div className="rounded-2xl bg-gradient-to-r from-[#0A1128] via-[#112255] to-[#1D4ED8] text-white p-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-md border border-blue-400/30">
-                <div className="flex items-center gap-3">
-                  <span className="px-3 py-1 rounded-full bg-blue-500/30 border border-blue-300/40 text-blue-100 text-[11px] font-extrabold uppercase">
-                    ⏱️ Next GD Countdown
-                  </span>
-                  <div>
-                    <h3 className="font-extrabold text-sm sm:text-base">
-                      {nextGdSession.title.split(':')[0]}
-                    </h3>
-                    <p className="text-xs text-blue-200">
-                      {nextGdSession.scheduled_date} • {nextGdSession.start_time}
-                    </p>
+            {/* 2. Next GD Countdown: Glowing Dark Blue Card with 4 Glass Boxes (days, hours, minutes, seconds) */}
+            {nextGdSession && countdownText && (() => {
+              const parts = countdownText.split(' : ');
+              const hasDays = parts.length === 4;
+              const daysVal = hasDays ? parts[0].replace('d', '').padStart(2, '0') : '00';
+              const hoursVal = (hasDays ? parts[1] : parts[0] || '00').replace('h', '');
+              const minsVal = (hasDays ? parts[2] : parts[1] || '00').replace('m', '');
+              const secsVal = (hasDays ? parts[3] : parts[2] || '00').replace('s', '');
+
+              return (
+                <div className="relative overflow-hidden rounded-3xl bg-[#030712] border border-blue-500/40 p-6 sm:p-8 shadow-[0_0_40px_rgba(29,107,243,0.3)] text-white">
+                  {/* Live Animated Blue Glow & Curved Neon Arc (Matching Reference Image 1) */}
+                  <div className="pointer-events-none absolute -top-20 -left-16 w-72 h-72 rounded-full bg-[#1D6BF3]/55 blur-3xl animate-pulse" />
+                  <div className="pointer-events-none absolute -bottom-24 right-10 w-64 h-64 rounded-full bg-blue-600/25 blur-3xl animate-pulse" />
+                  <div className="pointer-events-none absolute -top-36 -left-28 w-[360px] h-[360px] rounded-full border-[2px] border-blue-500/50 shadow-[0_0_20px_rgba(59,130,246,0.5)]" />
+
+                  <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-6">
+                    {/* Left Info */}
+                    <div className="text-center lg:text-left space-y-1.5">
+                      <span className="inline-block px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/40 text-blue-200 text-[11px] font-extrabold uppercase tracking-wider">
+                        ⏱️ Next GD Countdown
+                      </span>
+                      <h3 className="text-xl sm:text-2xl font-extrabold text-white">
+                        {nextGdSession.title.split(':')[0]}
+                      </h3>
+                      <p className="text-xs text-blue-200/90">
+                        {nextGdSession.scheduled_date} • {nextGdSession.start_time}
+                      </p>
+                      <div className="pt-1">
+                        <Link
+                          to={`/session?id=${nextGdSession.id}`}
+                          className="inline-flex items-center gap-1 text-xs font-bold text-blue-400 hover:text-blue-300 underline-offset-4 hover:underline"
+                        >
+                          View Session Details →
+                        </Link>
+                      </div>
+                    </div>
+
+                    {/* Right 4 Glassmorphic Countdown Boxes */}
+                    <div className="grid grid-cols-4 gap-2.5 sm:gap-4 w-full sm:w-auto">
+                      {[
+                        { value: daysVal, label: 'days' },
+                        { value: hoursVal, label: 'hours' },
+                        { value: minsVal, label: 'minutes' },
+                        { value: secsVal, label: 'seconds' },
+                      ].map((unit, idx) => (
+                        <div
+                          key={idx}
+                          className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-[#1E40AF]/65 to-[#1E3A8A]/45 backdrop-blur-md border border-blue-400/35 px-3.5 py-3.5 sm:px-6 sm:py-4 text-center shadow-[0_8px_25px_rgba(30,64,175,0.45)] min-w-[68px] sm:min-w-[92px]"
+                        >
+                          <div className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white drop-shadow">
+                            {unit.value}
+                          </div>
+                          <div className="text-[10px] sm:text-xs font-medium text-blue-200/85 mt-1 lowercase tracking-wide">
+                            {unit.label}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="bg-white/15 border border-white/25 px-4 py-2 rounded-xl font-mono font-extrabold text-sm sm:text-base tracking-wider text-amber-300">
-                    {countdownText}
-                  </div>
-                  <Link
-                    to={`/session?id=${nextGdSession.id}`}
-                    className="px-4 py-2 rounded-full bg-[#1D6BF3] hover:bg-blue-500 text-white font-bold text-xs shrink-0 transition"
-                  >
-                    Details →
-                  </Link>
-                </div>
-              </div>
-            )}
+              );
+            })()}
+
           </div>
         </section>
       )}
+
 
       {/* 1. UPCOMING VIDEO GD SESSIONS + VIEW ALL OPTION */}
       <section className="bg-white py-14">
