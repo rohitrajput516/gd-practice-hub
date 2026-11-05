@@ -12,12 +12,88 @@ import { api, isValidHttps } from '../lib/supabase';
    PAGE 1: HOME PAGE (100% Pixel-Accurate Match to 1000085022_3.png)
    ============================================================================ */
 export const HomePage: React.FC = () => {
-  const [sessions, setSessions] = useState<any[]>([]);
+  const [allSessions, setAllSessions] = useState<any[]>([]);
+  const [showAllSessions, setShowAllSessions] = useState(false);
+  const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [feedbacks, setFeedbacks] = useState<any[]>([]);
+  const [fbName, setFbName] = useState('');
+  const [fbSession, setFbSession] = useState('');
+  const [fbRating, setFbRating] = useState(5);
+  const [fbMessage, setFbMessage] = useState('');
+  const [countdownText, setCountdownText] = useState<string | null>(null);
+  const [nextGdSession, setNextGdSession] = useState<any>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    api.list('sessions', true).then((rows) => setSessions(rows.slice(0, 3)));
+    api.list('sessions', true).then(setAllSessions);
+    api.list('announcements', true).then((rows) => setAnnouncements(rows.slice(0, 4)));
+    api.list('feedback').then((rows) => setFeedbacks(rows.slice(0, 3)));
   }, []);
+
+  // Next GD Countdown calculation (Sirf tabhi dikhega jab future date/time valid ho)
+  useEffect(() => {
+    const parseSessionTime = (s: any) => {
+      if (!s?.scheduled_date || !s?.start_time) return null;
+      const dt = new Date(`${s.scheduled_date} ${s.start_time}`);
+      return isNaN(dt.getTime()) ? null : dt.getTime();
+    };
+
+    const updateTimer = () => {
+      const now = Date.now();
+      const upcomingWithValidTime = allSessions
+        .filter((s) => s.status === 'Upcoming')
+        .map((s) => ({ ...s, targetMs: parseSessionTime(s) }))
+        .filter((s) => s.targetMs && s.targetMs > now)
+        .sort((a, b) => a.targetMs - b.targetMs);
+
+      if (upcomingWithValidTime.length === 0) {
+        setNextGdSession(null);
+        setCountdownText(null);
+        return;
+      }
+
+      const next = upcomingWithValidTime[0];
+      setNextGdSession(next);
+      const diff = Math.max(0, Math.floor((next.targetMs - now) / 1000));
+      const days = Math.floor(diff / 86400);
+      const hrs = String(Math.floor((diff % 86400) / 3600)).padStart(2, '0');
+      const mins = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
+      const secs = String(diff % 60).padStart(2, '0');
+      setCountdownText(days > 0 ? `${days}d : ${hrs}h : ${mins}m : ${secs}s` : `${hrs}h : ${mins}m : ${secs}s`);
+    };
+
+    updateTimer();
+    const timer = setInterval(updateTimer, 1000);
+    return () => clearInterval(timer);
+  }, [allSessions]);
+
+  const liveSessions = allSessions.filter((s) => s.status === 'Live');
+  const sessions = showAllSessions ? allSessions : allSessions.slice(0, 3);
+
+  const handleHomeFeedbackSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!fbMessage.trim()) {
+      alert('Kripya apna feedback message likhein.');
+      return;
+    }
+    await api.save('feedback', {
+      name: fbName.trim() || 'Student',
+      email: '',
+      session_title: fbSession || 'General GD Session',
+      subject: fbSession ? `Feedback on ${fbSession}` : 'Student Feedback',
+      message: fbMessage.trim(),
+      rating: fbRating,
+      is_reviewed: false,
+    });
+    const updated = await api.list('feedback');
+    setFeedbacks(updated.slice(0, 3));
+    setFbName('');
+    setFbSession('');
+    setFbRating(5);
+    setFbMessage('');
+    alert('Aapka feedback successfully jud gaya hai!');
+  };
+
 
   const videoFaces = [
     { name: 'Aarav', img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&q=80' },
@@ -347,7 +423,72 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* UPCOMING VIDEO GD SESSIONS (3-Column Cards matching 1000085022_3.png) */}
+      {/* LIVE SESSION INDICATOR & NEXT GD COUNTDOWN BAR (Sirf valid data hone par dikhega) */}
+      {(liveSessions.length > 0 || (nextGdSession && countdownText)) && (
+        <section className="bg-white pt-8 pb-2">
+          <div className="max-w-5xl mx-auto px-4 sm:px-8 space-y-3">
+            {/* 1. Live Session Indicator */}
+            {liveSessions.map((live) => (
+              <div
+                key={live.id}
+                className="rounded-2xl bg-gradient-to-r from-[#881337] via-[#BE123C] to-[#E11D48] text-white p-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg shadow-rose-600/20 border border-rose-400/40"
+              >
+                <div className="flex items-center gap-3.5">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-rose-700 text-xs font-extrabold uppercase tracking-wider shadow-sm animate-pulse">
+                    <Radio className="w-3.5 h-3.5" /> LIVE NOW
+                  </span>
+                  <div>
+                    <h3 className="font-extrabold text-sm sm:text-base leading-snug">
+                      {live.title}
+                    </h3>
+                    <p className="text-xs text-rose-100">
+                      Topic: {live.topic || live.category} • {live.platform || 'Zoom Room'}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => joinZoomSession(live.zoom_url, live.status)}
+                  className="px-5 py-2.5 rounded-full bg-white hover:bg-rose-50 text-rose-700 font-extrabold text-xs shrink-0 shadow transition"
+                >
+                  Join Live GD Now →
+                </button>
+              </div>
+            ))}
+
+            {/* 2. Next GD Countdown Banner */}
+            {nextGdSession && countdownText && (
+              <div className="rounded-2xl bg-gradient-to-r from-[#0A1128] via-[#112255] to-[#1D4ED8] text-white p-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-md border border-blue-400/30">
+                <div className="flex items-center gap-3">
+                  <span className="px-3 py-1 rounded-full bg-blue-500/30 border border-blue-300/40 text-blue-100 text-[11px] font-extrabold uppercase">
+                    ⏱️ Next GD Countdown
+                  </span>
+                  <div>
+                    <h3 className="font-extrabold text-sm sm:text-base">
+                      {nextGdSession.title.split(':')[0]}
+                    </h3>
+                    <p className="text-xs text-blue-200">
+                      {nextGdSession.scheduled_date} • {nextGdSession.start_time}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="bg-white/15 border border-white/25 px-4 py-2 rounded-xl font-mono font-extrabold text-sm sm:text-base tracking-wider text-amber-300">
+                    {countdownText}
+                  </div>
+                  <Link
+                    to={`/session?id=${nextGdSession.id}`}
+                    className="px-4 py-2 rounded-full bg-[#1D6BF3] hover:bg-blue-500 text-white font-bold text-xs shrink-0 transition"
+                  >
+                    Details →
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* 1. UPCOMING VIDEO GD SESSIONS + VIEW ALL OPTION */}
       <section className="bg-white py-14">
         <div className="max-w-5xl mx-auto px-4 sm:px-8">
           <h2 className="text-2xl sm:text-[28px] font-extrabold text-center text-[#0A1128] mb-10">
@@ -359,9 +500,14 @@ export const HomePage: React.FC = () => {
               <motion.div
                 key={s.id}
                 whileHover={{ y: -4 }}
-                className="bg-white border border-slate-200 rounded-2xl p-6 shadow-[0_4px_20px_rgba(10,17,40,0.05)] flex flex-col justify-between"
+                className="bg-white border border-slate-200 rounded-2xl p-6 shadow-[0_4px_20px_rgba(10,17,40,0.05)] flex flex-col justify-between relative"
               >
                 <div>
+                  {s.status === 'Live' && (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700 text-[10px] font-extrabold mb-2">
+                      ● LIVE NOW
+                    </span>
+                  )}
                   <h3 className="text-xl font-extrabold text-[#0A1128] leading-snug mb-1.5">
                     {s.title.split(':')[0]}
                   </h3>
@@ -397,8 +543,366 @@ export const HomePage: React.FC = () => {
               </motion.div>
             ))}
           </div>
+
+          {/* View All Upcoming Sessions Button */}
+          <div className="mt-10 flex justify-center gap-3">
+            {allSessions.length > 3 ? (
+              <button
+                onClick={() => setShowAllSessions(!showAllSessions)}
+                className="px-7 py-3 rounded-full bg-[#1D6BF3] hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-lg shadow-blue-500/30 transition"
+              >
+                {showAllSessions ? 'Show Less Sessions ↑' : 'View All Upcoming Sessions →'}
+              </button>
+            ) : (
+              <Link
+                to="/schedule"
+                className="px-7 py-3 rounded-full bg-[#1D6BF3] hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-lg shadow-blue-500/30 transition"
+              >
+                View All Upcoming Sessions →
+              </Link>
+            )}
+          </div>
         </div>
       </section>
+
+      {/* 2. WHY JOIN GD PRACTICE HUB? (4 Benefits matching Preview Image 1) */}
+      <section className="py-14 bg-[#EEF4FC] border-t border-slate-200/70">
+        <div className="max-w-5xl mx-auto px-4 sm:px-8">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl sm:text-[28px] font-extrabold text-[#0A1128]">
+              Why Join GD Practice Hub?
+            </h2>
+            <p className="text-xs sm:text-sm font-semibold text-slate-600 mt-1">
+              चार मुख्य फायदे जो आपकी तैयारी को मजबूत बनाते हैं
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[
+              {
+                title: 'Improve Communication Skills',
+                desc: 'Join real-time online group discussions, express your thoughts clearly in English & Hindi, and sharpen fluency.',
+                svg: (
+                  <svg className="w-7 h-7 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                ),
+              },
+              {
+                title: 'Build Confidence',
+                desc: 'Overcome stage fear and hesitation by speaking regularly in front of fellow aspirants and moderators.',
+                svg: (
+                  <svg className="w-7 h-7 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                  </svg>
+                ),
+              },
+              {
+                title: 'Learn Team Discussion',
+                desc: 'Master active listening, logical turn-taking, initiation, and respectful disagreement in a team environment.',
+                svg: (
+                  <svg className="w-7 h-7 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                ),
+              },
+              {
+                title: 'Prepare for Interviews',
+                desc: 'Practice real placement, campus, and defence GD topics with structured preparation points and rules.',
+                svg: (
+                  <svg className="w-7 h-7 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                ),
+              },
+            ].map((item, idx) => (
+              <motion.div
+                key={idx}
+                whileHover={{ y: -3 }}
+                className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-sm flex items-start gap-4"
+              >
+                <div className="w-16 h-16 rounded-2xl bg-[#0A1128] shadow-lg shadow-blue-950/25 flex items-center justify-center shrink-0 border border-blue-500/30">
+                  {item.svg}
+                </div>
+                <div>
+                  <h3 className="text-lg font-extrabold text-[#0A1128] mb-1">
+                    {item.title}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                    {item.desc}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 3. HOW IT WORKS (3 Connected Steps matching Preview Image 1) */}
+      <section className="py-14 bg-[#F5F8FF] border-t border-slate-200/70">
+        <div className="max-w-5xl mx-auto px-4 sm:px-8">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl sm:text-[28px] font-extrabold text-[#0A1128]">
+              How It Works
+            </h2>
+            <p className="text-xs sm:text-sm font-semibold text-slate-600 mt-1">
+              तीन आसान Steps
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative items-stretch">
+            {[
+              {
+                num: '01',
+                title: 'Explore Upcoming Sessions',
+                desc: 'Check the live GD Schedule, pick a topic of your choice, and read its preparation points beforehand.',
+              },
+              {
+                num: '02',
+                title: 'Join the GD Meeting',
+                desc: 'Click the Join Session button at the scheduled time to enter the live Zoom discussion room.',
+              },
+              {
+                num: '03',
+                title: 'Practice, Learn and Improve',
+                desc: 'Present your views, listen to peers, follow GD etiquette, and level up your speaking confidence.',
+              },
+            ].map((st, i) => (
+              <div key={st.num} className="relative flex flex-col">
+                <motion.div
+                  whileHover={{ y: -4 }}
+                  className="bg-white border border-slate-200 rounded-2xl p-6 text-center shadow-sm flex-1 flex flex-col items-center"
+                >
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#0EA5E9] to-[#2563EB] text-white font-extrabold text-xl flex items-center justify-center shadow-md shadow-blue-500/30 mb-4">
+                    {st.num}
+                  </div>
+                  <h3 className="text-lg font-extrabold text-[#0A1128] mb-2">
+                    {st.title}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                    {st.desc}
+                  </p>
+                </motion.div>
+
+                {i < 2 && (
+                  <div className="hidden md:flex items-center justify-center absolute top-1/2 -right-5 w-4 z-10">
+                    <span className="w-full border-t-2 border-dashed border-blue-400" />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 4. LATEST ANNOUNCEMENTS (Admin Updates matching Preview Image 2) */}
+      <section className="py-14 bg-white border-t border-slate-200/70">
+        <div className="max-w-5xl mx-auto px-4 sm:px-8">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl sm:text-[28px] font-extrabold text-[#0A1128]">
+              Latest Announcements
+            </h2>
+            <p className="text-xs sm:text-sm font-semibold text-slate-600 mt-1">
+              Admin द्वारा प्रकाशित नवीनतम सूचनाएँ:
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {(announcements.length > 0
+              ? announcements
+              : [
+                  { id: '1', title: 'New GD Schedule', message: 'Weekly live GD schedule has been updated for upcoming evening batches.', is_important: true },
+                  { id: '2', title: 'Meeting Link Update', message: 'Zoom meeting links are activated 15 minutes prior to each scheduled session.', is_important: false },
+                  { id: '3', title: 'Special Practice Session', message: 'Join our weekend mock panel GD session with detailed evaluation feedback.', is_important: true },
+                  { id: '4', title: 'Important Instructions', message: 'Please review the 3-minute speaking limit and GD etiquette before joining.', is_important: false },
+                ]
+            ).slice(0, 4).map((ann, idx) => (
+              <motion.div
+                key={ann.id || idx}
+                whileHover={{ y: -3 }}
+                className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-start gap-4 relative"
+              >
+                <div className="w-14 h-14 rounded-2xl bg-[#0A1128] text-cyan-400 flex items-center justify-center shrink-0 shadow-md">
+                  <Calendar className="w-6 h-6" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex flex-wrap items-center gap-2 mb-1">
+                    <h3 className="text-base font-extrabold text-[#0A1128]">
+                      {ann.title}
+                    </h3>
+                    {ann.is_important && (
+                      <span className="px-2.5 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-extrabold uppercase">
+                        PRIORITY
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed line-clamp-2">
+                    {ann.message}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="mt-9 text-center">
+            <Link
+              to="/announcements"
+              className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-[#1D6BF3] hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-lg shadow-blue-500/30 transition"
+            >
+              <span>View All Announcements →</span>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. STUDENT FEEDBACK & TESTIMONIALS + WRITE FEEDBACK FORM */}
+      <section className="py-14 bg-[#F5F8FF] border-t border-slate-200/70">
+        <div className="max-w-5xl mx-auto px-4 sm:px-8">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl sm:text-[28px] font-extrabold text-[#0A1128]">
+              Student Feedback &amp; Testimonials
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 mt-1">
+              What our students say &amp; write your own experience
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+            {/* Left Column: Existing Student Reviews */}
+            <div className="md:col-span-6 space-y-4">
+              {feedbacks.map((fb, idx) => (
+                <div
+                  key={fb.id || idx}
+                  className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm"
+                >
+                  <div className="flex items-center gap-1 text-amber-400 mb-2">
+                    {Array.from({ length: fb.rating || 5 }).map((_, s) => (
+                      <Star key={s} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-9 h-9 rounded-full bg-blue-100 text-blue-700 font-extrabold text-xs flex items-center justify-center">
+                      {(fb.name || 'S')[0].toUpperCase()}
+                    </div>
+                    <div>
+                      <h4 className="font-extrabold text-sm text-[#0A1128]">
+                        {fb.name || 'Student'}
+                      </h4>
+                      <p className="text-[11px] text-slate-500">
+                        {fb.session_title || 'Live GD Participant'}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-xs sm:text-sm text-slate-700 italic leading-relaxed">
+                    “{fb.message}”
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {/* Right Column: Write Your Feedback Form */}
+            <div className="md:col-span-6 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+              <h3 className="text-lg font-extrabold text-[#0A1128] mb-4">
+                Write Your Feedback
+              </h3>
+              <form onSubmit={handleHomeFeedbackSubmit} className="space-y-3.5 text-xs">
+                <input
+                  type="text"
+                  value={fbName}
+                  onChange={(e) => setFbName(e.target.value)}
+                  placeholder="Your Name"
+                  className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl"
+                />
+
+                <select
+                  value={fbSession}
+                  onChange={(e) => setFbSession(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-700"
+                >
+                  <option value="">Select Session (Optional)</option>
+                  {allSessions.map((s) => (
+                    <option key={s.id} value={s.title.split(':')[0]}>
+                      {s.title.split(':')[0]}
+                    </option>
+                  ))}
+                </select>
+
+                <div>
+                  <p className="font-bold text-slate-700 mb-1">Rating</p>
+                  <div className="flex items-center gap-1.5">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setFbRating(star)}
+                        className="p-1"
+                      >
+                        <Star
+                          className={`w-5 h-5 ${
+                            star <= fbRating
+                              ? 'fill-amber-400 text-amber-400'
+                              : 'text-slate-300'
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <textarea
+                  rows={3}
+                  value={fbMessage}
+                  onChange={(e) => setFbMessage(e.target.value)}
+                  placeholder="Write your feedback or review..."
+                  className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl"
+                />
+
+                <button
+                  type="submit"
+                  className="w-full py-3 rounded-full bg-[#1D6BF3] hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-blue-500/25 transition"
+                >
+                  Submit Feedback
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. TELEGRAM SUPPORT SECTION (Existing Design Preserved) */}
+      <section className="py-14 bg-[#EBF1FA]">
+        <div className="max-w-5xl mx-auto px-4 sm:px-8 grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+          <div className="md:col-span-6">
+            <h2 className="text-3xl font-extrabold text-[#0A1128] mb-2">
+              Telegram Support
+            </h2>
+            <p className="text-slate-700 text-base">
+              Have a doubt? Ask Owner for Any Doubt
+            </p>
+          </div>
+
+          <div className="md:col-span-6">
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-100 text-center max-w-md mx-auto">
+              <div className="w-14 h-14 rounded-full bg-[#2AABEE] text-white flex items-center justify-center mx-auto mb-3.5 shadow-md">
+                <Send className="w-6 h-6 -ml-0.5" />
+              </div>
+              <h3 className="text-xl font-extrabold text-[#0A1128] mb-1">
+                Ask Owner for Any Doubt 👋
+              </h3>
+              <p className="text-xs text-slate-600 mb-6">
+                Get 1-on-1 support directly from the founder.
+              </p>
+              <button
+                onClick={openTelegramSupport}
+                className="w-full py-3.5 rounded-xl bg-[#0A142F] hover:bg-blue-700 text-white font-bold text-xs tracking-wide transition"
+              >
+                Message on Telegram
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
 
       {/* TELEGRAM SUPPORT SECTION (Exact 2-Column Match to 1000085022_3.png) */}
       <section className="py-14 bg-[#EBF1FA]">

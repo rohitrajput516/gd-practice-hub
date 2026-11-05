@@ -133,22 +133,70 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
 
       <main className="flex-1">{children}</main>
 
-      {/* Footer matching Image 2 */}
-      <footer className="bg-[#EBF1FA] border-t border-slate-200/80 py-6">
-        <div className="max-w-6xl mx-auto px-4 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-600">
-          <div className="flex items-center gap-2">
-            <span className="font-medium text-slate-700">
-              {settings.footer_text || '© 2026 GD Practice Hub'}
-            </span>
+      {/* Premium Dark Navy Footer (Logo + Intro, Quick Links, Important Pages, Telegram & Legal) */}
+      <footer className="bg-[#070C1C] text-slate-300 pt-12 pb-8 border-t border-slate-800">
+        <div className="max-w-6xl mx-auto px-4 sm:px-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-8 pb-10 border-b border-slate-800/80">
+          {/* Column 1: Logo & Website Intro */}
+          <div className="md:col-span-4 space-y-3">
+            <Link to="/" className="flex items-center gap-2.5">
+              <img
+                src={settings.logo_url || '/logo.png'}
+                alt="GD Practice Hub"
+                className="w-10 h-10 rounded-xl object-contain bg-white p-0.5 shadow"
+              />
+              <span className="font-extrabold text-lg text-white tracking-tight">
+                {settings.website_name || 'GD Practice Hub'}
+              </span>
+            </Link>
+            <p className="text-xs text-slate-400 leading-relaxed pr-2">
+              {settings.mission_statement ||
+                "India's premier Group Discussion practice platform for defence candidates and students to build confidence and ace interviews."}
+            </p>
           </div>
-          <div className="flex flex-wrap gap-6 font-medium text-slate-700">
-            <Link to="/" className="hover:text-blue-600">Home</Link>
-            <Link to="/schedule" className="hover:text-blue-600">GD Schedule</Link>
-            <Link to="/announcements" className="hover:text-blue-600">Announcements</Link>
-            <Link to="/contact" className="hover:text-blue-600">Contact</Link>
+
+          {/* Column 2: Quick Links */}
+          <div className="md:col-span-3 space-y-2.5 text-xs">
+            <h4 className="font-extrabold text-sm text-white mb-3">Quick Links</h4>
+            <ul className="space-y-2 text-slate-400">
+              <li><Link to="/" className="hover:text-white transition">Home</Link></li>
+              <li><Link to="/schedule" className="hover:text-white transition">GD Schedule</Link></li>
+              <li><Link to="/topics" className="hover:text-white transition">Topics Library</Link></li>
+              <li><Link to="/guidelines" className="hover:text-white transition">Rules &amp; Guidelines</Link></li>
+            </ul>
+          </div>
+
+          {/* Column 3: Important Pages */}
+          <div className="md:col-span-2 space-y-2.5 text-xs">
+            <h4 className="font-extrabold text-sm text-white mb-3">Important Pages</h4>
+            <ul className="space-y-2 text-slate-400">
+              <li><Link to="/announcements" className="hover:text-white transition">Announcements</Link></li>
+              <li><Link to="/contact" className="hover:text-white transition">Contact &amp; FAQs</Link></li>
+              <li><Link to="/admin/login" className="hover:text-white transition">Admin Portal</Link></li>
+            </ul>
+          </div>
+
+          {/* Column 4: Telegram Contact & Legal Policies */}
+          <div className="md:col-span-3 space-y-2.5 text-xs">
+            <h4 className="font-extrabold text-sm text-white mb-3">Telegram Contact</h4>
+            <button
+              onClick={openTelegramSupport}
+              className="px-4 py-2 rounded-lg bg-[#1D6BF3] hover:bg-blue-600 text-white font-bold text-xs transition inline-block mb-2"
+            >
+              Ask Owner for Any Doubt
+            </button>
+            <ul className="space-y-1.5 text-slate-400 pt-1">
+              <li><Link to="/guidelines" className="hover:text-white transition">Privacy Policy</Link></li>
+              <li><Link to="/guidelines" className="hover:text-white transition">Terms &amp; Conditions</Link></li>
+            </ul>
           </div>
         </div>
+
+        <div className="max-w-6xl mx-auto px-4 sm:px-8 pt-6 text-center text-xs text-slate-500">
+          {settings.footer_text || '© 2026 GD Practice Hub. All Rights Reserved.'}
+        </div>
       </footer>
+
+
     </div>
   );
 };
