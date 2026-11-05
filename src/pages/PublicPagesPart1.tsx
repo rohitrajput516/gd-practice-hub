@@ -904,39 +904,7 @@ export const HomePage: React.FC = () => {
       </section>
 
 
-      {/* TELEGRAM SUPPORT SECTION (Exact 2-Column Match to 1000085022_3.png) */}
-      <section className="py-14 bg-[#EBF1FA]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-8 grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
-          <div className="md:col-span-6">
-            <h2 className="text-3xl font-extrabold text-[#0A1128] mb-2">
-              Telegram Support
-            </h2>
-            <p className="text-slate-700 text-base">
-              Have a doubt? Ask Owner for Any Doubt
-            </p>
-          </div>
 
-          <div className="md:col-span-6">
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-100 text-center max-w-md mx-auto">
-              <div className="w-14 h-14 rounded-full bg-[#2AABEE] text-white flex items-center justify-center mx-auto mb-3.5 shadow-md">
-                <Send className="w-6 h-6 -ml-0.5" />
-              </div>
-              <h3 className="text-xl font-extrabold text-[#0A1128] mb-1">
-                Ask Owner for Any Doubt 👋
-              </h3>
-              <p className="text-xs text-slate-600 mb-6">
-                Get 1-on-1 support directly from the founder.
-              </p>
-              <button
-                onClick={openTelegramSupport}
-                className="w-full py-3.5 rounded-xl bg-[#0A142F] hover:bg-blue-700 text-white font-bold text-xs tracking-wide transition"
-              >
-                Message on Telegram
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
     </PublicLayout>
   );
 };
