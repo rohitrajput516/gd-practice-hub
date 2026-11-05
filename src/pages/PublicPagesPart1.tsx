@@ -1,24 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Video, Send, Search, Calendar, AlertCircle,
-  LayoutGrid, List, Flame, Star, Radio, Mic, PhoneOff
+  LayoutGrid, List, Flame, Star, Radio
 } from 'lucide-react';
 import { PublicLayout, openTelegramSupport, joinZoomSession } from '../components/Layout';
 import { api, isValidHttps } from '../lib/supabase';
 
 /* ============================================================================
-   PAGE 1: HOME PAGE (100% Exact Match to Image 1000085022_2.png)
+   PAGE 1: HOME PAGE (100% Pixel-Accurate Match to 1000085022_3.png)
    ============================================================================ */
 export const HomePage: React.FC = () => {
   const [sessions, setSessions] = useState<any[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     api.list('sessions', true).then((rows) => setSessions(rows.slice(0, 3)));
   }, []);
 
-  const participants = [
+  const videoFaces = [
     { name: 'Aarav', img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&q=80' },
     { name: 'Rohan', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&q=80' },
     { name: 'Ananya', img: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300&q=80' },
@@ -26,236 +27,339 @@ export const HomePage: React.FC = () => {
     { name: 'Neha', img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&q=80' },
     { name: 'Sneha', img: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=300&q=80' },
     { name: 'Vikram', img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&q=80' },
-    { name: 'Kabir', img: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&q=80' },
-    { name: 'Aditi', img: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=300&q=80' },
+    { name: 'Kabir', img: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=300&q=80' },
+    { name: 'Aditi', img: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&q=80' },
   ];
+
+  // Generate isometric keyboard keys rows
+  const keyRows = [0, 1, 2, 3];
+  const keyCols = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
   return (
     <PublicLayout>
-      {/* HERO SECTION WITH CONSTELLATION MESH, DOTTED RINGS & 3D SILVER LAPTOP */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#EDF3FC] via-[#F2F6FD] to-[#E5EEFB] border-b border-slate-200/60 pt-10 pb-16 lg:py-20">
+      {/* HERO SECTION - Side by Side (md:grid-cols-12) matching 1000085022_3.png */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#EDF3FC] via-[#F1F6FE] to-[#E4EEFB] border-b border-slate-200/70 py-10 md:py-14">
         
-        {/* Bottom-Left Constellation Network Mesh SVG (Exact match to Image 2) */}
+        {/* Bottom-Left Constellation Network Mesh SVG */}
         <svg
-          className="absolute bottom-0 left-0 w-72 sm:w-96 h-56 text-slate-400/35 pointer-events-none"
-          viewBox="0 0 320 220"
+          className="absolute bottom-0 left-0 w-72 md:w-96 h-52 text-slate-400/40 pointer-events-none"
+          viewBox="0 0 360 220"
           fill="none"
         >
           <path
-            d="M10 190 L65 140 L130 165 L195 120 L260 185 L310 210 M65 140 L95 75 L165 100 L130 165 M10 110 L65 140 M95 75 L40 45"
+            d="M0 150 L45 125 L95 160 L155 135 L215 175 L285 155 L340 215 M45 125 L75 70 L140 95 L155 135 M95 160 L70 215 M155 135 L185 215 M215 175 L245 215 M0 85 L45 125"
             stroke="currentColor"
-            strokeWidth="1.2"
+            strokeWidth="1.1"
           />
           {[
-            [10, 190], [65, 140], [130, 165], [195, 120], [260, 185],
-            [95, 75], [165, 100], [10, 110], [40, 45]
+            [45, 125], [95, 160], [155, 135], [215, 175], [285, 155],
+            [75, 70], [140, 95], [70, 215], [185, 215]
           ].map(([cx, cy], idx) => (
-            <circle key={idx} cx={cx} cy={cy} r="3.5" fill="#94A3B8" fillOpacity="0.5" />
+            <circle key={idx} cx={cx} cy={cy} r="3.5" fill="#94A3B8" fillOpacity="0.55" />
           ))}
         </svg>
 
-        <div className="max-w-6xl mx-auto px-4 sm:px-8 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center relative z-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-8 grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-4 items-center relative z-10">
           
-          {/* Left Column: Headline, Description & Pill Buttons */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-            className="lg:col-span-6 space-y-5"
-          >
-            <h1 className="text-[34px] sm:text-[46px] font-extrabold text-[#0A1128] leading-[1.12] tracking-tight">
+          {/* Left Column (5 Cols): Headline, Subtitle, Buttons */}
+          <div className="md:col-span-5 space-y-4">
+            <h1 className="text-[32px] sm:text-[40px] lg:text-[46px] font-extrabold text-[#0A1128] leading-[1.12] tracking-tight">
               Master Group<br />
               Discussions, Speak<br />
               with Absolute<br />
               Confidence.
             </h1>
 
-            <p className="text-slate-700 text-sm sm:text-base max-w-lg leading-relaxed">
+            <p className="text-slate-700 text-xs sm:text-sm lg:text-[15px] leading-relaxed max-w-md">
               Join real-time online Group Discussions, improve your communication skills, and prepare for interviews on India’s premier GD practice platform.
             </p>
 
-            <div className="flex flex-wrap items-center gap-3.5 pt-1">
+            <div className="flex flex-wrap items-center gap-3 pt-1">
               <Link
                 to="/schedule"
-                className="px-7 py-3 rounded-full bg-[#1D6BF3] hover:bg-blue-700 text-white font-bold text-sm shadow-lg shadow-blue-500/30 transition"
+                className="px-6 py-2.5 rounded-full bg-[#1D6BF3] hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-blue-500/25 transition"
               >
                 Explore GD Sessions
               </Link>
               <Link
                 to="/topics"
-                className="px-7 py-3 rounded-full bg-white/90 hover:bg-white text-[#1D6BF3] border-[1.5px] border-[#3B82F6] font-bold text-sm shadow-sm transition"
+                className="px-6 py-2.5 rounded-full bg-white/80 hover:bg-white text-[#1D6BF3] border-[1.5px] border-[#2563EB] font-bold text-xs sm:text-sm transition"
               >
                 Browse GD Topics
               </Link>
             </div>
 
-            <p className="text-xs sm:text-sm font-bold text-[#0A1128] pt-1">
+            <p className="text-xs sm:text-[13px] font-bold text-[#0A1128] pt-1">
               No experience required • Live Mock GDs
             </p>
-          </motion.div>
+          </div>
 
-          {/* Right Column: 3D Isometric Silver Laptop + Dotted Rings + Floating Badges */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.94 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.55 }}
-            className="lg:col-span-6 relative flex items-center justify-center py-6"
-          >
-            {/* Background Dotted Concentric Circles & Radar Waves SVG */}
-            <svg
-              className="absolute inset-0 w-full h-full max-w-[520px] max-h-[520px] m-auto pointer-events-none"
-              viewBox="0 0 500 500"
-              fill="none"
-            >
-              {/* Outer & Inner Dashed Orbit Circles */}
-              <circle cx="255" cy="245" r="215" stroke="#60A5FA" strokeWidth="1.5" strokeDasharray="4 6" opacity="0.55" />
-              <circle cx="255" cy="245" r="182" stroke="#3B82F6" strokeWidth="1.3" strokeDasharray="3 5" opacity="0.45" />
-              <circle cx="255" cy="245" r="148" stroke="#93C5FD" strokeWidth="1.2" opacity="0.4" />
-
-              {/* Top-Right Radar Wave Rings */}
-              <circle cx="395" cy="95" r="18" stroke="#93C5FD" strokeWidth="1.5" opacity="0.6" />
-              <circle cx="395" cy="95" r="32" stroke="#93C5FD" strokeWidth="1.5" opacity="0.45" />
-              <circle cx="395" cy="95" r="46" stroke="#93C5FD" strokeWidth="1.5" opacity="0.3" />
-              <circle cx="395" cy="95" r="60" stroke="#93C5FD" strokeWidth="1.2" opacity="0.18" />
-
-              {/* Floating Blue Orbit Dots */}
-              <circle cx="155" cy="60" r="4" fill="#2563EB" opacity="0.7" />
-              <circle cx="290" cy="34" r="3.5" fill="#60A5FA" opacity="0.8" />
-              <circle cx="70" cy="170" r="3" fill="#3B82F6" opacity="0.5" />
-              <circle cx="445" cy="195" r="4.5" fill="#60A5FA" opacity="0.7" />
-              <circle cx="465" cy="225" r="3" fill="#93C5FD" opacity="0.7" />
-              <circle cx="110" cy="395" r="3.5" fill="#60A5FA" opacity="0.6" />
-              <circle cx="365" cy="435" r="5" fill="#1D4ED8" opacity="0.85" />
-            </svg>
-
-            {/* 3D Tilted Laptop Container */}
-            <div
-              className="relative w-full max-w-[460px] select-none"
-              style={{ perspective: '1200px' }}
-            >
-              {/* Floating Red "Live GD Session" Pill (Top-Left of Screen) */}
-              <motion.div
-                animate={{ y: [0, -4, 0] }}
-                transition={{ duration: 3, repeat: Infinity }}
-                className="absolute -top-3 left-0 sm:-left-4 z-30 flex items-center gap-2 bg-gradient-to-r from-[#E11D48] to-[#F43F5E] text-white px-4 py-2 rounded-full text-xs font-bold shadow-xl shadow-rose-600/30"
+          {/* Right Column (7 Cols): Exact 3D Isometric Silver Laptop Illustration */}
+          <div className="md:col-span-7 relative flex items-center justify-center">
+            <div className="w-full max-w-[590px]">
+              <svg
+                viewBox="0 0 640 470"
+                className="w-full h-auto overflow-visible drop-shadow-sm select-none"
               >
-                <Video className="w-3.5 h-3.5 fill-white" />
-                <span>Live GD Session</span>
-              </motion.div>
+                <defs>
+                  {/* Laptop Drop Shadow */}
+                  <filter id="laptopShadow" x="-20%" y="-20%" width="150%" height="150%">
+                    <feDropShadow dx="0" dy="18" stdDeviation="16" floodColor="#0F172A" floodOpacity="0.28" />
+                  </filter>
+                  <filter id="badgeShadow" x="-20%" y="-20%" width="150%" height="150%">
+                    <feDropShadow dx="0" dy="8" stdDeviation="10" floodColor="#0F172A" floodOpacity="0.22" />
+                  </filter>
 
-              {/* Floating Blue "Join Zoom Meeting ->" Pill (Right of Screen) */}
-              <motion.div
-                animate={{ y: [0, 4, 0] }}
-                transition={{ duration: 3.2, repeat: Infinity }}
-                className="absolute right-0 sm:-right-5 bottom-24 z-30"
-              >
-                <Link
-                  to="/schedule"
-                  className="flex items-center gap-2 bg-gradient-to-r from-[#1D6BF3] to-[#2563EB] hover:from-blue-600 hover:to-blue-700 text-white px-5 py-2.5 rounded-full text-xs font-extrabold shadow-xl shadow-blue-600/40 border border-blue-400/40"
-                >
-                  <span>Join Zoom Meeting</span>
-                  <span>→</span>
-                </Link>
-              </motion.div>
+                  {/* Metallic Silver Gradients for 3D Keyboard Base */}
+                  <linearGradient id="silverTop" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#F1F5F9" />
+                    <stop offset="50%" stopColor="#CBD5E1" />
+                    <stop offset="100%" stopColor="#94A3B8" />
+                  </linearGradient>
+                  <linearGradient id="silverEdgeFront" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#94A3B8" />
+                    <stop offset="50%" stopColor="#64748B" />
+                    <stop offset="100%" stopColor="#475569" />
+                  </linearGradient>
+                  <linearGradient id="silverEdgeSide" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#64748B" />
+                    <stop offset="100%" stopColor="#334155" />
+                  </linearGradient>
+                  <linearGradient id="redPillGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#E11D48" />
+                    <stop offset="100%" stopColor="#F43F5E" />
+                  </linearGradient>
+                  <linearGradient id="bluePillGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#1D6BF3" />
+                    <stop offset="100%" stopColor="#2563EB" />
+                  </linearGradient>
+                </defs>
 
-              {/* Floating Frosted Glass "zoom" Card (Bottom-Right) */}
-              <div className="absolute -bottom-3 right-2 sm:right-0 z-30 bg-white/90 backdrop-blur-md px-4 py-2.5 rounded-2xl shadow-xl border border-white flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-full bg-[#1D6BF3] text-white flex items-center justify-center shadow-sm">
-                  <Video className="w-4 h-4 fill-white" />
-                </div>
-                <span className="font-extrabold text-[#1D6BF3] text-base tracking-tight">
-                  zoom
-                </span>
-              </div>
+                {/* 1. CONCENTRIC DOTTED ORBIT CIRCLES & RADAR WAVES */}
+                <circle cx="365" cy="225" r="205" fill="none" stroke="#60A5FA" strokeWidth="1.4" strokeDasharray="3 6" opacity="0.65" />
+                <circle cx="365" cy="225" r="178" fill="none" stroke="#3B82F6" strokeWidth="1.3" strokeDasharray="4 6" opacity="0.55" />
+                <circle cx="365" cy="225" r="152" fill="none" stroke="#93C5FD" strokeWidth="1.2" opacity="0.5" />
 
-              {/* 3D Tilted Laptop Assembly */}
-              <div
-                className="relative mx-auto transition-transform duration-500"
-                style={{
-                  transform: 'rotateY(-18deg) rotateX(8deg) rotateZ(-2deg)',
-                  transformStyle: 'preserve-3d',
-                }}
-              >
-                {/* Laptop Lid / Dark Bezel Screen */}
-                <div className="bg-[#0F172A] rounded-t-2xl p-2.5 pb-2 border-[3px] border-[#334155] shadow-2xl relative">
-                  {/* Top Camera Notch & Window Dots */}
-                  <div className="flex items-center justify-between px-2 pb-1.5">
-                    <div className="flex gap-1">
-                      <span className="w-2 h-2 rounded-full bg-rose-500/80" />
-                      <span className="w-2 h-2 rounded-full bg-amber-400/80" />
-                      <span className="w-2 h-2 rounded-full bg-emerald-500/80" />
-                    </div>
-                    <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
-                    <span className="text-[8px] text-slate-400 font-semibold">REC ●</span>
-                  </div>
+                {/* Top-Right Radar Concentric Waves */}
+                <g opacity="0.7">
+                  <circle cx="525" cy="88" r="16" fill="#DBEAFE" stroke="#93C5FD" strokeWidth="1.5" />
+                  <circle cx="525" cy="88" r="29" fill="none" stroke="#93C5FD" strokeWidth="1.5" />
+                  <circle cx="525" cy="88" r="43" fill="none" stroke="#93C5FD" strokeWidth="1.4" opacity="0.75" />
+                  <circle cx="525" cy="88" r="58" fill="none" stroke="#93C5FD" strokeWidth="1.2" opacity="0.45" />
+                </g>
 
-                  {/* 3x3 Video Call Grid inside Laptop Screen */}
-                  <div className="grid grid-cols-3 gap-1.5 bg-[#1E293B] p-1.5 rounded-lg">
-                    {participants.map((p, i) => (
-                      <div
-                        key={i}
-                        className={`relative h-16 sm:h-20 rounded overflow-hidden bg-slate-800 ${
-                          i === 4 ? 'ring-2 ring-emerald-400' : ''
-                        }`}
-                      >
-                        <img
-                          src={p.img}
-                          alt={p.name}
-                          className="w-full h-full object-cover"
+                {/* Floating Orbit Dots */}
+                <circle cx="290" cy="36" r="4" fill="#3B82F6" opacity="0.8" />
+                <circle cx="408" cy="24" r="3" fill="#60A5FA" opacity="0.7" />
+                <circle cx="490" cy="48" r="4.5" fill="#60A5FA" opacity="0.8" />
+                <circle cx="170" cy="145" r="3" fill="#93C5FD" opacity="0.7" />
+                <circle cx="156" cy="235" r="3" fill="#60A5FA" opacity="0.5" />
+                <circle cx="562" cy="175" r="4" fill="#60A5FA" opacity="0.7" />
+                <circle cx="585" cy="205" r="3.5" fill="#93C5FD" opacity="0.7" />
+                <circle cx="556" cy="252" r="5.5" fill="#60A5FA" opacity="0.55" />
+                <circle cx="485" cy="405" r="5.5" fill="#1D4ED8" opacity="0.9" />
+                <circle cx="245" cy="392" r="3" fill="#60A5FA" opacity="0.6" />
+
+                {/* 2. 3D LAPTOP SCREEN LID & BEZEL (Tilted Isometric Back) */}
+                {/* Silver Lid Back Rim */}
+                <polygon
+                  points="240,42 544,78 515,288 216,242"
+                  fill="#94A3B8"
+                  stroke="#CBD5E1"
+                  strokeWidth="2"
+                  strokeLinejoin="round"
+                />
+                {/* Dark Screen Bezel */}
+                <polygon
+                  points="237,45 540,81 511,288 213,242"
+                  fill="#0F172A"
+                  stroke="#1E293B"
+                  strokeWidth="8"
+                  strokeLinejoin="round"
+                />
+
+                {/* Top Bezel Webcam Dot & Status */}
+                <circle cx="385" cy="66" r="2.5" fill="#475569" />
+                <text x="505" y="86" fill="#94A3B8" fontSize="7" fontWeight="bold">● V0:08</text>
+
+                {/* 3. EMBEDDED 3x3 STUDENT VIDEO CALL GRID (Isometric Skewed Matrix) */}
+                <g transform="matrix(0.955, 0.114, -0.095, 0.94, 242, 60)">
+                  {/* Screen Inner Canvas */}
+                  <rect x="0" y="0" width="292" height="186" rx="4" fill="#1E293B" />
+
+                  {videoFaces.map((p, idx) => {
+                    const col = idx % 3;
+                    const row = Math.floor(idx / 3);
+                    const x = 4 + col * 96;
+                    const y = 4 + row * 54;
+                    return (
+                      <g key={idx}>
+                        <clipPath id={`vidClip${idx}`}>
+                          <rect x={x} y={y} width="92" height="50" rx="3" />
+                        </clipPath>
+                        <rect x={x} y={y} width="92" height="50" rx="3" fill="#334155" />
+                        <image
+                          href={p.img}
+                          x={x}
+                          y={y - 6}
+                          width="92"
+                          height="64"
+                          preserveAspectRatio="xMidYMid slice"
+                          clipPath={`url(#vidClip${idx})`}
                         />
-                        <span className="absolute bottom-1 left-1 bg-black/65 text-white text-[9px] font-medium px-1.5 py-0.5 rounded">
+                        {/* Participant Name Tag */}
+                        <rect x={x + 3} y={y + 36} width="34" height="11" rx="2" fill="rgba(0,0,0,0.65)" />
+                        <text x={x + 6} y={y + 44} fill="#FFFFFF" fontSize="6.5" fontWeight="600">
                           {p.name}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
+                        </text>
+                      </g>
+                    );
+                  })}
 
-                  {/* Laptop Bottom Call Control Bar */}
-                  <div className="mt-1.5 px-3 py-1 bg-[#090D16] rounded flex items-center justify-center gap-4 text-slate-300">
-                    <Mic className="w-3 h-3 text-emerald-400" />
-                    <Video className="w-3 h-3 text-blue-400" />
-                    <span className="px-2 py-0.5 rounded bg-rose-600 text-white text-[8px] font-bold flex items-center gap-1">
-                      <PhoneOff className="w-2.5 h-2.5" /> End
-                    </span>
-                  </div>
-                </div>
+                  {/* Bottom Zoom Call Control Bar */}
+                  <rect x="0" y="166" width="292" height="20" fill="#090E17" />
+                  <circle cx="95" cy="176" r="4" fill="#334155" />
+                  <circle cx="115" cy="176" r="4" fill="#334155" />
+                  <circle cx="135" cy="176" r="4" fill="#10B981" />
+                  <circle cx="155" cy="176" r="4" fill="#334155" />
+                  <rect x="242" y="171" width="38" height="10" rx="4" fill="#E11D48" />
+                  <text x="248" y="178" fill="#FFFFFF" fontSize="5.5" fontWeight="bold">End Call</text>
+                </g>
 
-                {/* 3D Silver Metallic Keyboard Deck & Trackpad Base */}
-                <div
-                  className="relative mx-auto w-[108%] -left-[4%] h-14 bg-gradient-to-b from-[#E2E8F0] via-[#CBD5E1] to-[#94A3B8] rounded-b-2xl shadow-[0_22px_35px_rgba(15,23,42,0.35)] border-t border-white px-5 pt-2 flex flex-col justify-between"
-                  style={{
-                    transform: 'rotateX(58deg)',
-                    transformOrigin: 'top center',
-                  }}
+                {/* 4. 3D SILVER METALLIC KEYBOARD DECK & TRACKPAD (Projecting Forward-Left) */}
+                <g filter="url(#laptopShadow)">
+                  {/* Top Aluminum Deck Surface */}
+                  <polygon
+                    points="213,242 511,288 386,374 72,315"
+                    fill="url(#silverTop)"
+                    stroke="#F8FAFC"
+                    strokeWidth="1.5"
+                    strokeLinejoin="round"
+                  />
+
+                  {/* Recessed Dark Keyboard Well */}
+                  <polygon
+                    points="212,251 482,294 420,339 144,289"
+                    fill="#1E293B"
+                    stroke="#475569"
+                    strokeWidth="1"
+                  />
+
+                  {/* Isometric Individual Keyboard Keycaps */}
+                  {keyRows.map((r) =>
+                    keyCols.map((c) => {
+                      // Interpolate key position inside the isometric keyboard well
+                      const u = (c + 0.3) / 11.4;
+                      const v = (r + 0.25) / 4.3;
+                      const topX = 216 + u * 260;
+                      const topY = 254 + u * 41;
+                      const kx = topX - v * 62;
+                      const ky = topY + v * 36;
+                      return (
+                        <polygon
+                          key={`${r}-${c}`}
+                          points={`${kx},${ky} ${kx + 18},${ky + 2.8} ${kx + 8},${ky + 9.2} ${kx - 10},${ky + 6.4}`}
+                          fill="#334155"
+                          stroke="#0F172A"
+                          strokeWidth="0.6"
+                        />
+                      );
+                    })
+                  )}
+
+                  {/* Angled Silver Trackpad */}
+                  <polygon
+                    points="224,312 304,327 272,349 192,334"
+                    fill="#CBD5E1"
+                    stroke="#94A3B8"
+                    strokeWidth="1.2"
+                  />
+
+                  {/* 3D Front Lip Edge of Laptop Base */}
+                  <polygon
+                    points="72,315 386,374 386,385 72,325"
+                    fill="url(#silverEdgeFront)"
+                  />
+                  {/* Front Center Thumb Notch */}
+                  <polygon
+                    points="205,340 248,348 246,352 203,344"
+                    fill="#334155"
+                  />
+
+                  {/* 3D Right Side Edge with USB-C Ports */}
+                  <polygon
+                    points="386,374 511,288 511,298 386,385"
+                    fill="url(#silverEdgeSide)"
+                  />
+                  <ellipse cx="445" cy="338" rx="4" ry="1.8" transform="rotate(-34 445 338)" fill="#0F172A" />
+                  <ellipse cx="465" cy="324" rx="4" ry="1.8" transform="rotate(-34 465 324)" fill="#0F172A" />
+                </g>
+
+                {/* 5. FLOATING PILL 1: RED "Live GD Session" (Top-Left of Laptop Screen) */}
+                <g filter="url(#badgeShadow)" transform="translate(115, 70)">
+                  <rect x="0" y="0" width="148" height="36" rx="18" fill="url(#redPillGrad)" />
+                  {/* Video Camera Icon */}
+                  <rect x="14" y="12" width="11" height="10" rx="2" fill="#FFFFFF" />
+                  <polygon points="26,15 31,12 31,22 26,19" fill="#FFFFFF" />
+                  <text x="38" y="23" fill="#FFFFFF" fontSize="13.5" fontWeight="700" fontFamily="Inter, sans-serif">
+                    Live GD Session
+                  </text>
+                </g>
+
+                {/* 6. FLOATING PILL 2: BLUE "Join Zoom Meeting ->" (Right of Laptop Screen) */}
+                <g
+                  filter="url(#badgeShadow)"
+                  transform="translate(425, 205)"
+                  className="cursor-pointer"
+                  onClick={() => navigate('/schedule')}
                 >
-                  {/* Dark Keyboard Key Rows */}
-                  <div className="w-full h-6 bg-[#1E293B] rounded p-1 grid grid-cols-12 gap-0.5 shadow-inner">
-                    {Array.from({ length: 24 }).map((_, k) => (
-                      <span key={k} className="bg-[#334155] rounded-[1px] h-1.5" />
-                    ))}
-                  </div>
-                  {/* Silver Trackpad */}
-                  <div className="w-20 h-3.5 mx-auto mb-1 bg-[#B8C4D4] border border-slate-400/70 rounded-sm shadow-inner" />
-                </div>
-              </div>
+                  <rect x="0" y="0" width="188" height="42" rx="21" fill="url(#bluePillGrad)" stroke="#60A5FA" strokeWidth="1" />
+                  <text x="18" y="26" fill="#FFFFFF" fontSize="14" fontWeight="700" fontFamily="Inter, sans-serif">
+                    Join Zoom Meeting
+                  </text>
+                  <text x="158" y="26" fill="#FFFFFF" fontSize="15" fontWeight="800">→</text>
+                </g>
+
+                {/* 7. FLOATING CARD 3: FROSTED GLASS "zoom" BADGE (Bottom-Right) */}
+                <g filter="url(#badgeShadow)" transform="translate(465, 296)">
+                  <rect
+                    x="0"
+                    y="0"
+                    width="132"
+                    height="50"
+                    rx="14"
+                    fill="#E8F1FD"
+                    fillOpacity="0.92"
+                    stroke="#FFFFFF"
+                    strokeWidth="2"
+                  />
+                  <circle cx="28" cy="25" r="14" fill="#2563EB" />
+                  <rect x="21" y="20" width="10" height="9" rx="1.5" fill="#FFFFFF" />
+                  <polygon points="32,22 36,19 36,29 32,26" fill="#FFFFFF" />
+                  <text x="50" y="31" fill="#1D6BF3" fontSize="22" fontWeight="800" fontFamily="Inter, sans-serif">
+                    zoom
+                  </text>
+                </g>
+              </svg>
             </div>
-          </motion.div>
+          </div>
+
         </div>
       </section>
 
-      {/* UPCOMING VIDEO GD SESSIONS (Exact match to Image 2) */}
+      {/* UPCOMING VIDEO GD SESSIONS (3-Column Cards matching 1000085022_3.png) */}
       <section className="bg-white py-14">
         <div className="max-w-5xl mx-auto px-4 sm:px-8">
           <h2 className="text-2xl sm:text-[28px] font-extrabold text-center text-[#0A1128] mb-10">
             Upcoming Video GD Sessions
           </h2>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {sessions.map((s) => (
               <motion.div
                 key={s.id}
                 whileHover={{ y: -4 }}
-                className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-[0_4px_20px_rgba(10,17,40,0.05)] flex flex-col justify-between"
+                className="bg-white border border-slate-200 rounded-2xl p-6 shadow-[0_4px_20px_rgba(10,17,40,0.05)] flex flex-col justify-between"
               >
                 <div>
                   <h3 className="text-xl font-extrabold text-[#0A1128] leading-snug mb-1.5">
@@ -265,7 +369,6 @@ export const HomePage: React.FC = () => {
                     {s.scheduled_date} • {s.start_time}
                   </p>
 
-                  {/* Light Blue Zoom Room Bar */}
                   <div className="bg-[#E9F2FF] text-[#0A1128] px-3.5 py-2.5 rounded-xl flex items-center justify-between text-xs font-bold mb-6">
                     <span className="flex items-center gap-2">
                       <span className="w-6 h-6 rounded-full bg-[#1D6BF3] text-white flex items-center justify-center">
@@ -297,9 +400,9 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* TELEGRAM SUPPORT SECTION (Exact match to Image 2) */}
+      {/* TELEGRAM SUPPORT SECTION (Exact 2-Column Match to 1000085022_3.png) */}
       <section className="py-14 bg-[#EBF1FA]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-8 grid md:grid-cols-12 gap-8 items-center">
+        <div className="max-w-5xl mx-auto px-4 sm:px-8 grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
           <div className="md:col-span-6">
             <h2 className="text-3xl font-extrabold text-[#0A1128] mb-2">
               Telegram Support
