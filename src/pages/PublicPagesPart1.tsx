@@ -541,7 +541,9 @@ export const HomePage: React.FC = () => {
               >
                 <div>
                   {s.status === 'Live' && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700 text-[10px] font-extrabold mb-2">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full 
+                    
+                    bg-[#DC3545] text-white text-[10px] font-extrabold mb-2">
                       ● LIVE NOW
                     </span>
                   )}
@@ -768,7 +770,7 @@ export const HomePage: React.FC = () => {
                       {ann.title}
                     </h3>
                     {ann.is_important && (
-                      <span className="px-2.5 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-extrabold uppercase">
+                      <span className="px-2.5 py-0.5 rounded-full bg-[#DC3545] text-white text-[10px] font-extrabold uppercase">
                         PRIORITY
                       </span>
                     )}
