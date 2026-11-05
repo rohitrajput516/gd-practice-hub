@@ -989,47 +989,92 @@ export const SchedulePage: React.FC = () => {
           </p>
         </div>
 
-        {featured && (
-          <div className="rounded-2xl bg-gradient-to-r from-[#040B24] via-[#0B1E54] to-[#0D3B9E] text-white p-7 sm:p-8 shadow-xl mb-7 grid md:grid-cols-12 gap-6 items-center">
-            <div className="md:col-span-6 space-y-2.5">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="px-3 py-1 rounded-full bg-[#10B981] text-[#042F2E] text-[11px] font-extrabold uppercase">
+               {featured && (
+          <div className="relative overflow-hidden rounded-2xl bg-[#040B22] text-white p-6 sm:p-8 shadow-[0_14px_35px_rgba(6,18,50,0.28)] border border-blue-500/30 mb-7 grid md:grid-cols-12 gap-6 items-center">
+            {/* Exact Background Theme: Diagonal Royal Blue Ribbons + Top-Right Halftone Dots */}
+            <svg
+              className="absolute inset-0 w-full h-full pointer-events-none"
+              viewBox="0 0 1000 300"
+              preserveAspectRatio="none"
+            >
+              <defs>
+                <linearGradient id="bgBase" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#040A1E" />
+                  <stop offset="55%" stopColor="#081A4B" />
+                  <stop offset="100%" stopColor="#0A2463" />
+                </linearGradient>
+                <linearGradient id="beam1" x1="0%" y1="100%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#0D47A1" stopOpacity="0.85" />
+                  <stop offset="100%" stopColor="#1D6BF3" stopOpacity="0.25" />
+                </linearGradient>
+                <linearGradient id="beam2" x1="0%" y1="100%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#1E88E5" stopOpacity="0.9" />
+                  <stop offset="100%" stopColor="#0052CC" stopOpacity="0.4" />
+                </linearGradient>
+                <pattern id="halftoneDots" x="0" y="0" width="14" height="14" patternUnits="userSpaceOnUse">
+                  <circle cx="3" cy="3" r="1.6" fill="#3B82F6" fillOpacity="0.35" />
+                </pattern>
+              </defs>
+              <rect width="1000" height="300" fill="url(#bgBase)" />
+              {/* Diagonal Glowing Blue Stripes matching Reference Photo */}
+              <polygon points="480,300 730,0 920,0 670,300" fill="url(#beam1)" />
+              <polygon points="690,300 940,0 1000,0 1000,190 860,300" fill="url(#beam2)" />
+              {/* Top-Right Dotted Pattern */}
+              <rect x="740" y="0" width="260" height="150" fill="url(#halftoneDots)" />
+            </svg>
+
+            {/* Left Column: Badges, Title, Date/Time & Description */}
+            <div className="md:col-span-6 space-y-2.5 relative z-10">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <span className="px-3.5 py-1 rounded-full bg-[#12D6B5] text-[#032B24] text-[11px] font-extrabold uppercase tracking-wide shadow-sm">
                   FEATURED UPCOMING GD
                 </span>
-                <span className="px-3 py-1 rounded-full border border-cyan-400/50 bg-cyan-950/50 text-cyan-300 text-[11px] font-bold flex items-center gap-1">
-                  <Radio className="w-3 h-3" /> LIVE COUNTDOWN
+                <span className="px-3.5 py-1 rounded-full border border-cyan-400/60 bg-[#071C3F]/80 text-white text-[11px] font-bold flex items-center gap-1.5">
+                  <Radio className="w-3.5 h-3.5 text-cyan-400" /> LIVE COUNTDOWN
                 </span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold">{featured.title.split(':')[0]}</h2>
-              <p className="text-xs text-blue-200 font-medium">
-                {featured.scheduled_date}, {featured.start_time} | {featured.platform}
+              <h2 className="text-2xl sm:text-[32px] font-extrabold tracking-tight text-white pt-1">
+                {featured.title.split(':')[0]}
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-200 font-medium">
+                {featured.scheduled_date}, {featured.start_time} | {featured.platform || 'Zoom Room'}
               </p>
-              <p className="text-xs text-slate-200 leading-relaxed">{featured.description}</p>
+              <p className="text-xs sm:text-[13px] text-slate-300 leading-relaxed max-w-lg">
+                {featured.description}
+              </p>
             </div>
 
-            <div className="md:col-span-3 text-center">
-              <p className="text-[11px] uppercase tracking-wider text-blue-200 font-semibold mb-2">
+            {/* Center Column: STARTS IN + 3 Frosted Glass Countdown Boxes */}
+            <div className="md:col-span-3 text-center relative z-10">
+              <p className="text-xs uppercase tracking-widest text-slate-200 font-semibold mb-2.5">
                 STARTS IN
               </p>
-              <div className="flex items-center justify-center gap-1.5 font-extrabold text-lg">
-                <span className="bg-white/15 border border-white/25 px-3 py-2 rounded-lg">{hrs}h</span>
-                <span>:</span>
-                <span className="bg-white/15 border border-white/25 px-3 py-2 rounded-lg">{mins}m</span>
-                <span>:</span>
-                <span className="bg-white/15 border border-white/25 px-3 py-2 rounded-lg">{secs}s</span>
+              <div className="flex items-center justify-center gap-2 font-extrabold text-lg sm:text-xl">
+                <span className="bg-[#1E3A6D]/75 backdrop-blur-md border border-blue-300/40 px-3.5 py-2.5 rounded-xl min-w-[60px] shadow-inner">
+                  {hrs}h
+                </span>
+                <span className="text-blue-200">:</span>
+                <span className="bg-[#1E3A6D]/75 backdrop-blur-md border border-blue-300/40 px-3.5 py-2.5 rounded-xl min-w-[60px] shadow-inner">
+                  {mins}m
+                </span>
+                <span className="text-blue-200">:</span>
+                <span className="bg-[#1E3A6D]/75 backdrop-blur-md border border-blue-300/40 px-3.5 py-2.5 rounded-xl min-w-[60px] shadow-inner">
+                  {secs}s
+                </span>
               </div>
             </div>
 
-            <div className="md:col-span-3 flex flex-col gap-2.5">
+            {/* Right Column: Join Session & View Details Buttons */}
+            <div className="md:col-span-3 flex flex-col gap-3 relative z-10">
               <button
                 onClick={() => joinZoomSession(featured.zoom_url, featured.status)}
-                className="w-full py-2.5 rounded-lg bg-[#1D7AFC] hover:bg-blue-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg"
+                className="w-full py-3 rounded-xl bg-[#1D7AFC] hover:bg-blue-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-600/35 transition"
               >
-                <Video className="w-4 h-4" /> Join Session
+                <Video className="w-4 h-4 fill-white" /> Join Session
               </button>
               <Link
                 to={`/session?id=${featured.id}`}
-                className="w-full py-2.5 rounded-lg border border-blue-300/60 hover:bg-white/10 text-white text-center font-bold text-xs"
+                className="w-full py-2.5 rounded-xl bg-[#0B2559]/70 border border-blue-300/60 hover:bg-white/10 text-white text-center font-bold text-xs sm:text-sm transition"
               >
                 View Details
               </Link>
@@ -1037,35 +1082,53 @@ export const SchedulePage: React.FC = () => {
           </div>
         )}
 
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+        {/* Filter Bar: Search + All Statuses + All Topics + Grid/List Toggle */}
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-7">
           <div className="relative flex-1 min-w-[220px] max-w-xs">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search sessions..."
-              className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-xs"
+              className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-800 outline-none focus:border-blue-500 shadow-sm"
             />
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2.5">
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-medium"
+              className="px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 outline-none shadow-sm"
             >
               <option>All Statuses</option>
               <option value="Live">Live</option>
               <option value="Upcoming">Upcoming</option>
               <option value="Completed">Completed</option>
             </select>
-            <div className="flex border border-slate-200 rounded-lg bg-white overflow-hidden">
-              <button className="p-2 bg-slate-100 text-slate-800"><LayoutGrid className="w-4 h-4" /></button>
-              <button className="p-2 text-slate-500"><List className="w-4 h-4" /></button>
+
+            <select
+              onChange={(e) => setSearch(e.target.value === 'All Topics' ? '' : e.target.value)}
+              className="px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 outline-none shadow-sm"
+            >
+              <option value="All Topics">All Topics</option>
+              <option value="Tech">Tech &amp; Society</option>
+              <option value="Business">Business &amp; Economy</option>
+              <option value="Placement">Placement Special</option>
+              <option value="AI">AI &amp; Future</option>
+            </select>
+
+            <div className="flex border border-slate-300 rounded-lg bg-white overflow-hidden p-0.5 shadow-sm">
+              <button className="p-2 rounded-md bg-[#0A1128] text-white">
+                <LayoutGrid className="w-3.5 h-3.5" />
+              </button>
+              <button className="p-2 rounded-md text-slate-500 hover:text-slate-800">
+                <List className="w-3.5 h-3.5" />
+              </button>
             </div>
           </div>
         </div>
+
 
         <h3 className="text-lg font-extrabold text-[#0A1128] mb-3">Other Upcoming Sessions</h3>
         <div className="space-y-3 mb-8">
@@ -1180,39 +1243,66 @@ export const SessionDetailsPage: React.FC = () => {
           <span className="text-slate-900 font-semibold">{session.title.split(':')[0]}</span>
         </div>
 
-        <div
-          className="relative rounded-2xl overflow-hidden bg-cover bg-center p-7 sm:p-10 text-white shadow-lg mb-8"
-          style={{
-            backgroundImage:
-              "linear-gradient(90deg, rgba(10,17,40,0.92) 0%, rgba(10,17,40,0.65) 100%), url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1400&q=80')",
-          }}
-        >
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-emerald-400 text-emerald-950 text-xs font-extrabold mb-3">
-            ● {session.status === 'Live' ? 'LIVE NOW' : session.status.toUpperCase()}
-          </span>
-          <h1 className="text-2xl sm:text-4xl font-extrabold max-w-2xl leading-tight mb-3">
-            {session.title}
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-200 mb-6">
-            Date &amp; Time: {session.scheduled_date}, {session.start_time} | {session.platform}
-          </p>
+        <div className="relative mb-9 select-none">
+          {/* Main Banner: Clear at Top, Dark Navy Gradient at Bottom */}
+          <div
+            className="relative rounded-t-2xl rounded-br-2xl overflow-hidden bg-cover bg-top pt-8 sm:pt-11 px-6 sm:px-10 pb-12 sm:pb-14 text-white shadow-lg"
+            style={{
+              backgroundImage:
+                "linear-gradient(180deg, rgba(10, 17, 40, 0.10) 0%, rgba(10, 17, 40, 0.48) 42%, rgba(8, 16, 38, 0.88) 76%, #071026 100%), url('https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=1400&q=85')",
+            }}
+          >
+            {/* Exact Pastel Green LIVE NOW Badge matching Image 2 */}
+            <div className="mb-3.5">
+              <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-[#A7F3D0] text-[#065F46] text-xs font-extrabold tracking-wide shadow-sm">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#10B981]" />
+                {session.status === 'Live' ? 'LIVE NOW' : session.status.toUpperCase()}
+              </span>
+            </div>
 
-          <div className="flex flex-wrap gap-3 justify-end">
-            <button
-              onClick={() => joinZoomSession(session.zoom_url, session.status)}
-              className="px-5 py-2.5 rounded-lg bg-[#1D7AFC] hover:bg-blue-600 text-white font-bold text-xs flex items-center gap-2 shadow"
-            >
-              <Video className="w-4 h-4" /> Join Session
-            </button>
-            <button
-              onClick={() => alert('Added reminder to your calendar!')}
-              className="px-5 py-2.5 rounded-lg bg-[#0A1128]/80 border border-white/40 text-white font-semibold text-xs"
-            >
-              Add to Calendar
-            </button>
+            {/* Session Heading */}
+            <h1 className="text-2xl sm:text-[38px] font-extrabold max-w-2xl leading-[1.16] tracking-tight text-white drop-shadow-sm mb-3">
+              {session.title}
+            </h1>
+
+            {/* Date & Time Subtitle */}
+            <p className="text-xs sm:text-[15px] text-slate-200/95 font-medium">
+              Date &amp; Time: {session.scheduled_date}, {session.start_time} | {session.platform || 'Zoom Session'}
+            </p>
+          </div>
+
+          {/* Bottom Half-Cutout (Left Side) + Stepped-Down Dark Navy Button Tab (Right Side) */}
+          <div className="relative flex items-end justify-between -mt-7 sm:-mt-8 z-10">
+            {/* Left Cutout matching page background so right side looks stepped-down */}
+            <div className="hidden sm:block flex-1 h-8 bg-[#F4F7FE] rounded-tr-2xl relative">
+              <svg
+                className="w-10 h-8 absolute -right-9 top-0 text-[#F4F7FE]"
+                viewBox="0 0 40 32"
+                fill="currentColor"
+              >
+                <path d="M0 0 C18 0, 22 32, 40 32 L0 32 Z" />
+              </svg>
+            </div>
+
+            {/* Right Stepped-Down Navy Action Bar */}
+            <div className="w-full sm:w-auto bg-[#071026] px-5 sm:px-7 pb-3.5 pt-1 rounded-b-2xl flex items-center justify-end gap-3 shadow-md">
+              <button
+                onClick={() => joinZoomSession(session.zoom_url, session.status)}
+                className="px-5 py-2.5 rounded-lg bg-[#1D88E5] hover:bg-blue-500 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-md transition"
+              >
+                <Video className="w-4 h-4 fill-white" /> Join Session
+              </button>
+              <button
+                onClick={() => alert('Added reminder to your calendar!')}
+                className="px-5 py-2.5 rounded-lg bg-[#0B162C] hover:bg-slate-800 border border-slate-400/70 text-white font-semibold text-xs sm:text-sm transition"
+              >
+                Add to Calendar
+              </button>
+            </div>
           </div>
         </div>
 
+        
         <div className="grid md:grid-cols-12 gap-8">
           <div className="md:col-span-8 space-y-6">
             <div>
