@@ -771,9 +771,9 @@ export const HomePage: React.FC = () => {
                     </h3>
                     {ann.is_important && (
                       <span className="px-2.5 py-0.5 rounded-full bg-[ #1D63EB] text-white text-[10px] font-extrabold uppercase">
-                        PRIORITY
+                        PRIORITY 👀😬
                       </span>
-                    )}
+                  )}
                   </div>
                   <p className="text-xs sm:text-sm text-slate-600 leading-relaxed line-clamp-2">
                     {ann.message}
