@@ -770,7 +770,7 @@ export const HomePage: React.FC = () => {
                       {ann.title}
                     </h3>
                     {ann.is_important && (
-                      <span className="px-2.5 py-0.5 rounded-full bg-[#1D63EB] text-white text-[10px] font-extrabold uppercase">
+                      <span className="px-2.5 py-0.5 rounded-full bg-[ #1D63EB] text-white text-[10px] font-extrabold uppercase">
                         PRIORITY
                       </span>
                     )}
@@ -1457,16 +1457,10 @@ export const TopicsPage: React.FC = () => {
           <span
             className={`absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-extrabold flex items-center gap-1 ${
               t.badge === 'RECOMMENDED'
-               // ? 'bg-amber-300 text-amber-950'
-              //  : 'bg-[#5CA9FF] text-white'
-              
-              
-    ? 'bg-[#5CA9FF] text-[#0A1628]'
-    : 'bg-[#1D63EB] text-white'
-
-              
-            }`}
-          >
+               ? 'bg-[#5CA9FF] text-[#0A1628]'
+               : 'bg-[#1D63EB] text-white'
+               }`}
+               >
             {t.badge === 'RECOMMENDED' ? <Star className="w-3 h-3" /> : <Flame className="w-3 h-3" />}
             {t.badge || 'POPULAR'}
           </span>
