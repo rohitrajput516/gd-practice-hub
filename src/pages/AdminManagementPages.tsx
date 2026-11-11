@@ -363,6 +363,39 @@ export const AdminSessionsPage: React.FC = () => {
                   />
                 </div>
 
+                <div>
+                  <label className="block font-bold text-slate-800 mb-1">Session Cover Image (Upload ya Image Link)</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={form.image_url || ''}
+                      onChange={(e) => setForm({ ...form, image_url: e.target.value })}
+                      placeholder="https://... ya Gallery se photo chunein"
+                      className="flex-1 px-3 py-2 border border-slate-300 rounded-lg"
+                    />
+                    <label className="px-3 py-2 rounded-lg bg-blue-50 text-blue-700 font-bold cursor-pointer border border-blue-200 shrink-0">
+                      Upload Photo
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          const reader = new FileReader();
+                          reader.onload = () => {
+                            if (typeof reader.result === 'string') {
+                              setForm({ ...form, image_url: reader.result });
+                            }
+                          };
+                          reader.readAsDataURL(file);
+                        }}
+                      />
+                    </label>
+                  </div>
+                </div>
+
+
                 <div className="flex justify-end gap-2.5 pt-2">
                   <button
                     type="button"
@@ -544,7 +577,7 @@ export const AdminTopicsPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-800 mb-1">Description</label>
+                  <</label>
                   <textarea
                     rows={3}
                     value={form.description}
@@ -562,6 +595,39 @@ export const AdminTopicsPage: React.FC = () => {
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg"
                   />
                 </div>
+
+                <div>
+                  <label className="block font-bold text-slate-800 mb-1">Topic Image (Upload ya Image Link)</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={form.image_url || ''}
+                      onChange={(e) => setForm({ ...form, image_url: e.target.value })}
+                      placeholder="https://... ya Gallery se photo chunein"
+                      className="flex-1 px-3 py-2 border border-slate-300 rounded-lg"
+                    />
+                    <label className="px-3 py-2 rounded-lg bg-blue-50 text-blue-700 font-bold cursor-pointer border border-blue-200 shrink-0">
+                      Upload Photo
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          const reader = new FileReader();
+                          reader.onload = () => {
+                            if (typeof reader.result === 'string') {
+                              setForm({ ...form, image_url: reader.result });
+                            }
+                          };
+                          reader.readAsDataURL(file);
+                        }}
+                      />
+                    </label>
+                  </div>
+                </div>
+
 
                 <div>
                   <label className="block font-bold text-slate-800 mb-1">Publish Directly?</label>

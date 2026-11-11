@@ -293,16 +293,79 @@ export const api = {
     writeLocal('website_settings', next);
     return next;
   },
+  
   async list(table: string, onlyPublished = false) {
+    let rows: any[] = [];
     if (isCloudEnabled && supabase) {
       let q = supabase.from(table).select('*');
       if (onlyPublished) q = q.eq('is_published', true);
       const { data } = await q;
-      if (data) return data;
+      if (data) rows = data;
+    } else {
+      rows = readLocal(table) || [];
+      if (onlyPublished) rows = rows.filter((r: any) => r.is_published !== false);
     }
-    const rows = readLocal(table) || [];
-    return onlyPublished ? rows.filter((r: any) => r.is_published !== false) : rows;
+
+    // Agar table 'sessions' hai to: 1) Time ke hisab se Live set karo, 2) Topic ki image jodo, 3) Date/Time se sort karo
+    if (table === 'sessions') {
+      const allTopics = readLocal('topics') || [];
+      const now = Date.now();
+      const DURATION_MS = 60 * 60 * 1000; // 1 ghante tak meeting Live rahegi
+
+      const parseTime = (s: any) => {
+        if (!s?.scheduled_date || !s?.start_time) return Number.MAX_SAFE_INTEGER;
+        const cleanDate = String(s.scheduled_date).replace(/^[A-Za-z]+,\s*/, '');
+        const parsed = new Date(`${cleanDate} ${s.start_time}`).getTime();
+        return isNaN(parsed) ? Number.MAX_SAFE_INTEGER : parsed;
+      };
+
+      const categoryFallbackImages: Record<string, string> = {
+        'AI & Tech': 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80',
+        'Business & Economy': 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200&q=80',
+        'Business & Finance': 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200&q=80',
+        'Social Issues': 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&w=1200&q=80',
+        'Interview and Placement GD': 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=1200&q=80',
+      };
+
+      rows = rows.map((s: any) => {
+        const startMs = parseTime(s);
+        let computedStatus = s.status;
+
+        // Time ke hisab se automatic Live / Upcoming / Completed
+        if (s.status !== 'Cancelled' && startMs !== Number.MAX_SAFE_INTEGER) {
+          if (now >= startMs && now <= startMs + DURATION_MS) {
+            computedStatus = 'Live';
+          } else if (now < startMs) {
+            computedStatus = 'Upcoming';
+          } else if (now > startMs + DURATION_MS) {
+            computedStatus = 'Completed';
+          }
+        }
+
+        // Topic ya Session ki apni Image match karo
+        const matchedTopic = allTopics.find(
+          (t: any) =>
+            (s.topic && t.title?.toLowerCase() === s.topic.toLowerCase()) ||
+            t.title?.toLowerCase() === s.title?.split(':')[0]?.toLowerCase()
+        );
+
+        const resolvedImage =
+          s.image_url ||
+          matchedTopic?.image_url ||
+          categoryFallbackImages[s.category] ||
+          'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80';
+
+        return { ...s, status: computedStatus, _startMs: startMs, image_url: resolvedImage };
+      });
+
+      // Date aur Time ke hisab se sort (Sabse pehle aane wali meeting sabse aage)
+      rows.sort((a: any, b: any) => a._startMs - b._startMs);
+    }
+
+    return rows;
   },
+
+  
   async save(table: string, record: any) {
     if (isCloudEnabled && supabase) {
       const { data, error } = await supabase.from(table).upsert(record).select().single();

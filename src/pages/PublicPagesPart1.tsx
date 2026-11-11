@@ -68,7 +68,13 @@ export const HomePage: React.FC = () => {
   }, [allSessions]);
 
   const liveSessions = allSessions.filter((s) => s.status === 'Live');
-  const sessions = showAllSessions ? allSessions : allSessions.slice(0, 3);
+  const activeUpcomingSessions = allSessions.filter(
+    (s) => s.status === 'Live' || s.status === 'Upcoming'
+  );
+  const sessions = showAllSessions
+    ? activeUpcomingSessions
+    : activeUpcomingSessions.slice(0, 3);
+
 
   const handleHomeFeedbackSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -771,7 +777,7 @@ export const HomePage: React.FC = () => {
                     </h3>
                     {ann.is_important && (
                       <span className="px-2.5 py-0.5 rounded-full bg-[ #1D63EB] text-white text-[10px] font-extrabold uppercase">
-                        PRIORITY 👀😬
+                        PRIORITY
                       </span>
                   )}
                   </div>
@@ -1282,13 +1288,18 @@ export const SessionDetailsPage: React.FC = () => {
 
         <div className="relative mb-9 select-none">
           {/* Main Banner: Clear at Top, Dark Navy Gradient at Bottom */}
-          <div
-            className="relative rounded-t-2xl rounded-br-2xl overflow-hidden bg-cover bg-top pt-8 sm:pt-11 px-6 sm:px-10 pb-12 sm:pb-14 text-white shadow-lg"
-            style={{
-              backgroundImage:
-                "linear-gradient(180deg, rgba(10, 17, 40, 0.10) 0%, rgba(10, 17, 40, 0.48) 42%, rgba(8, 16, 38, 0.88) 76%, #071026 100%), url('https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=1400&q=85')",
-            }}
-          >
+          
+          < div
+          className = "relative rounded-t-2xl rounded-br-2xl overflow-hidden bg-cover bg-center pt-8 sm:pt-11 px-6 sm:px-10 pb-12 sm:pb-14 text-white shadow-lg"
+          style = {
+              {
+                backgroundImage: `linear-gradient(180deg, rgba(10, 17, 40, 0.12) 0%, rgba(10, 17, 40, 0.50) 42%, rgba(8, 16, 38, 0.88) 76%, #071026 100%), url('${
+                session.image_url ||
+                'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1400&q=85'
+              }')`,
+              }
+            } >
+          
             {/* Exact Pastel Green LIVE NOW Badge matching Image 2 */}
             <div className="mb-3.5">
               <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-[#A7F3D0] text-[#065F46] text-xs font-extrabold tracking-wide shadow-sm">
