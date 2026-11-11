@@ -577,7 +577,7 @@ export const AdminTopicsPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <</label>
+                  </label>
                   <textarea
                     rows={3}
                     value={form.description}
