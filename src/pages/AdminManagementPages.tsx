@@ -577,14 +577,16 @@ export const AdminTopicsPage: React.FC = () => {
                 </div>
 
                 <div>
-                  </label>
+                  <label className="block font-bold text-slate-800 mb-1">Description</label>
                   <textarea
                     rows={3}
                     value={form.description}
                     onChange={(e) => setForm({ ...form, description: e.target.value })}
+                    placeholder="A group discussion about the rise of digital currency..."
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg"
                   />
                 </div>
+
 
                 <div>
                   <label className="block font-bold text-slate-800 mb-1">Preparation Points</label>
