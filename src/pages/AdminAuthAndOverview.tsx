@@ -20,7 +20,7 @@ export const AdminLoginPage: React.FC = () => {
     const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     // Yahan aap apna manchaha Admin Email aur Password set kar sakte hain
-    const CORRECT_EMAIL = 'rohitrajput.com';
+    const CORRECT_EMAIL = 'rohitrajput@gmail.com';
     const CORRECT_PASS = 'Rajput@123';
 
     if (email.trim() === CORRECT_EMAIL && password === CORRECT_PASS) {
