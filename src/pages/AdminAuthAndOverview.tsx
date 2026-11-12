@@ -11,8 +11,8 @@ import { api, isValidHttps } from '../lib/supabase';
    PAGE 8: ADMIN LOGIN (Design 4 - Full-Screen Dark Theme - Image 8)
    ============================================================================ */
 export const AdminLoginPage: React.FC = () => {
-  const [email, setEmail] = useState('admin@gdpractice.com');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('rohitrajput@gmail.com');
+  const [password, setPassword] = useState('Rajput@123');
   const [showPwd, setShowPwd] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
