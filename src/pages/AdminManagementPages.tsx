@@ -1844,7 +1844,7 @@ export const AdminGuidelinesEditorPage: React.FC = () => {
           ))}
         </div>
 
-        {modalOpen && (
+               {modalOpen && (
           <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl">
               <div className="flex items-start justify-between mb-4">
@@ -1889,7 +1889,7 @@ export const AdminGuidelinesEditorPage: React.FC = () => {
                   <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 rounded-lg bg-slate-100 font-bold">
                     Cancel
                   </button>
-                  <button type="submit" className="px-5 py-2 rounded-lg bg-[#0F172A] hover:bg-blue-600 text-white font-bold">
+                  <button type="submit" className="px-5 py-2 rounded-lg bg-[#0F172A] hover:bg-blue-600 text-white font-bold shadow">
                     Save Rule
                   </button>
                 </div>
@@ -1897,7 +1897,7 @@ export const AdminGuidelinesEditorPage: React.FC = () => {
             </div>
           </div>
         )}
-      </div>
+
     </AdminLayout>
   );
 };
