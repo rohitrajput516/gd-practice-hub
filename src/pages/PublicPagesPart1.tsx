@@ -25,10 +25,14 @@ export const HomePage: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    api.list('sessions', true).then(setAllSessions);
+    const fetchAll = () => api.list('sessions', true).then(setAllSessions);
+    fetchAll();
     api.list('announcements', true).then((rows) => setAnnouncements(rows.slice(0, 4)));
     api.list('feedback').then((rows) => setFeedbacks(rows.slice(0, 3)));
+    const statusPoller = setInterval(fetchAll, 15000);
+    return () => clearInterval(statusPoller);
   }, []);
+
 
   // Next GD Countdown calculation (Sirf tabhi dikhega jab future date/time valid ho)
   useEffect(() => {
@@ -968,27 +972,31 @@ export const SchedulePage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [nowMs, setNowMs] = useState(Date.now());
 
-  useEffect(() => {
-    api.list('sessions', true).then(setSessions);
+    useEffect(() => {
+    const loadSessions = () => api.list('sessions', true).then(setSessions);
+    loadSessions();
     const timer = setInterval(() => setNowMs(Date.now()), 1000);
-    return () => clearInterval(timer);
+    const statusRefresh = setInterval(loadSessions, 15000);
+    return () => {
+      clearInterval(timer);
+      clearInterval(statusRefresh);
+    };
   }, []);
 
-  // Featured session: Live session ko priority, warna sabse nazdeeki Upcoming session
+  // Featured session: Sirf Live ya Future Upcoming session hi top banner mein aayega (Past session kabhi nahi)
   const featured =
     sessions.find((s) => s.status === 'Live') ||
-    sessions.find((s) => s.status === 'Upcoming' && s.is_featured) ||
-    sessions.find((s) => s.status === 'Upcoming') ||
-    sessions[0];
+    sessions.find((s) => s.status === 'Upcoming' && s._startMs > nowMs && s.is_featured) ||
+    sessions.find((s) => s.status === 'Upcoming' && s._startMs > nowMs) ||
+    null;
 
   // Real-time countdown calculation for Featured Session
-  const targetMs = featured?._startMs && featured._startMs !== Number.MAX_SAFE_INTEGER
-    ? featured._startMs
-    : nowMs + (2 * 3600 + 45 * 60 + 10) * 1000;
+  const targetMs = featured?._startMs && featured._startMs > nowMs ? featured._startMs : nowMs;
   const secLeft = Math.max(0, Math.floor((targetMs - nowMs) / 1000));
   const hrs = String(Math.floor(secLeft / 3600)).padStart(2, '0');
   const mins = String(Math.floor((secLeft % 3600) / 60)).padStart(2, '0');
   const secs = String(secLeft % 60).padStart(2, '0');
+
 
   const filtered = sessions.filter((s) => {
     const mSearch =

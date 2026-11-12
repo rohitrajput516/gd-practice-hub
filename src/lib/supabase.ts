@@ -332,19 +332,18 @@ export const api = {
         'Interview and Placement GD': 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=1200&q=80',
       };
 
-      rows = rows.map((s: any) => {
+            rows = rows.map((s: any) => {
         const startMs = parseTime(s);
         let computedStatus = s.status;
 
-        // Automatic Time-Based Status: Jese hi meeting ka time ho, 'Live' ho jaye
+        // Strict Time-Based Status: Future = Upcoming, Ongoing (1 hr) = Live, Past = Completed
         if (s.status !== 'Cancelled' && startMs !== Number.MAX_SAFE_INTEGER) {
           if (now >= startMs && now <= startMs + DURATION_MS) {
             computedStatus = 'Live';
-          } else if (now < startMs && s.status !== 'Live') {
+          } else if (now < startMs) {
             computedStatus = 'Upcoming';
-          } else if (now > startMs + DURATION_MS && s.status === 'Live' && s.id === '1') {
-            // Default seed session 1 ko Upcoming rakhein jab tak real time na ho
-            computedStatus = 'Upcoming';
+          } else if (now > startMs + DURATION_MS) {
+            computedStatus = 'Completed';
           }
         }
 

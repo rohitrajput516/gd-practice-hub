@@ -15,12 +15,79 @@ export const AdminSessionsPage: React.FC = () => {
   const [sessions, setSessions] = useState<any[]>([]);
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
+
+  // Calendar (YYYY-MM-DD) aur Watch (HH:mm) ke helper functions
+  const getTodayIso = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
+
+  const getCurrentTime24 = () => {
+    const d = new Date();
+    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  };
+
+  const getDefaultFutureSlot = () => {
+    const d = new Date(Date.now() + 2 * 60 * 60 * 1000); // Abhi se 2 ghante aage ka default time
+    d.setMinutes(0, 0, 0);
+    const date_iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const time_24 = `${String(d.getHours()).padStart(2, '0')}:00`;
+    return { date_iso, time_24 };
+  };
+
+  const isoToDisplayDate = (iso: string) => {
+    if (!iso) return '';
+    const [y, m, day] = iso.split('-').map(Number);
+    if (!y || !m || !day) return iso;
+    return new Date(y, m - 1, day).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  };
+
+  const displayDateToIso = (display: string) => {
+    if (!display) return getTodayIso();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(display.trim())) return display.trim();
+    const clean = String(display).replace(/^[A-Za-z]+,\s*/, '');
+    const dt = new Date(clean);
+    if (isNaN(dt.getTime())) return getTodayIso();
+    return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+  };
+
+  const time24To12 = (t24: string) => {
+    if (!t24) return '6:00 PM';
+    if (t24.toLowerCase().includes('am') || t24.toLowerCase().includes('pm')) return t24;
+    const [hStr, mStr] = t24.split(':');
+    let h = parseInt(hStr, 10);
+    const m = mStr || '00';
+    if (isNaN(h)) return '6:00 PM';
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    return `${h}:${m} ${ampm}`;
+  };
+
+  const time12To24 = (t12: string) => {
+    if (!t12) return '18:00';
+    if (/^\d{2}:\d{2}$/.test(t12.trim())) return t12.trim();
+    const match = t12.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (!match) return '18:00';
+    let h = parseInt(match[1], 10);
+    const m = match[2];
+    const period = match[3].toUpperCase();
+    if (period === 'PM' && h < 12) h += 12;
+    if (period === 'AM' && h === 12) h = 0;
+    return `${String(h).padStart(2, '0')}:${m}`;
+  };
+
   const [form, setForm] = useState<any>({
     id: '',
     title: '',
     topic: '',
     category: 'Business & Finance',
-    scheduled_date: 'March 22, 2026',
+    date_iso: getTodayIso(),
+    time_24: '18:00',
+    scheduled_date: isoToDisplayDate(getTodayIso()),
     start_time: '6:00 PM',
     timezone: 'IST (UTC+5:30)',
     platform: 'Zoom Room',
@@ -30,6 +97,7 @@ export const AdminSessionsPage: React.FC = () => {
     status: 'Upcoming',
     is_published: true,
     description: '',
+    preparation_points: '',
     special_instructions: 'Be respectful to other candidates.\nNo interruptions while someone is speaking.\nSupport your opinions with factual data.\nAdhere to the 3-minute speaking limit.'
   });
 
@@ -37,13 +105,16 @@ export const AdminSessionsPage: React.FC = () => {
   useEffect(() => { load(); }, []);
 
   const openCreate = () => {
+    const slot = getDefaultFutureSlot();
     setForm({
       id: '',
       title: '',
       topic: '',
       category: 'Business & Finance',
-      scheduled_date: 'March 22, 2026',
-      start_time: '6:00 PM',
+      date_iso: slot.date_iso,
+      time_24: slot.time_24,
+      scheduled_date: isoToDisplayDate(slot.date_iso),
+      start_time: time24To12(slot.time_24),
       timezone: 'IST (UTC+5:30)',
       platform: 'Zoom Room',
       zoom_url: '',
@@ -52,13 +123,22 @@ export const AdminSessionsPage: React.FC = () => {
       status: 'Upcoming',
       is_published: true,
       description: '',
+      preparation_points: '',
       special_instructions: 'Be respectful to other candidates.\nNo interruptions while someone is speaking.\nSupport your opinions with factual data.\nAdhere to the 3-minute speaking limit.'
     });
     setModalOpen(true);
   };
 
   const openEdit = (s: any) => {
-    setForm({ ...s });
+    const dIso = displayDateToIso(s.scheduled_date);
+    const t24 = time12To24(s.start_time);
+    setForm({
+      ...s,
+      date_iso: dIso,
+      time_24: t24,
+      scheduled_date: isoToDisplayDate(dIso),
+      start_time: time24To12(t24),
+    });
     setModalOpen(true);
   };
 
@@ -68,13 +148,35 @@ export const AdminSessionsPage: React.FC = () => {
       alert('Zoom URL https:// se shuru hona chahiye.');
       return;
     }
-    await api.save('sessions', {
+
+    const formattedDate = isoToDisplayDate(form.date_iso);
+    const formattedTime = time24To12(form.time_24);
+    const selectedMs = new Date(`${formattedDate} ${formattedTime}`).getTime();
+
+    // Past Date ya Past Time block check
+    if (!form.id && selectedMs < Date.now()) {
+      alert('Beete hue (past) date ya time par naya session create nahi ho sakta! Kripya Calendar aur Watch se aage ka time chunein.');
+      return;
+    }
+    if (form.id && form.status === 'Upcoming' && selectedMs < Date.now()) {
+      alert('Upcoming session ke liye past date/time select nahi kiya ja sakta! Kripya aage ki date/time chunein.');
+      return;
+    }
+
+    const payload = {
       ...form,
-      topic: form.topic || form.title
-    });
+      scheduled_date: formattedDate,
+      start_time: formattedTime,
+      topic: form.topic || form.title,
+    };
+    delete payload.date_iso;
+    delete payload.time_24;
+
+    await api.save('sessions', payload);
     setModalOpen(false);
     load();
   };
+
 
   const togglePublish = async (s: any) => {
     await api.save('sessions', { ...s, is_published: !s.is_published });
@@ -252,27 +354,43 @@ export const AdminSessionsPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2.5">
+                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                   <div>
-                    <label className="block font-bold text-slate-800 mb-1">Date <span className="text-red-500">*</span></label>
+                    <label className="block font-bold text-slate-800 mb-1">
+                      Date (Calendar) <span className="text-red-500">*</span>
+                    </label>
                     <input
                       required
-                      type="text"
-                      value={form.scheduled_date}
-                      onChange={(e) => setForm({ ...form, scheduled_date: e.target.value })}
-                      placeholder="March 22, 2026"
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                      type="date"
+                      min={getTodayIso()}
+                      value={form.date_iso || getTodayIso()}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          date_iso: e.target.value,
+                          scheduled_date: isoToDisplayDate(e.target.value),
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white font-semibold text-slate-800 cursor-pointer"
                     />
                   </div>
                   <div>
-                    <label className="block font-bold text-slate-800 mb-1">Start Time <span className="text-red-500">*</span></label>
+                    <label className="block font-bold text-slate-800 mb-1">
+                      Start Time (Watch) <span className="text-red-500">*</span>
+                    </label>
                     <input
                       required
-                      type="text"
-                      value={form.start_time}
-                      onChange={(e) => setForm({ ...form, start_time: e.target.value })}
-                      placeholder="6:00 PM"
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                      type="time"
+                      min={form.date_iso === getTodayIso() ? getCurrentTime24() : undefined}
+                      value={form.time_24 || '18:00'}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          time_24: e.target.value,
+                          start_time: time24To12(e.target.value),
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white font-semibold text-slate-800 cursor-pointer"
                     />
                   </div>
                   <div>
@@ -281,10 +399,14 @@ export const AdminSessionsPage: React.FC = () => {
                       type="text"
                       value={form.timezone}
                       onChange={(e) => setForm({ ...form, timezone: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-slate-50"
                     />
                   </div>
                 </div>
+                <p className="text-[11px] font-semibold text-blue-600 -mt-1">
+                  📅 Selected Schedule: {isoToDisplayDate(form.date_iso)} at {time24To12(form.time_24)}
+                </p>
+
 
                 <div>
                   <label className="block font-bold text-slate-800 mb-1">Zoom Meeting Link (HTTPS)</label>
