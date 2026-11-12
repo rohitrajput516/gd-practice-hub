@@ -1853,6 +1853,7 @@ export const AdminGuidelinesEditorPage: React.FC = () => {
                   <X className="w-5 h-5" />
                 </button>
               </div>
+              
               <form onSubmit={handleSave} className="space-y-4 text-xs">
                 <div className="grid grid-cols-3 gap-3">
                   <div>

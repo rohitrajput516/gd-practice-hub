@@ -307,11 +307,8 @@ export const AnnouncementsPage: React.FC = () => {
                               <span className="px-2.5 py-0.5 rounded bg-blue-100 text-blue-800 text-[10px] font-bold">
                                 {a.category || 'Sessions'}
                               </span>
-                              {a.is_important && (
-                                <span className="px-2.5 py-0.5 rounded-full bg-[#DC3545] text-white text-[10px] font-bold">
-                                  Priority
-                                </span>
-                              )}
+            
+        
                             </div>
                             <h4 className="font-bold text-base text-[#0A1128]">{a.title}</h4>
                           </div>
