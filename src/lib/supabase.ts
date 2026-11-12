@@ -294,6 +294,7 @@ export const api = {
     return next;
   },
   
+
   async list(table: string, onlyPublished = false) {
     let rows: any[] = [];
     if (isCloudEnabled && supabase) {
@@ -306,7 +307,10 @@ export const api = {
       if (onlyPublished) rows = rows.filter((r: any) => r.is_published !== false);
     }
 
-    // Agar table 'sessions' hai to: 1) Time ke hisab se Live set karo, 2) Topic ki image jodo, 3) Date/Time se sort karo
+    if (table === 'topics' && rows.length > 0) {
+      writeLocal('topics', rows);
+    }
+
     if (table === 'sessions') {
       const allTopics = readLocal('topics') || [];
       const now = Date.now();
@@ -321,6 +325,7 @@ export const api = {
 
       const categoryFallbackImages: Record<string, string> = {
         'AI & Tech': 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80',
+        'Artificial Intelligence and Technology': 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80',
         'Business & Economy': 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200&q=80',
         'Business & Finance': 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200&q=80',
         'Social Issues': 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&w=1200&q=80',
@@ -331,18 +336,18 @@ export const api = {
         const startMs = parseTime(s);
         let computedStatus = s.status;
 
-        // Time ke hisab se automatic Live / Upcoming / Completed
+        // Automatic Time-Based Status: Jese hi meeting ka time ho, 'Live' ho jaye
         if (s.status !== 'Cancelled' && startMs !== Number.MAX_SAFE_INTEGER) {
           if (now >= startMs && now <= startMs + DURATION_MS) {
             computedStatus = 'Live';
-          } else if (now < startMs) {
+          } else if (now < startMs && s.status !== 'Live') {
             computedStatus = 'Upcoming';
-          } else if (now > startMs + DURATION_MS) {
-            computedStatus = 'Completed';
+          } else if (now > startMs + DURATION_MS && s.status === 'Live' && s.id === '1') {
+            // Default seed session 1 ko Upcoming rakhein jab tak real time na ho
+            computedStatus = 'Upcoming';
           }
         }
 
-        // Topic ya Session ki apni Image match karo
         const matchedTopic = allTopics.find(
           (t: any) =>
             (s.topic && t.title?.toLowerCase() === s.topic.toLowerCase()) ||
@@ -358,33 +363,41 @@ export const api = {
         return { ...s, status: computedStatus, _startMs: startMs, image_url: resolvedImage };
       });
 
-      // Date aur Time ke hisab se sort (Sabse pehle aane wali meeting sabse aage)
-      rows.sort((a: any, b: any) => a._startMs - b._startMs);
+      // Date aur Time ke hisab se sort (Live sabse pehle, fir sabse nazdeeki Upcoming)
+      rows.sort((a: any, b: any) => {
+        if (a.status === 'Live' && b.status !== 'Live') return -1;
+        if (b.status === 'Live' && a.status !== 'Live') return 1;
+        return a._startMs - b._startMs;
+      });
     }
 
     return rows;
   },
 
-  
   async save(table: string, record: any) {
+    const cleanRecord = { ...record };
+    delete cleanRecord._startMs;
+
     if (isCloudEnabled && supabase) {
-      const { data, error } = await supabase.from(table).upsert(record).select().single();
+      const { data, error } = await supabase.from(table).upsert(cleanRecord).select().single();
       if (error) throw error;
       return data;
     }
     const rows = readLocal(table) || [];
-    if (record.id) {
-      const idx = rows.findIndex((r: any) => r.id === record.id);
-      if (idx > -1) rows[idx] = { ...rows[idx], ...record };
-      else rows.unshift(record);
+    if (cleanRecord.id) {
+      const idx = rows.findIndex((r: any) => r.id === cleanRecord.id);
+      if (idx > -1) rows[idx] = { ...rows[idx], ...cleanRecord };
+      else rows.unshift(cleanRecord);
     } else {
-      record.id = `${Date.now()}`;
-      record.created_at = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-      rows.unshift(record);
+      cleanRecord.id = `${Date.now()}`;
+      cleanRecord.created_at = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      rows.unshift(cleanRecord);
     }
     writeLocal(table, rows);
-    return record;
+    return cleanRecord;
   },
+
+
   async remove(table: string, id: string) {
     if (isCloudEnabled && supabase) {
       await supabase.from(table).delete().eq('id', id);

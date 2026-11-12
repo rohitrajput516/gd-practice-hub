@@ -362,6 +362,18 @@ export const AdminSessionsPage: React.FC = () => {
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg"
                   />
                 </div>
+                
+                             <div>
+               <label className="block font-bold text-slate-800 mb-1">Preparation Points (Har line ek bullet point banegi)</label>
+               <textarea
+                 rows={3}
+                 value={form.preparation_points || ''}
+                 onChange={(e) => setForm({ ...form, preparation_points: e.target.value })}
+                 placeholder="Point 1&#10;Point 2&#10;Point 3"
+                 className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+               />
+             </div>
+
 
                 <div>
                   <label className="block font-bold text-slate-800 mb-1">Session Cover Image (Upload ya Image Link)</label>
@@ -952,7 +964,15 @@ export const AdminFeedbackPage: React.FC = () => {
                   >
                     <div className="flex items-center gap-3 min-w-[210px]">
                       <input type="checkbox" checked={isOpen} readOnly className="rounded text-blue-600" />
-                      <Star className={`w-4 h-4 ${f.is_starred ? 'fill-amber-400 text-amber-400' : 'text-slate-400'}`} />
+                      <Star
+  onClick={async (e) => {
+    e.stopPropagation();
+    await api.save('feedback', { ...f, is_starred: !f.is_starred });
+    load();
+  }}
+  className={`w-4 h-4 cursor-pointer ${f.is_starred ? 'fill-amber-400 text-amber-400' : 'text-slate-400 hover:text-amber-400'}`}
+/>
+
                       <div>
                         <p className="font-bold text-[#0A1128] flex items-center gap-1.5">
                           {f.name}

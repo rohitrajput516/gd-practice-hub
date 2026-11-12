@@ -591,7 +591,7 @@ export const HomePage: React.FC = () => {
 
           {/* View All Upcoming Sessions Button */}
           <div className="mt-10 flex justify-center gap-3">
-            {allSessions.length > 3 ? (
+            {activeUpcomingSessions.length > 3 ? (
               <button
                 onClick={() => setShowAllSessions(!showAllSessions)}
                 className="px-7 py-3 rounded-full bg-[#1D6BF3] hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-lg shadow-blue-500/30 transition"
@@ -610,7 +610,7 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* 2. WHY JOIN GD PRACTICE HUB? (4 Benefits matching Preview Image 1) */}
+      {/* 2. WHY JOIN GD PRACTICE HUB? */}
       <section className="py-14 bg-[#EEF4FC] border-t border-slate-200/70">
         <div className="max-w-5xl mx-auto px-4 sm:px-8">
           <div className="text-center mb-10">
@@ -683,7 +683,7 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* 3. HOW IT WORKS (3 Connected Steps matching Preview Image 1) */}
+      {/* 3. HOW IT WORKS */}
       <section className="py-14 bg-[#F5F8FF] border-t border-slate-200/70">
         <div className="max-w-5xl mx-auto px-4 sm:px-8">
           <div className="text-center mb-10">
@@ -740,7 +740,7 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* 4. LATEST ANNOUNCEMENTS (Admin Updates matching Preview Image 2) */}
+      {/* 4. LATEST ANNOUNCEMENTS */}
       <section className="py-14 bg-white border-t border-slate-200/70">
         <div className="max-w-5xl mx-auto px-4 sm:px-8">
           <div className="text-center mb-10">
@@ -776,10 +776,10 @@ export const HomePage: React.FC = () => {
                       {ann.title}
                     </h3>
                     {ann.is_important && (
-                      <span className="px-2.5 py-0.5 rounded-full bg-[ #1D63EB] text-white text-[10px] font-extrabold uppercase">
+                      <span className="px-2.5 py-0.5 rounded-full bg-[#DC3545] text-white text-[10px] font-extrabold uppercase">
                         PRIORITY
                       </span>
-                  )}
+                    )}
                   </div>
                   <p className="text-xs sm:text-sm text-slate-600 leading-relaxed line-clamp-2">
                     {ann.message}
@@ -797,6 +797,9 @@ export const HomePage: React.FC = () => {
               <span>View All Announcements →</span>
             </Link>
           </div>
+
+
+
         </div>
       </section>
 
@@ -961,25 +964,42 @@ export const SchedulePage: React.FC = () => {
   const [sessions, setSessions] = useState<any[]>([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All Statuses');
-  const [secLeft, setSecLeft] = useState(2 * 3600 + 45 * 60 + 10);
+  const [topicFilter, setTopicFilter] = useState('All Topics');
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [nowMs, setNowMs] = useState(Date.now());
 
   useEffect(() => {
     api.list('sessions', true).then(setSessions);
-    const timer = setInterval(() => {
-      setSecLeft((prev) => (prev > 0 ? prev - 1 : 9900));
-    }, 1000);
+    const timer = setInterval(() => setNowMs(Date.now()), 1000);
     return () => clearInterval(timer);
   }, []);
 
+  // Featured session: Live session ko priority, warna sabse nazdeeki Upcoming session
+  const featured =
+    sessions.find((s) => s.status === 'Live') ||
+    sessions.find((s) => s.status === 'Upcoming' && s.is_featured) ||
+    sessions.find((s) => s.status === 'Upcoming') ||
+    sessions[0];
+
+  // Real-time countdown calculation for Featured Session
+  const targetMs = featured?._startMs && featured._startMs !== Number.MAX_SAFE_INTEGER
+    ? featured._startMs
+    : nowMs + (2 * 3600 + 45 * 60 + 10) * 1000;
+  const secLeft = Math.max(0, Math.floor((targetMs - nowMs) / 1000));
   const hrs = String(Math.floor(secLeft / 3600)).padStart(2, '0');
   const mins = String(Math.floor((secLeft % 3600) / 60)).padStart(2, '0');
   const secs = String(secLeft % 60).padStart(2, '0');
 
-  const featured = sessions.find((s) => s.is_featured || s.status === 'Live') || sessions[0];
   const filtered = sessions.filter((s) => {
-    const mSearch = s.title.toLowerCase().includes(search.toLowerCase());
+    const mSearch =
+      s.title.toLowerCase().includes(search.toLowerCase()) ||
+      (s.topic || '').toLowerCase().includes(search.toLowerCase());
     const mStatus = statusFilter === 'All Statuses' || s.status === statusFilter;
-    return mSearch && mStatus;
+    const mTopic =
+      topicFilter === 'All Topics' ||
+      (s.category || '').toLowerCase().includes(topicFilter.toLowerCase()) ||
+      s.title.toLowerCase().includes(topicFilter.toLowerCase());
+    return mSearch && mStatus && mTopic;
   });
 
   const upcoming = filtered.filter((s) => s.status === 'Upcoming' || s.status === 'Live');
@@ -997,7 +1017,6 @@ export const SchedulePage: React.FC = () => {
 
         {featured && (
           <div className="relative overflow-hidden rounded-[20px] bg-[#04091E] text-white px-6 py-7 sm:px-9 sm:py-8 shadow-[0_18px_40px_rgba(4,9,30,0.28)] mb-7">
-            {/* 100% Exact Background Artwork: Deep Navy Left + Smooth Glowing Blue Diagonal Waves + Radial Halftone Dots */}
             <svg
               className="absolute inset-0 w-full h-full pointer-events-none"
               viewBox="0 0 1000 290"
@@ -1036,10 +1055,7 @@ export const SchedulePage: React.FC = () => {
                 </mask>
               </defs>
 
-              {/* Base Dark Navy */}
               <rect width="1000" height="290" fill="url(#cardBg)" />
-
-              {/* Smooth Diagonal Royal-Blue Light Waves (Bottom-Right to Upper-Middle) */}
               <path
                 d="M 470,290 C 560,200 660,95 790,0 L 960,0 C 850,110 740,210 660,290 Z"
                 fill="url(#softWave1)"
@@ -1050,22 +1066,18 @@ export const SchedulePage: React.FC = () => {
                 fill="url(#softWave2)"
                 filter="url(#waveBlur)"
               />
-
-              {/* Radial Faded Halftone Dots in Top-Right Corner */}
               <rect width="1000" height="290" fill="url(#cornerDots)" mask="url(#fadeDotsMask)" />
             </svg>
 
-            {/* Card Content Grid (Exact 3-Part Alignment matching Source 56) */}
             <div className="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-              
-              {/* Left Section (6 Cols): Badges, Big Title, Date | Platform, Description */}
               <div className="md:col-span-6 space-y-2.5">
                 <div className="flex flex-wrap items-center gap-2.5 mb-1">
                   <span className="px-3.5 py-1 rounded-full bg-[#15DEC2] text-[#032520] text-[11px] font-extrabold uppercase tracking-wide">
                     FEATURED UPCOMING GD
                   </span>
                   <span className="px-3.5 py-1 rounded-full border border-[#2E7CF6]/80 bg-[#081B44]/90 text-white text-[11px] font-bold flex items-center gap-1.5">
-                    <Radio className="w-3.5 h-3.5 text-[#38BDF8]" /> LIVE COUNTDOWN
+                    <Radio className="w-3.5 h-3.5 text-[#38BDF8]" />
+                    {featured.status === 'Live' ? 'LIVE NOW' : 'LIVE COUNTDOWN'}
                   </span>
                 </div>
 
@@ -1084,27 +1096,31 @@ export const SchedulePage: React.FC = () => {
                 </p>
               </div>
 
-              {/* Middle Section (3 Cols): STARTS IN + 3 Glassmorphic Boxes */}
               <div className="md:col-span-3 flex flex-col items-center justify-center pt-2">
                 <p className="text-xs sm:text-[13px] uppercase tracking-wider text-white/90 font-medium mb-2.5">
-                  STARTS IN
+                  {featured.status === 'Live' ? 'SESSION STATUS' : 'STARTS IN'}
                 </p>
-                <div className="flex items-center justify-center gap-1.5 sm:gap-2">
-                  <div className="bg-[#244380]/70 backdrop-blur-md border border-[#6094F8]/55 rounded-[10px] px-3 py-2.5 min-w-[54px] sm:min-w-[60px] text-center shadow-inner">
-                    <span className="text-lg sm:text-[21px] font-bold text-white tracking-tight">{hrs}h</span>
+                {featured.status === 'Live' ? (
+                  <div className="px-5 py-2.5 rounded-xl bg-[#DC3545] text-white font-extrabold text-sm tracking-wider animate-pulse shadow-lg">
+                    ● LIVE NOW
                   </div>
-                  <span className="text-white font-bold text-lg">:</span>
-                  <div className="bg-[#244380]/70 backdrop-blur-md border border-[#6094F8]/55 rounded-[10px] px-3 py-2.5 min-w-[54px] sm:min-w-[60px] text-center shadow-inner">
-                    <span className="text-lg sm:text-[21px] font-bold text-white tracking-tight">{mins}m</span>
+                ) : (
+                  <div className="flex items-center justify-center gap-1.5 sm:gap-2">
+                    <div className="bg-[#244380]/70 backdrop-blur-md border border-[#6094F8]/55 rounded-[10px] px-3 py-2.5 min-w-[54px] sm:min-w-[60px] text-center shadow-inner">
+                      <span className="text-lg sm:text-[21px] font-bold text-white tracking-tight">{hrs}h</span>
+                    </div>
+                    <span className="text-white font-bold text-lg">:</span>
+                    <div className="bg-[#244380]/70 backdrop-blur-md border border-[#6094F8]/55 rounded-[10px] px-3 py-2.5 min-w-[54px] sm:min-w-[60px] text-center shadow-inner">
+                      <span className="text-lg sm:text-[21px] font-bold text-white tracking-tight">{mins}m</span>
+                    </div>
+                    <span className="text-white font-bold text-lg">:</span>
+                    <div className="bg-[#244380]/70 backdrop-blur-md border border-[#6094F8]/55 rounded-[10px] px-3 py-2.5 min-w-[54px] sm:min-w-[60px] text-center shadow-inner">
+                      <span className="text-lg sm:text-[21px] font-bold text-white tracking-tight">{secs}s</span>
+                    </div>
                   </div>
-                  <span className="text-white font-bold text-lg">:</span>
-                  <div className="bg-[#244380]/70 backdrop-blur-md border border-[#6094F8]/55 rounded-[10px] px-3 py-2.5 min-w-[54px] sm:min-w-[60px] text-center shadow-inner">
-                    <span className="text-lg sm:text-[21px] font-bold text-white tracking-tight">{secs}s</span>
-                  </div>
-                </div>
+                )}
               </div>
 
-              {/* Right Section (3 Cols): Join Session & View Details Buttons */}
               <div className="md:col-span-3 flex flex-col gap-3 md:pl-2">
                 <button
                   onClick={() => joinZoomSession(featured.zoom_url, featured.status)}
@@ -1120,12 +1136,11 @@ export const SchedulePage: React.FC = () => {
                   View Details
                 </Link>
               </div>
-
             </div>
           </div>
         )}
 
-        {/* Filter Bar: Clean Non-Overlapping Search + Dropdowns + Grid/List Toggle */}
+        {/* Filter Bar */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-7">
           <div className="relative w-full sm:w-64">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
@@ -1151,7 +1166,8 @@ export const SchedulePage: React.FC = () => {
             </select>
 
             <select
-              onChange={(e) => setSearch(e.target.value === 'All Topics' ? '' : e.target.value)}
+              value={topicFilter}
+              onChange={(e) => setTopicFilter(e.target.value)}
               className="px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-medium text-slate-800 outline-none min-w-[115px]"
             >
               <option value="All Topics">All Topics</option>
@@ -1159,22 +1175,30 @@ export const SchedulePage: React.FC = () => {
               <option value="Business">Business &amp; Economy</option>
               <option value="Placement">Placement Special</option>
               <option value="AI">AI &amp; Future</option>
+              <option value="Social">Social Issues</option>
             </select>
 
             <div className="flex items-center border border-slate-300 rounded-lg bg-white overflow-hidden">
-              <button className="p-2 bg-slate-100 text-slate-900 border-r border-slate-300">
+              <button
+                type="button"
+                onClick={() => setViewMode('grid')}
+                className={`p-2 border-r border-slate-300 ${viewMode === 'grid' ? 'bg-[#0A1128] text-white' : 'text-slate-500 hover:text-slate-800'}`}
+              >
                 <LayoutGrid className="w-3.5 h-3.5" />
               </button>
-              <button className="p-2 text-slate-500 hover:text-slate-800">
+              <button
+                type="button"
+                onClick={() => setViewMode('list')}
+                className={`p-2 ${viewMode === 'list' ? 'bg-[#0A1128] text-white' : 'text-slate-500 hover:text-slate-800'}`}
+              >
                 <List className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
         </div>
 
-
         <h3 className="text-lg font-extrabold text-[#0A1128] mb-3">Other Upcoming Sessions</h3>
-        <div className="space-y-3 mb-8">
+        <div className={viewMode === 'grid' ? 'grid sm:grid-cols-2 gap-4 mb-8' : 'space-y-3 mb-8'}>
           {upcoming.map((s) => (
             <div
               key={s.id}
@@ -1187,7 +1211,9 @@ export const SchedulePage: React.FC = () => {
                 </p>
               </div>
               <div className="flex items-center gap-2.5">
-                <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-[11px] font-bold uppercase">
+                <span className={`px-3 py-1 rounded-full text-[11px] font-bold uppercase ${
+                  s.status === 'Live' ? 'bg-[#DC3545] text-white' : 'bg-blue-100 text-blue-700'
+                }`}>
                   {s.status}
                 </span>
                 <Link
@@ -1201,7 +1227,7 @@ export const SchedulePage: React.FC = () => {
                   disabled={!isValidHttps(s.zoom_url)}
                   className={`px-3.5 py-2 rounded-lg text-xs font-semibold ${
                     isValidHttps(s.zoom_url)
-                      ? 'bg-[#1D7AFC] text-white'
+                      ? 'bg-[#1D7AFC] text-white hover:bg-blue-600'
                       : 'bg-slate-200 text-slate-500 cursor-not-allowed'
                   }`}
                 >
@@ -1227,7 +1253,7 @@ export const SchedulePage: React.FC = () => {
               </div>
               <div className="flex items-center gap-2.5">
                 <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-[11px] font-bold uppercase">
-                  COMPLETED
+                  {s.status}
                 </span>
                 <Link
                   to={`/session?id=${s.id}`}
@@ -1243,7 +1269,7 @@ export const SchedulePage: React.FC = () => {
           ))}
         </div>
 
-        <div className="bg-[#D8EAFF] border border-blue-200 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="bg-[#D8EAFF] border border-blue-200 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 mb-10">
           <div>
             <h3 className="text-lg font-extrabold text-[#0A1128]">Ask Owner for Any Doubt 💬</h3>
             <p className="text-xs text-slate-700">
@@ -1278,29 +1304,34 @@ export const SessionDetailsPage: React.FC = () => {
 
   if (!session) return null;
 
+  const handleAddToCalendar = () => {
+    const title = encodeURIComponent(session.title || 'GD Practice Session');
+    const details = encodeURIComponent(session.description || 'Join live Group Discussion session.');
+    window.open(
+      `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}`,
+      '_blank',
+      'noopener,noreferrer'
+    );
+  };
+
   return (
     <PublicLayout>
-      <div className="max-w-5xl mx-auto px-4 sm:px-8 pt-6">
+      <div className="max-w-5xl mx-auto px-4 sm:px-8 pt-6 pb-12">
         <div className="text-xs text-slate-500 mb-3">
           <Link to="/schedule" className="hover:underline">GD Schedule</Link> / Session Details /{' '}
           <span className="text-slate-900 font-semibold">{session.title.split(':')[0]}</span>
         </div>
 
         <div className="relative mb-9 select-none">
-          {/* Main Banner: Clear at Top, Dark Navy Gradient at Bottom */}
-          
-          < div
-          className = "relative rounded-t-2xl rounded-br-2xl overflow-hidden bg-cover bg-center pt-8 sm:pt-11 px-6 sm:px-10 pb-12 sm:pb-14 text-white shadow-lg"
-          style = {
-              {
-                backgroundImage: `linear-gradient(180deg, rgba(10, 17, 40, 0.12) 0%, rgba(10, 17, 40, 0.50) 42%, rgba(8, 16, 38, 0.88) 76%, #071026 100%), url('${
+          <div
+            className="relative rounded-t-2xl rounded-br-2xl overflow-hidden bg-cover bg-center pt-8 sm:pt-11 px-6 sm:px-10 pb-12 sm:pb-14 text-white shadow-lg"
+            style={{
+              backgroundImage: `linear-gradient(180deg, rgba(10, 17, 40, 0.12) 0%, rgba(10, 17, 40, 0.50) 42%, rgba(8, 16, 38, 0.88) 76%, #071026 100%), url('${
                 session.image_url ||
                 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1400&q=85'
               }')`,
-              }
-            } >
-          
-            {/* Exact Pastel Green LIVE NOW Badge matching Image 2 */}
+            }}
+          >
             <div className="mb-3.5">
               <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-[#A7F3D0] text-[#065F46] text-xs font-extrabold tracking-wide shadow-sm">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#10B981]" />
@@ -1308,20 +1339,16 @@ export const SessionDetailsPage: React.FC = () => {
               </span>
             </div>
 
-            {/* Session Heading */}
             <h1 className="text-2xl sm:text-[38px] font-extrabold max-w-2xl leading-[1.16] tracking-tight text-white drop-shadow-sm mb-3">
               {session.title}
             </h1>
 
-            {/* Date & Time Subtitle */}
             <p className="text-xs sm:text-[15px] text-slate-200/95 font-medium">
               Date &amp; Time: {session.scheduled_date}, {session.start_time} | {session.platform || 'Zoom Session'}
             </p>
           </div>
 
-          {/* Bottom Half-Cutout (Left Side) + Stepped-Down Dark Navy Button Tab (Right Side) */}
           <div className="relative flex items-end justify-between -mt-7 sm:-mt-8 z-10">
-            {/* Left Cutout matching page background so right side looks stepped-down */}
             <div className="hidden sm:block flex-1 h-8 bg-[#F4F7FE] rounded-tr-2xl relative">
               <svg
                 className="w-10 h-8 absolute -right-9 top-0 text-[#F4F7FE]"
@@ -1332,7 +1359,6 @@ export const SessionDetailsPage: React.FC = () => {
               </svg>
             </div>
 
-            {/* Right Stepped-Down Navy Action Bar */}
             <div className="w-full sm:w-auto bg-[#071026] px-5 sm:px-7 pb-3.5 pt-1 rounded-b-2xl flex items-center justify-end gap-3 shadow-md">
               <button
                 onClick={() => joinZoomSession(session.zoom_url, session.status)}
@@ -1341,7 +1367,7 @@ export const SessionDetailsPage: React.FC = () => {
                 <Video className="w-4 h-4 fill-white" /> Join Session
               </button>
               <button
-                onClick={() => alert('Added reminder to your calendar!')}
+                onClick={handleAddToCalendar}
                 className="px-5 py-2.5 rounded-lg bg-[#0B162C] hover:bg-slate-800 border border-slate-400/70 text-white font-semibold text-xs sm:text-sm transition"
               >
                 Add to Calendar
@@ -1350,7 +1376,6 @@ export const SessionDetailsPage: React.FC = () => {
           </div>
         </div>
 
-        
         <div className="grid md:grid-cols-12 gap-8">
           <div className="md:col-span-8 space-y-6">
             <div>
@@ -1362,7 +1387,7 @@ export const SessionDetailsPage: React.FC = () => {
               <h2 className="text-xl font-extrabold text-[#0A1128] mb-1">Preparation Points</h2>
               <p className="text-xs text-slate-500 mb-3">Article-style, structured, readable</p>
               <ul className="list-disc pl-5 space-y-2 text-sm text-slate-800">
-                {(session.preparation_points || '').split('\n').filter(Boolean).map((pt: string, i: number) => (
+                {(session.preparation_points || 'Review key facts and current affairs related to the topic.').split('\n').filter(Boolean).map((pt: string, i: number) => (
                   <li key={i}>{pt}</li>
                 ))}
               </ul>
@@ -1373,7 +1398,7 @@ export const SessionDetailsPage: React.FC = () => {
                 <AlertCircle className="w-4 h-4 text-blue-700" /> Discussion Rules &amp; Guidelines
               </h3>
               <ul className="list-disc pl-5 space-y-1.5 text-sm text-slate-800">
-                {(session.special_instructions || '').split('\n').filter(Boolean).map((r: string, i: number) => (
+                {(session.special_instructions || 'Be respectful to all participants.\nAdhere to the 3-minute speaking time limit.').split('\n').filter(Boolean).map((r: string, i: number) => (
                   <li key={i}>{r}</li>
                 ))}
               </ul>
@@ -1394,7 +1419,13 @@ export const SessionDetailsPage: React.FC = () => {
                 <Video className="w-4 h-4 text-slate-500 mt-0.5" />
                 <div>
                   <p className="text-slate-500">Platform</p>
-                  <p className="font-bold text-slate-900">Zoom</p>
+                  <p className="font-bold text-slate-900">{session.platform || 'Zoom Room'}</p>
+                  {session.meeting_id && (
+                    <p className="text-slate-600 mt-0.5">Meeting ID: <span className="font-bold">{session.meeting_id}</span></p>
+                  )}
+                  {session.passcode && (
+                    <p className="text-slate-600">Passcode: <span className="font-bold">{session.passcode}</span></p>
+                  )}
                 </div>
               </div>
               <div className="text-xs border-t border-slate-100 pt-3">
@@ -1448,12 +1479,25 @@ export const TopicsPage: React.FC = () => {
     'Interview & Placement GD',
   ];
 
+  // Smart category matcher so both "AI & Tech" and "Artificial Intelligence and Technology" match
+  const matchesTopicCategory = (topicCategory: string, chip: string) => {
+    if (chip === 'All Topics') return true;
+    const c = (topicCategory || '').toLowerCase();
+    const q = chip.toLowerCase();
+    if (c.includes(q)) return true;
+    if (chip === 'AI & Tech' && (c.includes('artificial intelligence') || c.includes('tech'))) return true;
+    if (chip === 'Interview & Placement GD' && (c.includes('interview') || c.includes('placement'))) return true;
+    if (chip === 'Business' && (c.includes('business') || c.includes('economy') || c.includes('finance'))) return true;
+    if (chip === 'Abstract' && c.includes('abstract')) return true;
+    return false;
+  };
+
   const featured = topics.filter((t) => t.is_featured).slice(0, 3);
   const filtered = topics.filter((t) => {
-    const mCat =
-      activeCat === 'All Topics' ||
-      t.category.toLowerCase().includes(activeCat.toLowerCase());
-    const mSearch = t.title.toLowerCase().includes(search.toLowerCase());
+    const mCat = matchesTopicCategory(t.category, activeCat);
+    const mSearch =
+      t.title.toLowerCase().includes(search.toLowerCase()) ||
+      (t.description || '').toLowerCase().includes(search.toLowerCase());
     return mCat && mSearch;
   });
 
@@ -1468,10 +1512,10 @@ export const TopicsPage: React.FC = () => {
           <span
             className={`absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-extrabold flex items-center gap-1 ${
               t.badge === 'RECOMMENDED'
-               ? 'bg-[#5CA9FF] text-[#0A1628]'
-               : 'bg-[#1D63EB] text-white'
-               }`}
-               >
+                ? 'bg-[#5CA9FF] text-[#0A1628]'
+                : 'bg-[#1D63EB] text-white'
+            }`}
+          >
             {t.badge === 'RECOMMENDED' ? <Star className="w-3 h-3" /> : <Flame className="w-3 h-3" />}
             {t.badge || 'POPULAR'}
           </span>
@@ -1487,8 +1531,8 @@ export const TopicsPage: React.FC = () => {
 
       <div className="px-5 pb-5">
         <p className="text-xs font-semibold text-slate-700 mb-3">
-          Difficulty: <span className="font-bold">{t.difficulty}</span> | Est. Time:{' '}
-          <span className="font-bold">{t.est_time}</span>
+          Difficulty: <span className="font-bold">{t.difficulty || 'Medium'}</span> | Est. Time:{' '}
+          <span className="font-bold">{t.est_time || '45m'}</span>
         </p>
         <Link
           to="/schedule"
@@ -1502,7 +1546,7 @@ export const TopicsPage: React.FC = () => {
 
   return (
     <PublicLayout>
-      <div className="max-w-6xl mx-auto px-4 sm:px-8 pt-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-8 pt-8 pb-12">
         <h1 className="text-3xl font-extrabold text-[#0A1128] mb-1">GD Topics Library</h1>
         <p className="text-sm text-slate-600 mb-6">
           A searchable, filterable library of GD topics to practice, prepare, and level up your skills.

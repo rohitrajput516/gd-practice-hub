@@ -170,7 +170,8 @@ export const AdminDashboardOverview: React.FC = () => {
             <p className="text-xs text-slate-500">Welcome back, Admin! Here is what’s happening on your platform today.</p>
           </div>
           <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm text-xs font-semibold">
-            <span>Current Date: <strong>March 15, 2026</strong></span>
+           <span>Current Date: <strong>{new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</strong></span>
+
           </div>
         </div>
 

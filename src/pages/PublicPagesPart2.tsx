@@ -64,7 +64,7 @@ export const GuidelinesPage: React.FC = () => {
             className="w-full h-full object-cover opacity-60"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-6">
-            <span className="text-white font-extrabold text-lg">Accordion FAQ Style</span>
+            <span className="text-white font-extrabold text-lg">Essential GD Rules & Etiquette</span>
           </div>
         </div>
 
@@ -146,14 +146,19 @@ export const AnnouncementsPage: React.FC = () => {
   }, []);
 
   const categories = ['All', 'Urgent', 'Sessions', 'Platform Updates', 'Tips'];
-  const filtered = list.filter((a) => {
-    const mCat =
-      filter === 'All' ||
-      (filter === 'Urgent' && a.is_important) ||
-      a.category.toLowerCase().includes(filter.toLowerCase());
-    const mSearch = a.title.toLowerCase().includes(search.toLowerCase());
-    return mCat && mSearch;
-  });
+const filtered = list.filter((a) => {
+  const catLower = (a.category || '').toLowerCase();
+  const mCat =
+    filter === 'All' ||
+    (filter === 'Urgent' && (a.is_important || catLower === 'priority')) ||
+    (filter === 'Platform Updates' && (catLower.includes('update') || catLower.includes('system'))) ||
+    catLower.includes(filter.toLowerCase());
+  const mSearch =
+    a.title.toLowerCase().includes(search.toLowerCase()) ||
+    (a.message || '').toLowerCase().includes(search.toLowerCase());
+  return mCat && mSearch;
+});
+
 
   const featured = filtered[0];
   const older = filtered.slice(1);
@@ -254,11 +259,18 @@ export const AnnouncementsPage: React.FC = () => {
           <div className="lg:col-span-4 space-y-6">
             <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
               <h3 className="font-extrabold text-base text-[#0A1128] mb-4">Quick Stats/Resources</h3>
-              <ul className="space-y-3 text-sm font-medium text-slate-700">
-                <li className="pb-2 border-b border-slate-100 hover:text-blue-600 cursor-pointer">Prep Schedules</li>
-                <li className="pb-2 border-b border-slate-100 hover:text-blue-600 cursor-pointer">GD Resources</li>
-                <li className="hover:text-blue-600 cursor-pointer">Downloads</li>
-              </ul>
+                         <ul className="space-y-3 text-sm font-medium text-slate-700">
+             <li className="pb-2 border-b border-slate-100">
+               <Link to="/schedule" className="hover:text-blue-600 block">Prep Schedules →</Link>
+             </li>
+             <li className="pb-2 border-b border-slate-100">
+               <Link to="/topics" className="hover:text-blue-600 block">GD Topics &amp; Resources →</Link>
+             </li>
+             <li>
+               <Link to="/guidelines" className="hover:text-blue-600 block">Rules &amp; Guidelines →</Link>
+             </li>
+           </ul>
+
             </div>
 
             <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-3">
