@@ -17,15 +17,20 @@ export const AdminLoginPage: React.FC = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || password.length < 5) {
-      setError('Kripya valid email aur password dalein.');
-      return;
+    // Yahan aap apna manchaha Admin Email aur Password set kar sakte hain
+    const CORRECT_EMAIL = 'rohitrajput.com';
+    const CORRECT_PASS = 'Rajput@123';
+
+    if (email.trim() === CORRECT_EMAIL && password === CORRECT_PASS) {
+      sessionStorage.setItem('gd_admin_auth', 'true');
+      navigate('/admin/dashboard');
+    } else {
+      setError('Galat Email ya Password! Kripya sahi details dalein.');
     }
-    sessionStorage.setItem('gd_admin_auth', 'true');
-    navigate('/admin/dashboard');
   };
+
 
   return (
     <div
