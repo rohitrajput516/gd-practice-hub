@@ -796,74 +796,284 @@ export const AdminTopicsPage: React.FC = () => {
 };
 
 /* ============================================================================
-   PAGE 12: ADMIN MANAGE ANNOUNCEMENTS (Image 12 - 1000086162.png & Spec 27)
+   PAGE 12: ADMIN MANAGE ANNOUNCEMENTS (With Full Filter & Show-More Control)
    ============================================================================ */
+const DEFAULT_ANNOUNCEMENT_FILTERS = ['Urgent', 'Sessions', 'Platform Updates', 'Tips'];
+
 export const AdminAnnouncementsPage: React.FC = () => {
   const [list, setList] = useState<any[]>([]);
+  const [filters, setFilters] = useState<string[]>(DEFAULT_ANNOUNCEMENT_FILTERS);
+  const [newFilterInput, setNewFilterInput] = useState('');
+  const [activeAdminFilter, setActiveAdminFilter] = useState('All');
   const [modalOpen, setModalOpen] = useState(false);
+  const [customCategoryMode, setCustomCategoryMode] = useState(false);
+  const [customCategoryName, setCustomCategoryName] = useState('');
+
   const [form, setForm] = useState<any>({
     id: '',
     title: '',
+    category: 'Sessions',
     message: '',
-    is_important: true,
-    is_published: true
+    action_text: '',
+    action_url: '',
+    is_important: false,
+    is_featured: false,
+    is_published: true,
   });
 
-  const load = () => api.list('announcements').then(setList);
-  useEffect(() => { load(); }, []);
+  const load = async () => {
+    const [anns, settings] = await Promise.all([
+      api.list('announcements'),
+      api.getSettings(),
+    ]);
+    setList(anns);
+
+    const savedFilters: string[] = Array.isArray(settings?.announcement_filters) && settings.announcement_filters.length > 0
+      ? settings.announcement_filters
+      : DEFAULT_ANNOUNCEMENT_FILTERS;
+
+    // Merge any custom categories already used in announcements
+    const merged = [...savedFilters];
+    anns.forEach((a: any) => {
+      if (a.category && !merged.some((f) => f.toLowerCase() === String(a.category).toLowerCase())) {
+        merged.push(a.category);
+      }
+    });
+    setFilters(merged);
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const saveFilterList = async (updatedFilters: string[]) => {
+    setFilters(updatedFilters);
+    const currentSettings = await api.getSettings();
+    await api.updateSettings({
+      ...currentSettings,
+      announcement_filters: updatedFilters,
+    });
+  };
+
+  const handleAddFilter = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const clean = newFilterInput.trim();
+    if (!clean) return;
+    if (filters.some((f) => f.toLowerCase() === clean.toLowerCase())) {
+      alert('Ye filter pehle se maujood hai!');
+      return;
+    }
+    const next = [...filters, clean];
+    await saveFilterList(next);
+    setNewFilterInput('');
+  };
+
+  const handleRemoveFilter = async (target: string) => {
+    if (!confirm(`Remove "${target}" filter tab from Announcements page?`)) return;
+    const next = filters.filter((f) => f !== target);
+    await saveFilterList(next);
+    if (activeAdminFilter === target) setActiveAdminFilter('All');
+  };
+
+  const openCreateModal = () => {
+    setCustomCategoryMode(false);
+    setCustomCategoryName('');
+    setForm({
+      id: '',
+      title: '',
+      category: filters[0] || 'Sessions',
+      message: '',
+      action_text: '',
+      action_url: '',
+      is_important: false,
+      is_featured: false,
+      is_published: true,
+    });
+    setModalOpen(true);
+  };
+
+  const openEditModal = (a: any) => {
+    setCustomCategoryMode(false);
+    setCustomCategoryName('');
+    setForm({
+      ...a,
+      category: a.category || 'Sessions',
+      action_text: a.action_text || '',
+      action_url: a.action_url || '',
+      is_featured: Boolean(a.is_featured),
+    });
+    setModalOpen(true);
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    const finalCategory = customCategoryMode
+      ? customCategoryName.trim() || 'General'
+      : form.category || 'Sessions';
+
+    // Agar Admin ne modal ke andar naya filter type kiya hai, to use Filter Bar mein bhi jod do
+    if (
+      finalCategory &&
+      !filters.some((f) => f.toLowerCase() === finalCategory.toLowerCase())
+    ) {
+      await saveFilterList([...filters, finalCategory]);
+    }
+
+    // Agar is announcement ko Top Featured banaya hai, to baki par se featured hata do
+    if (form.is_featured) {
+      for (const item of list) {
+        if (item.id !== form.id && item.is_featured) {
+          await api.save('announcements', { ...item, is_featured: false });
+        }
+      }
+    }
+
     await api.save('announcements', {
       ...form,
-      category: form.is_important ? 'Priority' : 'Sessions'
+      category: finalCategory,
     });
     setModalOpen(false);
     load();
   };
 
+  const filteredList = list.filter((a) => {
+    if (activeAdminFilter === 'All') return true;
+    if (activeAdminFilter === 'Urgent') {
+      return a.is_important || String(a.category).toLowerCase() === 'urgent' || String(a.category).toLowerCase() === 'priority';
+    }
+    return String(a.category || '').toLowerCase() === activeAdminFilter.toLowerCase();
+  });
+
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-extrabold text-[#0A1128]">Manage Announcements</h1>
-            <p className="text-xs text-slate-500">Create, edit, and publish announcements &amp; important notices.</p>
+            <p className="text-xs text-slate-500">
+              Control all announcements, custom filter tabs, featured notice, and Show More details.
+            </p>
           </div>
           <button
-            onClick={() => {
-              setForm({ id: '', title: '', message: '', is_important: true, is_published: true });
-              setModalOpen(true);
-            }}
-            className="px-4 py-2 rounded-lg bg-[#0F172A] hover:bg-blue-600 text-white font-bold text-xs flex items-center gap-1.5 shadow"
+            onClick={openCreateModal}
+            className="px-4 py-2 rounded-lg bg-[#0F172A] hover:bg-blue-600 text-white font-bold text-xs flex items-center gap-1.5 shadow transition"
           >
             <Plus className="w-4 h-4" /> Create Announcement
           </button>
         </div>
 
-        {/* Announcements Table matching Image 12 */}
+        {/* FILTER TABS MANAGER CARD (Add / Remove Public Page Filters) */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 className="text-sm font-extrabold text-[#0A1128]">
+                Announcements Page Filter Tabs (Public &amp; Admin)
+              </h3>
+              <p className="text-[11px] text-slate-500">
+                Yahan se aap Announcements page ke filters dekh sakte hain, naya filter add kar sakte hain ya hata sakte hain.
+              </p>
+            </div>
+            <form onSubmit={handleAddFilter} className="flex items-center gap-2">
+              <input
+                type="text"
+                value={newFilterInput}
+                onChange={(e) => setNewFilterInput(e.target.value)}
+                placeholder="New filter name (e.g. Exam Alert)"
+                className="px-3 py-1.5 border border-slate-300 rounded-lg text-xs w-48"
+              />
+              <button
+                type="submit"
+                className="px-3.5 py-1.5 rounded-lg bg-[#2563EB] hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-1 shrink-0"
+              >
+                <Plus className="w-3.5 h-3.5" /> Add Filter
+              </button>
+            </form>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <button
+              type="button"
+              onClick={() => setActiveAdminFilter('All')}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-bold border transition ${
+                activeAdminFilter === 'All'
+                  ? 'bg-[#0A1128] text-white border-[#0A1128]'
+                  : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+              }`}
+            >
+              All ({list.length})
+            </button>
+
+            {filters.map((f) => {
+              const active = activeAdminFilter === f;
+              return (
+                <div
+                  key={f}
+                  className={`inline-flex items-center gap-1.5 pl-3.5 pr-2 py-1 rounded-full text-xs font-bold border transition ${
+                    active
+                      ? 'bg-[#2563EB] text-white border-[#2563EB]'
+                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  <button type="button" onClick={() => setActiveAdminFilter(f)}>
+                    {f}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveFilter(f)}
+                    title={`Delete "${f}" filter`}
+                    className={`w-4 h-4 rounded-full flex items-center justify-center text-[11px] ${
+                      active ? 'hover:bg-blue-800 text-white' : 'hover:bg-red-100 text-slate-400 hover:text-red-600'
+                    }`}
+                  >
+                    ×
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Announcements Data Table */}
         <div className="bg-white border border-slate-200 rounded-2xl overflow-x-auto shadow-sm">
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase font-bold text-[11px]">
-                <th className="py-3.5 px-4">Title</th>
+                <th className="py-3.5 px-4">Title &amp; Preview</th>
+                <th className="py-3.5 px-4">Filter / Category</th>
                 <th className="py-3.5 px-4">Date</th>
-                <th className="py-3.5 px-4">Important</th>
+                <th className="py-3.5 px-4">Priority / Featured</th>
                 <th className="py-3.5 px-4">Published</th>
                 <th className="py-3.5 px-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {list.map((a) => (
+              {filteredList.map((a) => (
                 <tr key={a.id} className="hover:bg-slate-50">
-                  <td className="py-3.5 px-4 font-bold text-[#0A1128] text-sm">{a.title}</td>
-                  <td className="py-3.5 px-4 text-slate-500">{a.created_at}</td>
+                  <td className="py-3.5 px-4 max-w-xs">
+                    <p className="font-bold text-[#0A1128] text-sm">{a.title}</p>
+                    <p className="text-[11px] text-slate-500 truncate">{a.message}</p>
+                  </td>
                   <td className="py-3.5 px-4">
-                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                      a.is_important ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'
-                    }`}>
-                      {a.is_important ? '★ Active' : 'Normal'}
+                    <span className="px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 font-bold text-[11px]">
+                      {a.category || 'Sessions'}
                     </span>
+                  </td>
+                  <td className="py-3.5 px-4 text-slate-500">{a.created_at}</td>
+                  <td className="py-3.5 px-4 space-x-1.5">
+                    <span
+                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                        a.is_important
+                          ? 'bg-[#DC3545] text-white'
+                          : 'bg-slate-100 text-slate-600'
+                      }`}
+                    >
+                      {a.is_important ? 'Priority' : 'Normal'}
+                    </span>
+                    {a.is_featured && (
+                      <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold">
+                        ★ Featured
+                      </span>
+                    )}
                   </td>
                   <td className="py-3.5 px-4">
                     <button
@@ -879,8 +1089,18 @@ export const AdminAnnouncementsPage: React.FC = () => {
                     </button>
                   </td>
                   <td className="py-3.5 px-4 text-right space-x-1.5">
-                    <Link to="/announcements" className="px-2.5 py-1 rounded border border-slate-200 font-semibold">View</Link>
-                    <button onClick={() => { setForm(a); setModalOpen(true); }} className="px-2.5 py-1 rounded border border-slate-200 font-semibold">Edit</button>
+                    <Link
+                      to="/announcements"
+                      className="px-2.5 py-1 rounded border border-slate-200 font-semibold hover:bg-slate-100"
+                    >
+                      View
+                    </Link>
+                    <button
+                      onClick={() => openEditModal(a)}
+                      className="px-2.5 py-1 rounded border border-slate-200 font-semibold hover:bg-slate-100"
+                    >
+                      Edit
+                    </button>
                     <button
                       onClick={async () => {
                         if (confirm('Delete announcement?')) {
@@ -888,7 +1108,7 @@ export const AdminAnnouncementsPage: React.FC = () => {
                           load();
                         }
                       }}
-                      className="px-2.5 py-1 rounded border border-red-200 bg-red-50 text-red-600 font-semibold"
+                      className="px-2.5 py-1 rounded border border-red-200 bg-red-50 text-red-600 font-semibold hover:bg-red-100"
                     >
                       Delete
                     </button>
@@ -899,18 +1119,22 @@ export const AdminAnnouncementsPage: React.FC = () => {
           </table>
         </div>
 
-        {/* Create / Edit Announcement Modal matching Image 12 */}
+        {/* Create / Edit Announcement Modal with Filter Selector & Custom Filter Input */}
         {modalOpen && (
           <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl">
+            <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[92vh] overflow-y-auto">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-11 h-11 rounded-xl bg-[#2563EB] text-white flex items-center justify-center shadow-md">
                     <Megaphone className="w-6 h-6" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-extrabold text-[#0A1128]">Create New Announcement</h2>
-                    <p className="text-xs text-slate-500">Fill in the details to publish a new announcement.</p>
+                    <h2 className="text-lg font-extrabold text-[#0A1128]">
+                      {form.id ? 'Edit Announcement' : 'Create New Announcement'}
+                    </h2>
+                    <p className="text-xs text-slate-500">
+                      Choose filter category, write full notice details, and publish.
+                    </p>
                   </div>
                 </div>
                 <button onClick={() => setModalOpen(false)} className="text-slate-400 hover:text-slate-600">
@@ -920,7 +1144,9 @@ export const AdminAnnouncementsPage: React.FC = () => {
 
               <form onSubmit={handleSave} className="space-y-3.5 text-xs">
                 <div>
-                  <label className="block font-bold text-slate-800 mb-1">Announcement Title <span className="text-red-500">*</span></label>
+                  <label className="block font-bold text-slate-800 mb-1">
+                    Announcement Title <span className="text-red-500">*</span>
+                  </label>
                   <input
                     required
                     type="text"
@@ -931,29 +1157,111 @@ export const AdminAnnouncementsPage: React.FC = () => {
                   />
                 </div>
 
+                {/* Filter / Category Selector + Create New Filter Option */}
                 <div>
-                  <label className="block font-bold text-slate-800 mb-1">Message <span className="text-red-500">*</span></label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="font-bold text-slate-800">
+                      Select Filter / Category <span className="text-red-500">*</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setCustomCategoryMode(!customCategoryMode)}
+                      className="text-[11px] font-bold text-blue-600 hover:underline"
+                    >
+                      {customCategoryMode ? '← Choose Existing Filter' : '+ Create New Filter'}
+                    </button>
+                  </div>
+
+                  {customCategoryMode ? (
+                    <input
+                      required
+                      type="text"
+                      value={customCategoryName}
+                      onChange={(e) => setCustomCategoryName(e.target.value)}
+                      placeholder="Type new filter name (e.g. Results, Rules, Weekend Batch)"
+                      className="w-full px-3 py-2 border border-blue-400 bg-blue-50/40 rounded-lg font-semibold"
+                    />
+                  ) : (
+                    <select
+                      value={form.category}
+                      onChange={(e) => setForm({ ...form, category: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white font-semibold"
+                    >
+                      {filters.map((f) => (
+                        <option key={f} value={f}>
+                          {f}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-800 mb-1">
+                    Full Message (Shown on Show More / Read Full Notice) <span className="text-red-500">*</span>
+                  </label>
                   <textarea
                     required
                     rows={5}
                     value={form.message}
                     onChange={(e) => setForm({ ...form, message: e.target.value })}
-                    placeholder="Hey everyone! Starting this week..."
+                    placeholder="Write full announcement details here..."
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg"
                   />
                 </div>
 
-                <div className="space-y-2">
+                {/* Optional Action Button inside Show More */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-bold text-slate-800 mb-1">Mark as Important? <span className="text-red-500">*</span></label>
+                    <label className="block font-bold text-slate-800 mb-1">
+                      Optional Button Text (Show More ke andar)
+                    </label>
+                    <input
+                      type="text"
+                      value={form.action_text || ''}
+                      onChange={(e) => setForm({ ...form, action_text: e.target.value })}
+                      placeholder="e.g. Check GD Schedule"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-800 mb-1">
+                      Optional Button Link (URL ya Page Path)
+                    </label>
+                    <input
+                      type="text"
+                      value={form.action_url || ''}
+                      onChange={(e) => setForm({ ...form, action_url: e.target.value })}
+                      placeholder="e.g. /schedule or https://..."
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 pt-1">
+                  <div>
+                    <label className="block font-bold text-slate-800 mb-1">Priority / Urgent?</label>
                     <button
                       type="button"
                       onClick={() => setForm({ ...form, is_important: !form.is_important })}
                       className={`px-3 py-1 rounded-full font-extrabold text-[11px] text-white ${
-                        form.is_important ? 'bg-blue-600' : 'bg-slate-400'
+                        form.is_important ? 'bg-[#DC3545]' : 'bg-slate-400'
                       }`}
                     >
-                      {form.is_important ? 'ON ●' : 'OFF ○'}
+                      {form.is_important ? 'ON ●' : 'OFF'}
+                    </button>
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-800 mb-1">Featured Top Box?</label>
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, is_featured: !form.is_featured })}
+                      className={`px-3 py-1 rounded-full font-extrabold text-[11px] text-white ${
+                        form.is_featured ? 'bg-amber-500' : 'bg-slate-400'
+                      }`}
+                    >
+                      {form.is_featured ? 'YES ★' : 'NO'}
                     </button>
                   </div>
 
@@ -966,17 +1274,24 @@ export const AdminAnnouncementsPage: React.FC = () => {
                         form.is_published ? 'bg-blue-600' : 'bg-slate-400'
                       }`}
                     >
-                      {form.is_published ? 'ON ●' : 'OFF ○'}
+                      {form.is_published ? 'ON ●' : 'OFF'}
                     </button>
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-2.5 pt-2">
-                  <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 rounded-lg bg-slate-100 font-bold">
+                <div className="flex justify-end gap-2.5 pt-3">
+                  <button
+                    type="button"
+                    onClick={() => setModalOpen(false)}
+                    className="px-4 py-2 rounded-lg bg-slate-100 font-bold"
+                  >
                     Cancel
                   </button>
-                  <button type="submit" className="px-5 py-2 rounded-lg bg-[#0F172A] hover:bg-blue-600 text-white font-bold">
-                    Create Announcement
+                  <button
+                    type="submit"
+                    className="px-5 py-2 rounded-lg bg-[#0F172A] hover:bg-blue-600 text-white font-bold shadow"
+                  >
+                    {form.id ? 'Save Changes' : 'Create Announcement'}
                   </button>
                 </div>
               </form>
@@ -989,23 +1304,30 @@ export const AdminAnnouncementsPage: React.FC = () => {
 };
 
 /* ============================================================================
-   PAGE 13: ADMIN MANAGE FEEDBACK (Image 13 - 1000086163.png & Spec 28)
+   PAGE 13: ADMIN MANAGE FEEDBACK & PRIVATE CONTACT MESSAGES
    ============================================================================ */
 export const AdminFeedbackPage: React.FC = () => {
   const [items, setItems] = useState<any[]>([]);
-  const [tab, setTab] = useState<'All' | 'Unread' | 'Reviewed'>('All');
+  const [tab, setTab] = useState<'All' | 'Messages' | 'Feedback' | 'Unread' | 'Reviewed'>('All');
   const [search, setSearch] = useState('');
-  const [expandedId, setExpandedId] = useState<string>('f2');
+  const [expandedId, setExpandedId] = useState<string>('');
 
   const load = () => api.list('feedback').then(setItems);
   useEffect(() => { load(); }, []);
 
+  // Helper: Check if record came from "Send Us a Message" (Contact Page)
+  const isPrivateMessage = (i: any) => !i.session_title || i.session_title === 'CONTACT_MESSAGE';
+
+  const msgCount = items.filter((i) => isPrivateMessage(i)).length;
+  const fbCount = items.filter((i) => !isPrivateMessage(i)).length;
   const unreadCount = items.filter((i) => !i.is_reviewed).length;
   const reviewedCount = items.filter((i) => i.is_reviewed).length;
 
   const filtered = items.filter((i) => {
     const mTab =
       tab === 'All' ||
+      (tab === 'Messages' && isPrivateMessage(i)) ||
+      (tab === 'Feedback' && !isPrivateMessage(i)) ||
       (tab === 'Unread' && !i.is_reviewed) ||
       (tab === 'Reviewed' && i.is_reviewed);
     const mSearch =
@@ -1019,17 +1341,16 @@ export const AdminFeedbackPage: React.FC = () => {
     <AdminLayout>
       <div className="space-y-5">
         <div>
-          <h1 className="text-2xl font-extrabold text-[#0A1128]">Manage Feedback</h1>
+          <h1 className="text-2xl font-extrabold text-[#0A1128]">Messages &amp; Feedback Inbox</h1>
           <p className="text-xs text-slate-600 flex items-center gap-1.5 mt-0.5">
-            <Lock className="w-3.5 h-3.5" /> Display visitor feedback. Admin can read, filter, mark as reviewed, and delete feedback records.
+            <Lock className="w-3.5 h-3.5" /> Private Contact Messages sirf aapko yahan dikhenge, aur Student Feedback public reviews mein.
           </p>
         </div>
 
-        {/* Inbox Container matching Image 13 */}
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
           {/* Filter Bar */}
           <div className="p-3.5 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-1.5">
               <button onClick={load} className="p-1.5 rounded hover:bg-slate-200 text-slate-600">
                 <RotateCw className="w-4 h-4" />
               </button>
@@ -1040,6 +1361,22 @@ export const AdminFeedbackPage: React.FC = () => {
                 }`}
               >
                 All ({items.length})
+              </button>
+              <button
+                onClick={() => setTab('Messages')}
+                className={`px-3 py-1 rounded-md text-xs font-bold ${
+                  tab === 'Messages' ? 'bg-[#2563EB] text-white' : 'text-slate-700 hover:bg-slate-200'
+                }`}
+              >
+                🔒 Contact Messages ({msgCount})
+              </button>
+              <button
+                onClick={() => setTab('Feedback')}
+                className={`px-3 py-1 rounded-md text-xs font-bold ${
+                  tab === 'Feedback' ? 'bg-[#2563EB] text-white' : 'text-slate-700 hover:bg-slate-200'
+                }`}
+              >
+                ⭐ Public Feedback ({fbCount})
               </button>
               <button
                 onClick={() => setTab('Unread')}
@@ -1059,13 +1396,13 @@ export const AdminFeedbackPage: React.FC = () => {
               </button>
             </div>
 
-            <div className="relative w-64">
+            <div className="relative w-full sm:w-60">
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search feedback..."
+                placeholder="Search messages or feedback..."
                 className="w-full pl-9 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs"
               />
             </div>
@@ -1075,6 +1412,7 @@ export const AdminFeedbackPage: React.FC = () => {
           <div className="divide-y divide-slate-200 text-xs">
             {filtered.map((f) => {
               const isOpen = expandedId === f.id;
+              const isPrivate = isPrivateMessage(f);
               return (
                 <div
                   key={f.id}
@@ -1084,47 +1422,60 @@ export const AdminFeedbackPage: React.FC = () => {
                     onClick={() => setExpandedId(isOpen ? '' : f.id)}
                     className="flex flex-wrap items-center justify-between gap-3 cursor-pointer"
                   >
-                    <div className="flex items-center gap-3 min-w-[210px]">
+                    <div className="flex items-center gap-3 min-w-[220px]">
                       <input type="checkbox" checked={isOpen} readOnly className="rounded text-blue-600" />
                       <Star
-  onClick={async (e) => {
-    e.stopPropagation();
-    await api.save('feedback', { ...f, is_starred: !f.is_starred });
-    load();
-  }}
-  className={`w-4 h-4 cursor-pointer ${f.is_starred ? 'fill-amber-400 text-amber-400' : 'text-slate-400 hover:text-amber-400'}`}
-/>
-
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          await api.save('feedback', { ...f, is_starred: !f.is_starred });
+                          load();
+                        }}
+                        className={`w-4 h-4 cursor-pointer ${
+                          f.is_starred ? 'fill-amber-400 text-amber-400' : 'text-slate-400 hover:text-amber-400'
+                        }`}
+                      />
                       <div>
                         <p className="font-bold text-[#0A1128] flex items-center gap-1.5">
                           {f.name}
                           {!f.is_reviewed && <span className="text-blue-600 text-[11px] font-semibold">● Unread</span>}
                         </p>
-                        <p className="text-slate-500 text-[11px]">{f.email}</p>
+                        <p className="text-slate-500 text-[11px]">{f.email || 'No email provided'}</p>
                       </div>
                     </div>
 
                     <div className="flex-1 max-w-xl">
-                      <p className={`${!f.is_reviewed ? 'font-extrabold text-[#0A1128]' : 'font-semibold text-slate-800'}`}>
-                        {f.subject} —
-                      </p>
+                      <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                        <span
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                            isPrivate
+                              ? 'bg-purple-100 text-purple-800'
+                              : 'bg-amber-100 text-amber-800'
+                          }`}
+                        >
+                          {isPrivate ? '🔒 Private Contact Message' : `⭐ Public Feedback (${f.rating || 5}★)`}
+                        </span>
+                        <p className={`${!f.is_reviewed ? 'font-extrabold text-[#0A1128]' : 'font-semibold text-slate-800'}`}>
+                          {f.subject}
+                        </p>
+                      </div>
                       <p className="text-slate-600 truncate">{f.message}</p>
                     </div>
 
                     <div className="text-right space-y-1">
                       <p className="text-[11px] text-slate-500">{f.created_at}</p>
-                      <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${
-                        f.is_reviewed ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'
-                      }`}>
+                      <span
+                        className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${
+                          f.is_reviewed ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'
+                        }`}
+                      >
                         {f.is_reviewed ? 'Reviewed' : 'Unread'}
                       </span>
                     </div>
                   </div>
 
-                  {/* Expanded Message Card matching Image 13 */}
                   {isOpen && (
                     <div className="mt-4 ml-8 bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-                      <p className="text-slate-800 leading-relaxed mb-4">{f.message}</p>
+                      <p className="text-slate-800 leading-relaxed mb-4 whitespace-pre-line">{f.message}</p>
                       <div className="flex justify-end gap-2.5">
                         <button
                           onClick={async () => {
@@ -1138,7 +1489,7 @@ export const AdminFeedbackPage: React.FC = () => {
                         </button>
                         <button
                           onClick={async () => {
-                            if (confirm('Delete feedback record?')) {
+                            if (confirm('Delete this record?')) {
                               await api.remove('feedback', f.id);
                               load();
                             }
@@ -1159,6 +1510,7 @@ export const AdminFeedbackPage: React.FC = () => {
     </AdminLayout>
   );
 };
+
 
 /* ============================================================================
    PAGE 14: WEBSITE & TELEGRAM SETTINGS (Image 14 - 1000086179.png & Spec 29)

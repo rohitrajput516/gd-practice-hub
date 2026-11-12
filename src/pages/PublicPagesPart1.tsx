@@ -28,7 +28,12 @@ export const HomePage: React.FC = () => {
     const fetchAll = () => api.list('sessions', true).then(setAllSessions);
     fetchAll();
     api.list('announcements', true).then((rows) => setAnnouncements(rows.slice(0, 4)));
-    api.list('feedback').then((rows) => setFeedbacks(rows.slice(0, 3)));
+        api.list('feedback').then((rows) =>
+      setFeedbacks(
+        rows.filter((f: any) => f.session_title && f.session_title !== 'CONTACT_MESSAGE').slice(0, 3)
+      )
+    );
+
     const statusPoller = setInterval(fetchAll, 15000);
     return () => clearInterval(statusPoller);
   }, []);
@@ -95,8 +100,11 @@ export const HomePage: React.FC = () => {
       rating: fbRating,
       is_reviewed: false,
     });
-    const updated = await api.list('feedback');
-    setFeedbacks(updated.slice(0, 3));
+        const updated = await api.list('feedback');
+    setFeedbacks(
+      updated.filter((f: any) => f.session_title && f.session_title !== 'CONTACT_MESSAGE').slice(0, 3)
+    );
+
     setFbName('');
     setFbSession('');
     setFbRating(5);
