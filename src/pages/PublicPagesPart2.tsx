@@ -12,39 +12,25 @@ import { api } from '../lib/supabase';
    ============================================================================ */
 export const GuidelinesPage: React.FC = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const [steps, setSteps] = useState<any[]>([]);
 
-  const steps = [
-    {
-      num: '01',
-      title: 'Start Strong (Initiation)',
-      content: 'Take the initiative if you are well-prepared. Introduce the topic clearly, set a positive, welcoming direction, and invite others to contribute. Tip: If you are unsure of the topic, wait, listen, and then initiate after gathering thoughts.',
-    },
-    {
-      num: '02',
-      title: 'Express Opinions Clearly',
-      content: 'Structure your points logically. Use clear language and state your stance firmly without being aggressive.',
-    },
-    {
-      num: '03',
-      title: 'Provide Factual Examples',
-      content: 'Support your arguments with real-world data, statistics, case studies, or historical references to boost credibility.',
-    },
-    {
-      num: '04',
-      title: 'Practice Active Listening',
-      content: 'Pay close attention to fellow speakers. Acknowledge valid points made by others before adding your perspective.',
-    },
-    {
-      num: '05',
-      title: 'Disagree Respectfully',
-      content: 'When countering an argument, attack the point, not the person. Use phrases like "I see it slightly differently..."',
-    },
-    {
-      num: '06',
-      title: 'Summarize & Conclude',
-      content: 'Bring diverse viewpoints together towards the end. Deliver a balanced conclusion that captures the essence of the group discussion.',
-    },
-  ];
+  useEffect(() => {
+    api.list('guidelines').then((rows) => {
+      if (rows && rows.length > 0) {
+        setSteps(rows);
+      } else {
+        setSteps([
+          { num: '01', title: 'Start Strong (Initiation)', content: 'Take the initiative if you are well-prepared. Introduce the topic clearly, set a positive, welcoming direction, and invite others to contribute.' },
+          { num: '02', title: 'Express Opinions Clearly', content: 'Structure your points logically. Use clear language and state your stance firmly without being aggressive.' },
+          { num: '03', title: 'Provide Factual Examples', content: 'Support your arguments with real-world data, statistics, case studies, or historical references.' },
+          { num: '04', title: 'Practice Active Listening', content: 'Pay close attention to fellow speakers. Acknowledge valid points made by others before adding your perspective.' },
+          { num: '05', title: 'Disagree Respectfully', content: 'When countering an argument, attack the point, not the person.' },
+          { num: '06', title: 'Summarize & Conclude', content: 'Bring diverse viewpoints together towards the end. Deliver a balanced conclusion.' },
+          { num: '07', title: 'Common Mistakes to Avoid', content: 'Interrupting others repeatedly.\nLosing your temper.\nGoing off-topic.' },
+        ]);
+      }
+    });
+  }, []);
 
   return (
     <PublicLayout>

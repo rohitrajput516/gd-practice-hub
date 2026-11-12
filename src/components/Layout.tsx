@@ -217,7 +217,8 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
     { label: 'GD Topics Library', to: '/admin/topics', icon: BookOpen },
     { label: 'Announcements', to: '/admin/announcements', icon: Megaphone },
     { label: 'Feedback & Testimonials', to: '/admin/feedback', icon: MessageSquare },
-    { label: 'Rules & Guidelines', to: '/guidelines', icon: FileText },
+       { label: 'Rules & Guidelines', to: '/admin/guidelines', icon: FileText },
+
     { label: 'Website & Telegram Settings', to: '/admin/settings', icon: Settings },
   ];
 

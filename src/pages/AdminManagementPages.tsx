@@ -1323,7 +1323,7 @@ export const AdminFeedbackPage: React.FC = () => {
   const unreadCount = items.filter((i) => !i.is_reviewed).length;
   const reviewedCount = items.filter((i) => i.is_reviewed).length;
 
-  const filtered = items.filter((i) => {
+    const filtered = items.filter((i) => {
     const mTab =
       tab === 'All' ||
       (tab === 'Messages' && isPrivateMessage(i)) ||
@@ -1336,6 +1336,15 @@ export const AdminFeedbackPage: React.FC = () => {
       (i.message || '').toLowerCase().includes(search.toLowerCase());
     return mTab && mSearch;
   });
+
+  // Fixed order sorting: Purane aur naye messages apni jagah par sthir rahein
+  filtered.sort((a, b) => {
+    const timeA = Number(a.id) || 0;
+    const timeB = Number(b.id) || 0;
+    if (timeA && timeB) return timeB - timeA;
+    return String(b.created_at || '').localeCompare(String(a.created_at || ''));
+  });
+
 
   return (
     <AdminLayout>
@@ -1748,6 +1757,146 @@ export const AdminSettingsPage: React.FC = () => {
             </button>
           </div>
         </form>
+      </div>
+    </AdminLayout>
+  );
+};
+
+
+/* ============================================================================
+   PAGE 15: ADMIN RULES & GUIDELINES EDITOR
+   ============================================================================ */
+export const AdminGuidelinesEditorPage: React.FC = () => {
+  const [guidelines, setGuidelines] = useState<any[]>([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [form, setForm] = useState<any>({ id: '', num: '01', title: '', content: '' });
+
+  const DEFAULT_GUIDELINES = [
+    { id: '1', num: '01', title: 'Start Strong (Initiation)', content: 'Take the initiative if you are well-prepared. Introduce the topic clearly, set a positive, welcoming direction, and invite others to contribute. Tip: If you are unsure of the topic, wait, listen, and then initiate after gathering thoughts.' },
+    { id: '2', num: '02', title: 'Express Opinions Clearly', content: 'Structure your points logically. Use clear language and state your stance firmly without being aggressive.' },
+    { id: '3', num: '03', title: 'Provide Factual Examples', content: 'Support your arguments with real-world data, statistics, case studies, or historical references to boost credibility.' },
+    { id: '4', num: '04', title: 'Practice Active Listening', content: 'Pay close attention to fellow speakers. Acknowledge valid points made by others before adding your perspective.' },
+    { id: '5', num: '05', title: 'Disagree Respectfully', content: 'When countering an argument, attack the point, not the person. Use phrases like "I see it slightly differently..."' },
+    { id: '6', num: '06', title: 'Summarize & Conclude', content: 'Bring diverse viewpoints together towards the end. Deliver a balanced conclusion that captures the essence of the group discussion.' },
+    { id: '7', num: '07', title: 'Common Mistakes to Avoid', content: 'Interrupting others repeatedly or talking over participants.\nLosing your temper or being overly aggressive.\nGoing off-topic or drifting away from the core agenda.' },
+  ];
+
+  const loadRules = async () => {
+    const saved = await api.list('guidelines');
+    if (saved && saved.length > 0) {
+      setGuidelines(saved);
+    } else {
+      setGuidelines(DEFAULT_GUIDELINES);
+      for (const r of DEFAULT_GUIDELINES) {
+        await api.save('guidelines', r);
+      }
+    }
+  };
+
+  useEffect(() => { loadRules(); }, []);
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await api.save('guidelines', form);
+    setModalOpen(false);
+    loadRules();
+    alert('Guidelines successfully update ho gayi hain!');
+  };
+
+  return (
+    <AdminLayout>
+      <div className="space-y-6 max-w-4xl">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-extrabold text-[#0A1128]">Manage Rules &amp; Guidelines</h1>
+            <p className="text-xs text-slate-500">Edit, update, and manage student GD rules displayed on the public guidelines page.</p>
+          </div>
+          <button
+            onClick={() => {
+              setForm({ id: '', num: `0${guidelines.length + 1}`, title: '', content: '' });
+              setModalOpen(true);
+            }}
+            className="px-4 py-2 rounded-lg bg-[#0F172A] hover:bg-blue-600 text-white font-bold text-xs flex items-center gap-1.5 shadow transition"
+          >
+            <Plus className="w-4 h-4" /> Add New Rule
+          </button>
+        </div>
+
+        <div className="space-y-3">
+          {guidelines.map((rule) => (
+            <div key={rule.id || rule.num} className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-start justify-between gap-4">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-[#0A1128] text-white font-extrabold text-sm flex items-center justify-center shrink-0">
+                  {rule.num}
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-base text-[#0A1128] mb-1">{rule.title}</h3>
+                  <p className="text-xs text-slate-600 whitespace-pre-line leading-relaxed">{rule.content}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => { setForm(rule); setModalOpen(true); }}
+                className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 shrink-0"
+              >
+                Edit Rule
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {modalOpen && (
+          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl">
+              <div className="flex items-start justify-between mb-4">
+                <h2 className="text-lg font-extrabold text-[#0A1128]">Edit Rule / Guideline</h2>
+                <button onClick={() => setModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <form onSubmit={handleSave} className="space-y-4 text-xs">
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className="block font-bold text-slate-800 mb-1">Rule Number</label>
+                    <input
+                      type="text"
+                      value={form.num}
+                      onChange={(e) => setForm({ ...form, num: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="block font-bold text-slate-800 mb-1">Rule Title</label>
+                    <input
+                      required
+                      type="text"
+                      value={form.title}
+                      onChange={(e) => setForm({ ...form, title: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-800 mb-1">Detailed Content / Instructions</label>
+                  <textarea
+                    required
+                    rows={5}
+                    value={form.content}
+                    onChange={(e) => setForm({ ...form, content: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                  />
+                </div>
+                <div className="flex justify-end gap-2.5 pt-2">
+                  <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 rounded-lg bg-slate-100 font-bold">
+                    Cancel
+                  </button>
+                  <button type="submit" className="px-5 py-2 rounded-lg bg-[#0F172A] hover:bg-blue-600 text-white font-bold">
+                    Save Rule
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </AdminLayout>
   );

@@ -23,6 +23,16 @@ import {
   AdminSettingsPage,
 } from './pages/AdminManagementPages';
 
+import {
+  AdminSessionsPage,
+  AdminTopicsPage,
+  AdminAnnouncementsPage,
+  AdminFeedbackPage,
+  AdminSettingsPage,
+  AdminGuidelinesEditorPage,
+} from './pages/AdminManagementPages';
+
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -46,6 +56,10 @@ export default function App() {
         <Route path="/admin/settings" element={<AdminSettingsPage />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
+        
+                <Route path="/admin/guidelines" element={<AdminGuidelinesEditorPage />} />
+
+        
       </Routes>
     </BrowserRouter>
   );
