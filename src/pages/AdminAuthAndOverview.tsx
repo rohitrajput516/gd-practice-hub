@@ -12,7 +12,7 @@ import { api, isValidHttps } from '../lib/supabase';
    ============================================================================ */
 export const AdminLoginPage: React.FC = () => {
   const [email, setEmail] = useState('enter your email here');
-  const [password, setPassword] = useState('password ');
+  const [password, setPassword] = useState('password');
   const [showPwd, setShowPwd] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
