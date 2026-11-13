@@ -531,7 +531,7 @@ export const ContactPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Telegram Direct Support Card design */}
+        {/* Telegram Direct Support Card */}
         <div className="bg-[#D8EAFF] border border-blue-200 rounded-2xl p-7 text-center mb-10 shadow-sm">
           <div className="w-12 h-12 rounded-full bg-[#2AABEE] text-white flex items-center justify-center mx-auto mb-3 shadow">
             <Send className="w-5 h-5" />
