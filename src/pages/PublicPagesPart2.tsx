@@ -1,35 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Send, Search } from 'lucide-react';
+import {
+  ChevronDown, Send, Search
+} from 'lucide-react';
 import { PublicLayout, openTelegramSupport } from '../components/Layout';
 import { api } from '../lib/supabase';
 
-const ActionButtonLink: React.FC<{ url: string; text?: string; className: string }> = ({
-  url,
-  text,
-  className,
-}) => {
-  const cleanUrl = url.trim();
-  const isExternal = /^https?:\/\//i.test(cleanUrl) || cleanUrl.startsWith('www.');
-  const href = cleanUrl.startsWith('www.') ? `https://${cleanUrl}` : cleanUrl;
-
-  if (isExternal) {
-    return (
-      <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
-        {text || 'Open Link →'}
-      </a>
-    );
-  }
-  return (
-    <Link to={cleanUrl} className={className}>
-      {text || 'Open Link →'}
-    </Link>
-  );
-};
-
 /* ============================================================================
-   PAGE 5: RULES & GUIDELINES
+   PAGE 5: RULES & GUIDELINES (Accordion FAQ Style)
    ============================================================================ */
 export const GuidelinesPage: React.FC = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
@@ -39,33 +18,31 @@ export const GuidelinesPage: React.FC = () => {
     api.list('guidelines').then((rows) => {
       if (rows && rows.length > 0) {
         setSteps(rows);
+      } else {
+        setSteps([
+          { num: '01', title: 'Start Strong (Initiation)', content: 'Take the initiative if you are well-prepared. Introduce the topic clearly, set a positive, welcoming direction, and invite others to contribute.' },
+          { num: '02', title: 'Express Opinions Clearly', content: 'Structure your points logically. Use clear language and state your stance firmly without being aggressive.' },
+          { num: '03', title: 'Provide Factual Examples', content: 'Support your arguments with real-world data, statistics, case studies, or historical references.' },
+          { num: '04', title: 'Practice Active Listening', content: 'Pay close attention to fellow speakers. Acknowledge valid points made by others before adding your perspective.' },
+          { num: '05', title: 'Disagree Respectfully', content: 'When countering an argument, attack the point, not the person.' },
+          { num: '06', title: 'Summarize & Conclude', content: 'Bring diverse viewpoints together towards the end. Deliver a balanced conclusion.' },
+          { num: '07', title: 'Common Mistakes to Avoid', content: 'Interrupting others repeatedly.\nLosing your temper.\nGoing off-topic.' },
+        ]);
       }
     });
   }, []);
-
-  const timelineRules = steps.filter(
-    (s) => !String(s.title).toLowerCase().includes('common mistakes')
-  );
-  const mistakesRule =
-    steps.find((s) => String(s.title).toLowerCase().includes('common mistakes')) || {
-      num: '07',
-      title: 'Common Mistakes to Avoid',
-      content:
-        'Interrupting others repeatedly or talking over participants.\nLosing your temper or being overly aggressive.\nGoing off-topic or drifting away from the core agenda.',
-    };
 
   return (
     <PublicLayout>
       <div className="max-w-4xl mx-auto px-4 sm:px-8 pt-8 pb-16">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-extrabold text-[#0A1128] mb-1">
-            Group Discussion (GD) Guidelines
-          </h1>
+          <h1 className="text-3xl font-extrabold text-[#0A1128] mb-1">Group Discussion (GD) Guidelines</h1>
           <p className="text-sm text-slate-600">
             A compact, on-demand guide on how to perform well in a GD, from starting to summarizing.
           </p>
         </div>
 
+        {/* Hero Banner with Photo */}
         <div className="relative rounded-2xl overflow-hidden mb-8 shadow-md h-52 bg-slate-900">
           <img
             src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80"
@@ -77,8 +54,9 @@ export const GuidelinesPage: React.FC = () => {
           </div>
         </div>
 
+        {/* Vertical Timeline paired with Accordions */}
         <div className="space-y-4 relative before:absolute before:left-7 before:top-4 before:bottom-4 before:w-0.5 before:bg-slate-300">
-          {timelineRules.map((st, idx) => {
+          {steps.map((st, idx) => {
             const isOpen = openIndex === idx;
             return (
               <div key={st.id || st.num} className="flex items-start gap-4 relative">
@@ -91,11 +69,7 @@ export const GuidelinesPage: React.FC = () => {
                     className="w-full px-6 py-4 flex items-center justify-between text-left font-bold text-[#0A1128] text-base"
                   >
                     <span>{st.num} | {st.title}</span>
-                    <ChevronDown
-                      className={`w-5 h-5 transition-transform ${
-                        isOpen ? 'rotate-180 text-blue-600' : 'text-slate-400'
-                      }`}
-                    />
+                    <ChevronDown className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180 text-blue-600' : 'text-slate-400'}`} />
                   </button>
                   <AnimatePresence>
                     {isOpen && (
@@ -115,28 +89,21 @@ export const GuidelinesPage: React.FC = () => {
           })}
         </div>
 
-        {mistakesRule && (
-          <div className="mt-8 bg-[#FFF5EB] border border-[#FCD34D] rounded-2xl p-6 text-[#9A3412]">
-            <h3 className="font-extrabold text-base mb-2">
-              {mistakesRule.num} | {mistakesRule.title}
-            </h3>
-            <ul className="list-disc pl-5 space-y-1 text-sm">
-              {String(mistakesRule.content)
-                .split('\n')
-                .filter(Boolean)
-                .map((line, i) => (
-                  <li key={i}>{line}</li>
-                ))}
-            </ul>
-          </div>
-        )}
+        {/* Highlighted Quick Reminder Box */}
+        <div className="mt-8 bg-[#FFF5EB] border border-[#FCD34D] rounded-2xl p-6 text-[#9A3412]">
+          <h3 className="font-extrabold text-base mb-2">Quick Etiquette Reminder</h3>
+          <ul className="list-disc pl-5 space-y-1 text-sm">
+            <li>Interrupting others repeatedly or talking over participants reduces your score.</li>
+            <li>Maintain a calm, composed tone even during heated debates.</li>
+            <li>Stay relevant to the core GD topic and back your points with facts.</li>
+          </ul>
+        </div>
 
+        {/* Bottom Telegram Banner */}
         <div className="mt-12 bg-gradient-to-r from-[#0A1128] to-[#1D4ED8] text-white rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow">
           <div>
             <h3 className="text-lg font-extrabold">Ask Owner for Any Doubt</h3>
-            <p className="text-xs text-blue-200">
-              Have a doubt? Get 1-on-1 support directly from the founder.
-            </p>
+            <p className="text-xs text-blue-200">Have a doubt? Get 1-on-1 support directly from the founder.</p>
           </div>
           <button
             onClick={openTelegramSupport}
@@ -151,7 +118,7 @@ export const GuidelinesPage: React.FC = () => {
 };
 
 /* ============================================================================
-   PAGE 6: ANNOUNCEMENTS PAGE
+   PAGE 6: ANNOUNCEMENTS PAGE (Neela Priority Tag Removed + Clean Filters)
    ============================================================================ */
 export const AnnouncementsPage: React.FC = () => {
   const [list, setList] = useState<any[]>([]);
@@ -170,19 +137,24 @@ export const AnnouncementsPage: React.FC = () => {
     Promise.all([api.list('announcements', true), api.getSettings()]).then(
       ([anns, settings]) => {
         setList(anns);
+        const ignoredLegacyTags = ['priority', 'update', 'system'];
         const baseFilters: string[] =
           Array.isArray(settings?.announcement_filters) &&
           settings.announcement_filters.length > 0
-            ? settings.announcement_filters
+            ? settings.announcement_filters.filter(
+                (f: string) => !ignoredLegacyTags.includes(String(f).toLowerCase())
+              )
             : ['Urgent', 'Sessions', 'Platform Updates', 'Tips'];
+
         const merged = [...baseFilters];
         anns.forEach((a: any) => {
+          const catStr = String(a.category || '').trim();
           if (
-            a.category &&
-            a.category !== 'Priority' &&
-            !merged.some((f) => f.toLowerCase() === String(a.category).toLowerCase())
+            catStr &&
+            !ignoredLegacyTags.includes(catStr.toLowerCase()) &&
+            !merged.some((f) => f.toLowerCase() === catStr.toLowerCase())
           ) {
-            merged.push(a.category);
+            merged.push(catStr);
           }
         });
         setAdminFilters(merged);
@@ -221,6 +193,14 @@ export const AnnouncementsPage: React.FC = () => {
     setExpandedIds((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  // Helper to check if category is redundant with Priority badge
+  const shouldShowBlueCategory = (item: any) => {
+    const cat = String(item?.category || '').trim().toLowerCase();
+    if (!cat) return false;
+    if (cat === 'priority' || cat === 'urgent') return false;
+    return true;
+  };
+
   return (
     <PublicLayout>
       <div className="max-w-6xl mx-auto px-4 sm:px-8 pt-8 pb-16">
@@ -231,6 +211,7 @@ export const AnnouncementsPage: React.FC = () => {
           </p>
         </div>
 
+        {/* Dynamic Category Pills & Search */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
           <div className="flex flex-wrap items-center gap-2">
             {categories.map((c) => (
@@ -259,6 +240,7 @@ export const AnnouncementsPage: React.FC = () => {
           </div>
         </div>
 
+        {/* 2-Column Grid */}
         <div className="grid lg:grid-cols-12 gap-8">
           <div className="lg:col-span-8 space-y-6">
             {featured ? (
@@ -271,12 +253,13 @@ export const AnnouncementsPage: React.FC = () => {
                 </div>
                 <h2 className="text-2xl font-extrabold text-[#0A1128] mb-3">{featured.title}</h2>
                 <div className="flex flex-wrap items-center gap-2 mb-4">
-                  {featured.is_important && (
+                  {(featured.is_important ||
+                    String(featured.category || '').toLowerCase() === 'priority') && (
                     <span className="inline-block px-3 py-1 rounded-full bg-[#DC3545] text-white text-[11px] font-bold">
                       Priority
                     </span>
                   )}
-                  {featured.category && (
+                  {shouldShowBlueCategory(featured) && (
                     <span className="inline-block px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-[11px] font-bold">
                       {featured.category}
                     </span>
@@ -294,14 +277,26 @@ export const AnnouncementsPage: React.FC = () => {
                     onClick={() => setFeaturedExpanded(!featuredExpanded)}
                     className="px-6 py-2.5 rounded-xl bg-[#0A1128] hover:bg-blue-700 text-white font-bold text-xs shadow transition"
                   >
-                    {featuredExpanded ? 'Show Less ↑' : 'Read Full Notice'}
+                    {featuredExpanded ? 'Show Less ▲' : 'Read Full Notice'}
                   </button>
                   {featured.action_url && (
-                    <ActionButtonLink
-                      url={featured.action_url}
-                      text={featured.action_text}
-                      className="px-5 py-2.5 rounded-xl bg-[#1D6BF3] hover:bg-blue-700 text-white font-bold text-xs shadow transition"
-                    />
+                    featured.action_url.startsWith('http') ? (
+                      <a
+                        href={featured.action_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-5 py-2.5 rounded-xl bg-[#1D6BF3] hover:bg-blue-700 text-white font-bold text-xs shadow transition"
+                      >
+                        {featured.action_text || 'Open Link →'}
+                      </a>
+                    ) : (
+                      <Link
+                        to={featured.action_url}
+                        className="px-5 py-2.5 rounded-xl bg-[#1D6BF3] hover:bg-blue-700 text-white font-bold text-xs shadow transition"
+                      >
+                        {featured.action_text || 'Open Link →'}
+                      </Link>
+                    )
                   )}
                 </div>
               </div>
@@ -326,9 +321,17 @@ export const AnnouncementsPage: React.FC = () => {
                           <div>
                             <div className="flex flex-wrap items-center gap-2 mb-1">
                               <span className="text-xs text-slate-400">{a.created_at}</span>
-                              <span className="px-2.5 py-0.5 rounded bg-blue-100 text-blue-800 text-[10px] font-bold">
-                                {a.category || 'Sessions'}
-                              </span>
+                              {(a.is_important ||
+                                String(a.category || '').toLowerCase() === 'priority') && (
+                                <span className="px-2.5 py-0.5 rounded-full bg-[#DC3545] text-white text-[10px] font-bold">
+                                  Priority
+                                </span>
+                              )}
+                              {shouldShowBlueCategory(a) && (
+                                <span className="px-2.5 py-0.5 rounded bg-blue-100 text-blue-800 text-[10px] font-bold">
+                                  {a.category}
+                                </span>
+                              )}
                             </div>
                             <h4 className="font-bold text-base text-[#0A1128]">{a.title}</h4>
                           </div>
@@ -336,7 +339,7 @@ export const AnnouncementsPage: React.FC = () => {
                             onClick={() => toggleExpand(a.id)}
                             className="text-xs font-bold text-blue-600 hover:text-blue-800 shrink-0 flex items-center gap-1 bg-blue-50 px-3 py-1.5 rounded-lg transition"
                           >
-                            {isOpen ? 'Show Less ↑' : 'Show More →'}
+                            {isOpen ? 'Show Less ▲' : 'Show More →'}
                           </button>
                         </div>
 
@@ -352,11 +355,23 @@ export const AnnouncementsPage: React.FC = () => {
                                 {a.message}
                                 {a.action_url && (
                                   <div className="mt-3">
-                                    <ActionButtonLink
-                                      url={a.action_url}
-                                      text={a.action_text}
-                                      className="inline-flex items-center gap-1 px-4 py-2 rounded-lg bg-[#1D6BF3] hover:bg-blue-700 text-white font-bold text-xs"
-                                    />
+                                    {a.action_url.startsWith('http') ? (
+                                      <a
+                                        href={a.action_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1 px-4 py-2 rounded-lg bg-[#1D6BF3] hover:bg-blue-700 text-white font-bold text-xs"
+                                      >
+                                        {a.action_text || 'Open Link →'}
+                                      </a>
+                                    ) : (
+                                      <Link
+                                        to={a.action_url}
+                                        className="inline-flex items-center gap-1 px-4 py-2 rounded-lg bg-[#1D6BF3] hover:bg-blue-700 text-white font-bold text-xs"
+                                      >
+                                        {a.action_text || 'Open Link →'}
+                                      </Link>
+                                    )}
                                   </div>
                                 )}
                               </div>
@@ -371,6 +386,7 @@ export const AnnouncementsPage: React.FC = () => {
             )}
           </div>
 
+          {/* Right Sidebar */}
           <div className="lg:col-span-4 space-y-6">
             <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
               <h3 className="font-extrabold text-base text-[#0A1128] mb-4">Quick Stats/Resources</h3>
@@ -455,6 +471,7 @@ export const ContactPage: React.FC = () => {
           </p>
         </div>
 
+        {/* Send Us a Message Form + Photo */}
         <div className="grid md:grid-cols-12 gap-8 items-center bg-white border border-slate-200 rounded-2xl p-7 shadow-sm mb-8">
           <form onSubmit={handleSubmit} className="md:col-span-6 space-y-4">
             <h2 className="text-xl font-extrabold text-[#0A1128] mb-2">Send Us a Message</h2>
@@ -514,6 +531,7 @@ export const ContactPage: React.FC = () => {
           </div>
         </div>
 
+        {/* Telegram Direct Support Card */}
         <div className="bg-[#D8EAFF] border border-blue-200 rounded-2xl p-7 text-center mb-10 shadow-sm">
           <div className="w-12 h-12 rounded-full bg-[#2AABEE] text-white flex items-center justify-center mx-auto mb-3 shadow">
             <Send className="w-5 h-5" />
@@ -530,6 +548,7 @@ export const ContactPage: React.FC = () => {
           </button>
         </div>
 
+        {/* Quick Answers (FAQs) Accordion */}
         <div>
           <h2 className="text-xl font-extrabold text-[#0A1128] mb-4">Quick Answers (FAQs)</h2>
           <div className="space-y-3">
