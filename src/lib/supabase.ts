@@ -216,7 +216,7 @@ const SEED_DATA: Record<string, any> = {
       title: 'IMPORTANT: GD Registration Policy Update',
       message:
         'Starting this Monday, please register at least 2 hours before any scheduled GD session to get the Zoom meeting credentials. Late registrations will not be accommodated to avoid disruptions.',
-      category: 'Priority',
+      category: 'Urgent',
       is_important: true,
       is_featured: true,
       is_published: true,
@@ -366,6 +366,26 @@ const readLocal = (key: string) => {
         localStorage.setItem(`gdhub_sessions`, JSON.stringify(SEED_DATA.sessions));
         return SEED_DATA.sessions;
       }
+    }
+    // Auto-clean legacy announcement categories ('Priority', 'Update', 'System') in localStorage
+    if (key === 'announcements' && Array.isArray(parsed)) {
+      let changed = false;
+      const cleaned = parsed.map((a: any) => {
+        const cat = String(a.category || '').trim().toLowerCase();
+        if (cat === 'priority') {
+          changed = true;
+          return { ...a, category: 'Urgent', is_important: true };
+        }
+        if (cat === 'update' || cat === 'system') {
+          changed = true;
+          return { ...a, category: 'Platform Updates' };
+        }
+        return a;
+      });
+      if (changed) {
+        localStorage.setItem(`gdhub_announcements`, JSON.stringify(cleaned));
+      }
+      return cleaned;
     }
     return parsed;
   } catch {

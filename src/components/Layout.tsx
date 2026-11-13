@@ -28,14 +28,16 @@ export const joinZoomSession = (url?: string, status?: string) => {
 };
 
 export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [settings, setSettings] = useState<any>({});
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (!search.includes('section=')) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
     api.getSettings().then(setSettings);
-  }, [pathname]);
+  }, [pathname, search]);
 
   const navItems = [
     { label: 'Home', to: '/' },
@@ -56,9 +58,16 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
               alt="GD Practice Hub"
               className="w-9 h-9 rounded-lg object-contain shadow-sm"
             />
-            <span className="font-extrabold text-lg tracking-tight text-[#0A1128]">
-              {settings.website_name || 'GD Practice Hub'}
-            </span>
+            <div>
+              <span className="font-extrabold text-lg tracking-tight text-[#0A1128] block leading-none">
+                {settings.website_name || 'GD Practice Hub'}
+              </span>
+              {settings.website_tagline && (
+                <span className="text-[10px] font-semibold text-slate-500 hidden sm:block mt-0.5">
+                  {settings.website_tagline}
+                </span>
+              )}
+            </div>
           </Link>
 
           <div className="flex items-center gap-2.5">
@@ -68,7 +77,6 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
             >
               Admin Login
             </Link>
-
             <button
               onClick={() => setMenuOpen(!menuOpen)}
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0A1128] hover:bg-[#1E3A8A] text-white text-xs font-bold shadow-sm transition"
@@ -138,9 +146,16 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
                 alt="GD Practice Hub"
                 className="w-10 h-10 rounded-xl object-contain bg-white p-0.5 shadow"
               />
-              <span className="font-extrabold text-lg text-white tracking-tight">
-                {settings.website_name || 'GD Practice Hub'}
-              </span>
+              <div>
+                <span className="font-extrabold text-lg text-white tracking-tight block leading-none">
+                  {settings.website_name || 'GD Practice Hub'}
+                </span>
+                {settings.website_tagline && (
+                  <span className="text-[11px] text-blue-400 font-semibold block mt-1">
+                    {settings.website_tagline}
+                  </span>
+                )}
+              </div>
             </Link>
             <p className="text-xs text-slate-400 leading-relaxed pr-2">
               {settings.mission_statement ||
@@ -175,12 +190,21 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
             >
               Ask Owner for Any Doubt
             </button>
+            {settings.contact_email && (
+              <p className="text-[11px] text-slate-400">
+                Email:{' '}
+                <a href={`mailto:${settings.contact_email}`} className="text-blue-400 hover:underline">
+                  {settings.contact_email}
+                </a>
+              </p>
+            )}
             <ul className="space-y-1.5 text-slate-400 pt-1">
               <li><Link to="/guidelines?section=privacy" className="hover:text-white transition">Privacy Policy</Link></li>
               <li><Link to="/guidelines?section=terms" className="hover:text-white transition">Terms &amp; Conditions</Link></li>
             </ul>
           </div>
         </div>
+
         <div className="max-w-6xl mx-auto px-4 sm:px-8 pt-6 text-center text-xs text-slate-500">
           {settings.footer_text || '© 2026 GD Practice Hub. All Rights Reserved.'}
         </div>
@@ -214,7 +238,6 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-[#F4F7FC] text-slate-900">
-      {/* Mobile Top Bar for Admin */}
       <div className="lg:hidden bg-[#0B1223] text-white px-4 py-3 flex items-center justify-between sticky top-0 z-40 shadow-md">
         <div className="flex items-center gap-2.5">
           <img src={settings.logo_url || '/logo.png'} alt="GD" className="w-8 h-8 rounded-lg object-contain bg-white p-0.5" />
@@ -228,7 +251,6 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
         </button>
       </div>
 
-      {/* Sidebar (Desktop Fixed + Mobile Drawer) */}
       <aside
         className={`${
           mobileMenuOpen ? 'block' : 'hidden'
