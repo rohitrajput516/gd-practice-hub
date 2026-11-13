@@ -21,17 +21,8 @@ import {
   AdminAnnouncementsPage,
   AdminFeedbackPage,
   AdminSettingsPage,
-} from './pages/AdminManagementPages';
-
-import {
-  AdminSessionsPage,
-  AdminTopicsPage,
-  AdminAnnouncementsPage,
-  AdminFeedbackPage,
-  AdminSettingsPage,
   AdminGuidelinesEditorPage,
 } from './pages/AdminManagementPages';
-
 
 export default function App() {
   return (
@@ -53,13 +44,11 @@ export default function App() {
         <Route path="/admin/topics" element={<AdminTopicsPage />} />
         <Route path="/admin/announcements" element={<AdminAnnouncementsPage />} />
         <Route path="/admin/feedback" element={<AdminFeedbackPage />} />
+        <Route path="/admin/guidelines" element={<AdminGuidelinesEditorPage />} />
         <Route path="/admin/settings" element={<AdminSettingsPage />} />
 
+        {/* Fallback Route */}
         <Route path="*" element={<Navigate to="/" replace />} />
-        
-                <Route path="/admin/guidelines" element={<AdminGuidelinesEditorPage />} />
-
-        
       </Routes>
     </BrowserRouter>
   );

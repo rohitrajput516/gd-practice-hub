@@ -2,35 +2,33 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   Lock, Eye, EyeOff, Users, BookOpen, Megaphone, MessageSquare,
-  TrendingUp, CheckCircle2, AlertCircle, Plus, Video
+  CheckCircle2, AlertCircle, Plus, Video
 } from 'lucide-react';
 import { AdminLayout, joinZoomSession } from '../components/Layout';
 import { api, isValidHttps } from '../lib/supabase';
 
 /* ============================================================================
-   PAGE 8: ADMIN LOGIN (Design 4 - Full-Screen Dark Theme - Image 8)
+   PAGE 8: ADMIN LOGIN
    ============================================================================ */
 export const AdminLoginPage: React.FC = () => {
-  const [email, setEmail] = useState('enter your email here');
-  const [password, setPassword] = useState('password');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPwd, setShowPwd] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-    const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Yahan aap apna manchaha Admin Email aur Password set kar sakte hain
     const CORRECT_EMAIL = 'rohitrajput@gmail.com';
     const CORRECT_PASS = 'Rajput@123';
 
-    if (email.trim() === CORRECT_EMAIL && password === CORRECT_PASS) {
+    if (email.trim().toLowerCase() === CORRECT_EMAIL.toLowerCase() && password === CORRECT_PASS) {
       sessionStorage.setItem('gd_admin_auth', 'true');
       navigate('/admin/dashboard');
     } else {
       setError('Galat Email ya Password! Kripya sahi details dalein.');
     }
   };
-
 
   return (
     <div
@@ -40,7 +38,6 @@ export const AdminLoginPage: React.FC = () => {
           "linear-gradient(rgba(7, 12, 28, 0.9), rgba(7, 12, 28, 0.95)), url('https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=1500&q=80')",
       }}
     >
-      {/* Glowing Glassmorphic Admin Card matching Image 8 */}
       <div className="w-full max-w-md bg-[#0F172A]/90 border border-blue-500/40 rounded-2xl p-8 shadow-[0_0_50px_rgba(37,99,235,0.25)] backdrop-blur text-white">
         <div className="flex items-center gap-3 mb-6">
           <img src="/logo.png" alt="Logo" className="w-10 h-10 rounded-xl object-contain" />
@@ -70,26 +67,29 @@ export const AdminLoginPage: React.FC = () => {
           <div>
             <label className="block text-xs font-bold text-slate-300 mb-1">Email Address</label>
             <input
+              required
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white"
+              placeholder="Enter admin email address"
+              className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white placeholder-slate-500"
             />
           </div>
-
           <div>
             <label className="block text-xs font-bold text-slate-300 mb-1">Password</label>
             <div className="relative">
               <input
+                required
                 type={showPwd ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-3.5 pr-10 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white"
+                placeholder="Enter password"
+                className="w-full pl-3.5 pr-10 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white placeholder-slate-500"
               />
               <button
                 type="button"
                 onClick={() => setShowPwd(!showPwd)}
-                className="absolute right-3 top-2.5 text-slate-400"
+                className="absolute right-3 top-2.5 text-slate-400 hover:text-white"
               >
                 {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -100,14 +100,22 @@ export const AdminLoginPage: React.FC = () => {
             <label className="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" className="rounded bg-slate-900 border-slate-700" defaultChecked /> Remember me
             </label>
-            <a href="#" className="hover:underline text-blue-400">Forgot Password?</a>
+            <button
+              type="button"
+              onClick={() =>
+                alert('Admin Password Reset ke liye src/pages/AdminAuthAndOverview.tsx mein CORRECT_EMAIL aur CORRECT_PASS check karein.')
+              }
+              className="hover:underline text-blue-400"
+            >
+              Forgot Password?
+            </button>
           </div>
 
           <button
             type="submit"
             className="w-full py-3 rounded-xl bg-[#2563EB] hover:bg-blue-700 text-white font-bold text-xs shadow-lg transition flex items-center justify-center gap-2"
           >
-            <span>Sign In to Dashboard</span> →
+            <span>Sign In to Dashboard</span>
           </button>
         </form>
       </div>
@@ -122,7 +130,7 @@ export const AdminLoginPage: React.FC = () => {
 };
 
 /* ============================================================================
-   PAGE 9: ADMIN DASHBOARD OVERVIEW (Design 1 - Classic Sidebar + Stat Cards - Image 9)
+   PAGE 9: ADMIN DASHBOARD OVERVIEW
    ============================================================================ */
 export const AdminDashboardOverview: React.FC = () => {
   const [stats, setStats] = useState({
@@ -172,15 +180,16 @@ export const AdminDashboardOverview: React.FC = () => {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-extrabold text-[#0A1128]">Dashboard Overview</h1>
-            <p className="text-xs text-slate-500">Welcome back, Admin! Here is what’s happening on your platform today.</p>
+            <p className="text-xs text-slate-500">Welcome back, Admin! Here is what's happening on your platform today.</p>
           </div>
           <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm text-xs font-semibold">
-           <span>Current Date: <strong>{new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</strong></span>
-
+            <span>
+              Current Date: <strong>{new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</strong>
+            </span>
           </div>
         </div>
 
-        {/* 6 Metric Stat Cards matching Image 9 */}
+        {/* 6 Metric Stat Cards */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {statCards.map((c, i) => {
             const Icon = c.icon;
@@ -199,7 +208,7 @@ export const AdminDashboardOverview: React.FC = () => {
           })}
         </div>
 
-        {/* Next Scheduled Sessions Table + Platform Settings Brief matching Image 9 */}
+        {/* Next Scheduled Sessions Table + Platform Settings Brief */}
         <div className="grid lg:grid-cols-12 gap-6">
           <div className="lg:col-span-8 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
@@ -211,7 +220,6 @@ export const AdminDashboardOverview: React.FC = () => {
                 <Plus className="w-3.5 h-3.5" /> Create New
               </Link>
             </div>
-
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
@@ -254,17 +262,18 @@ export const AdminDashboardOverview: React.FC = () => {
             <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
               <h3 className="font-extrabold text-base text-[#0A1128]">Platform Settings Brief</h3>
               <div>
-                <p className="text-xs text-slate-500 mb-1">Owner Support Telegram Support Link</p>
+                <p className="text-xs text-slate-500 mb-1">Owner Support Telegram Link</p>
                 <div className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg text-xs font-medium text-emerald-700 border border-slate-200">
                   <CheckCircle2 className="w-4 h-4 shrink-0" />
                   <span className="truncate">{settings.telegram_url || 'https://t.me/gdpractice_owner'}</span>
                 </div>
               </div>
-
               <div className="bg-[#EBF2FF] border border-blue-200 rounded-xl p-4">
-                <h4 className="font-extrabold text-xs text-[#0A1128] mb-1">Ask Owner for Any Doubt Tracker</h4>
-                <p className="text-[11px] text-slate-600 mb-2">Tracking support redirects with your...</p>
-                <p className="text-xs font-bold text-blue-700">Activity Count: 24 clicks this week</p>
+                <h4 className="font-extrabold text-xs text-[#0A1128] mb-1">Quick Settings Access</h4>
+                <p className="text-[11px] text-slate-600 mb-2">Update Telegram link, logo, or session policies anytime.</p>
+                <Link to="/admin/settings" className="text-xs font-bold text-blue-700 hover:underline">
+                  Open Website Settings →
+                </Link>
               </div>
             </div>
           </div>

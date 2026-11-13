@@ -3,13 +3,13 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Video, Send, Search, Calendar, AlertCircle,
-  LayoutGrid, List, Flame, Star, Radio
+  LayoutGrid, List, Flame, Star, Radio, BookOpen, ChevronDown
 } from 'lucide-react';
 import { PublicLayout, openTelegramSupport, joinZoomSession } from '../components/Layout';
 import { api, isValidHttps } from '../lib/supabase';
 
 /* ============================================================================
-   PAGE 1: HOME PAGE (100% Pixel-Accurate Match to 1000085022_3.png)
+   PAGE 1: HOME PAGE
    ============================================================================ */
 export const HomePage: React.FC = () => {
   const [allSessions, setAllSessions] = useState<any[]>([]);
@@ -28,18 +28,15 @@ export const HomePage: React.FC = () => {
     const fetchAll = () => api.list('sessions', true).then(setAllSessions);
     fetchAll();
     api.list('announcements', true).then((rows) => setAnnouncements(rows.slice(0, 4)));
-        api.list('feedback').then((rows) =>
+    api.list('feedback').then((rows) =>
       setFeedbacks(
         rows.filter((f: any) => f.session_title && f.session_title !== 'CONTACT_MESSAGE').slice(0, 3)
       )
     );
-
     const statusPoller = setInterval(fetchAll, 15000);
     return () => clearInterval(statusPoller);
   }, []);
 
-
-  // Next GD Countdown calculation (Sirf tabhi dikhega jab future date/time valid ho)
   useEffect(() => {
     const parseSessionTime = (s: any) => {
       if (!s?.scheduled_date || !s?.start_time) return null;
@@ -84,7 +81,6 @@ export const HomePage: React.FC = () => {
     ? activeUpcomingSessions
     : activeUpcomingSessions.slice(0, 3);
 
-
   const handleHomeFeedbackSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fbMessage.trim()) {
@@ -100,18 +96,16 @@ export const HomePage: React.FC = () => {
       rating: fbRating,
       is_reviewed: false,
     });
-        const updated = await api.list('feedback');
+    const updated = await api.list('feedback');
     setFeedbacks(
       updated.filter((f: any) => f.session_title && f.session_title !== 'CONTACT_MESSAGE').slice(0, 3)
     );
-
     setFbName('');
     setFbSession('');
     setFbRating(5);
     setFbMessage('');
     alert('Aapka feedback successfully jud gaya hai!');
   };
-
 
   const videoFaces = [
     { name: 'Aarav', img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&q=80' },
@@ -125,16 +119,13 @@ export const HomePage: React.FC = () => {
     { name: 'Aditi', img: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&q=80' },
   ];
 
-  // Generate isometric keyboard keys rows
   const keyRows = [0, 1, 2, 3];
   const keyCols = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
   return (
     <PublicLayout>
-      {/* HERO SECTION - Side by Side (md:grid-cols-12) matching 1000085022_3.png */}
+      {/* HERO SECTION */}
       <section className="relative overflow-hidden bg-gradient-to-br from-[#EDF3FC] via-[#F1F6FE] to-[#E4EEFB] border-b border-slate-200/70 py-10 md:py-14">
-        
-        {/* Bottom-Left Constellation Network Mesh SVG */}
         <svg
           className="absolute bottom-0 left-0 w-72 md:w-96 h-52 text-slate-400/40 pointer-events-none"
           viewBox="0 0 360 220"
@@ -154,8 +145,6 @@ export const HomePage: React.FC = () => {
         </svg>
 
         <div className="max-w-6xl mx-auto px-4 sm:px-8 grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-4 items-center relative z-10">
-          
-          {/* Left Column (5 Cols): Headline, Subtitle, Buttons */}
           <div className="md:col-span-5 space-y-4">
             <h1 className="text-[32px] sm:text-[40px] lg:text-[46px] font-extrabold text-[#0A1128] leading-[1.12] tracking-tight">
               Master Group<br />
@@ -163,11 +152,9 @@ export const HomePage: React.FC = () => {
               with Absolute<br />
               Confidence.
             </h1>
-
             <p className="text-slate-700 text-xs sm:text-sm lg:text-[15px] leading-relaxed max-w-md">
-              Join real-time online Group Discussions, improve your communication skills, and prepare for interviews on India’s premier GD practice platform.
+              Join real-time online Group Discussions, improve your communication skills, and prepare for interviews on India's premier GD practice platform.
             </p>
-
             <div className="flex flex-wrap items-center gap-3 pt-1">
               <Link
                 to="/schedule"
@@ -182,13 +169,11 @@ export const HomePage: React.FC = () => {
                 Browse GD Topics
               </Link>
             </div>
-
             <p className="text-xs sm:text-[13px] font-bold text-[#0A1128] pt-1">
               No experience required • Live Mock GDs
             </p>
           </div>
 
-          {/* Right Column (7 Cols): Exact 3D Isometric Silver Laptop Illustration */}
           <div className="md:col-span-7 relative flex items-center justify-center">
             <div className="w-full max-w-[590px]">
               <svg
@@ -196,15 +181,12 @@ export const HomePage: React.FC = () => {
                 className="w-full h-auto overflow-visible drop-shadow-sm select-none"
               >
                 <defs>
-                  {/* Laptop Drop Shadow */}
                   <filter id="laptopShadow" x="-20%" y="-20%" width="150%" height="150%">
                     <feDropShadow dx="0" dy="18" stdDeviation="16" floodColor="#0F172A" floodOpacity="0.28" />
                   </filter>
                   <filter id="badgeShadow" x="-20%" y="-20%" width="150%" height="150%">
                     <feDropShadow dx="0" dy="8" stdDeviation="10" floodColor="#0F172A" floodOpacity="0.22" />
                   </filter>
-
-                  {/* Metallic Silver Gradients for 3D Keyboard Base */}
                   <linearGradient id="silverTop" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#F1F5F9" />
                     <stop offset="50%" stopColor="#CBD5E1" />
@@ -229,12 +211,10 @@ export const HomePage: React.FC = () => {
                   </linearGradient>
                 </defs>
 
-                {/* 1. CONCENTRIC DOTTED ORBIT CIRCLES & RADAR WAVES */}
                 <circle cx="365" cy="225" r="205" fill="none" stroke="#60A5FA" strokeWidth="1.4" strokeDasharray="3 6" opacity="0.65" />
                 <circle cx="365" cy="225" r="178" fill="none" stroke="#3B82F6" strokeWidth="1.3" strokeDasharray="4 6" opacity="0.55" />
                 <circle cx="365" cy="225" r="152" fill="none" stroke="#93C5FD" strokeWidth="1.2" opacity="0.5" />
 
-                {/* Top-Right Radar Concentric Waves */}
                 <g opacity="0.7">
                   <circle cx="525" cy="88" r="16" fill="#DBEAFE" stroke="#93C5FD" strokeWidth="1.5" />
                   <circle cx="525" cy="88" r="29" fill="none" stroke="#93C5FD" strokeWidth="1.5" />
@@ -242,7 +222,6 @@ export const HomePage: React.FC = () => {
                   <circle cx="525" cy="88" r="58" fill="none" stroke="#93C5FD" strokeWidth="1.2" opacity="0.45" />
                 </g>
 
-                {/* Floating Orbit Dots */}
                 <circle cx="290" cy="36" r="4" fill="#3B82F6" opacity="0.8" />
                 <circle cx="408" cy="24" r="3" fill="#60A5FA" opacity="0.7" />
                 <circle cx="490" cy="48" r="4.5" fill="#60A5FA" opacity="0.8" />
@@ -254,8 +233,6 @@ export const HomePage: React.FC = () => {
                 <circle cx="485" cy="405" r="5.5" fill="#1D4ED8" opacity="0.9" />
                 <circle cx="245" cy="392" r="3" fill="#60A5FA" opacity="0.6" />
 
-                {/* 2. 3D LAPTOP SCREEN LID & BEZEL (Tilted Isometric Back) */}
-                {/* Silver Lid Back Rim */}
                 <polygon
                   points="240,42 544,78 515,288 216,242"
                   fill="#94A3B8"
@@ -263,7 +240,6 @@ export const HomePage: React.FC = () => {
                   strokeWidth="2"
                   strokeLinejoin="round"
                 />
-                {/* Dark Screen Bezel */}
                 <polygon
                   points="237,45 540,81 511,288 213,242"
                   fill="#0F172A"
@@ -271,16 +247,11 @@ export const HomePage: React.FC = () => {
                   strokeWidth="8"
                   strokeLinejoin="round"
                 />
-
-                {/* Top Bezel Webcam Dot & Status */}
                 <circle cx="385" cy="66" r="2.5" fill="#475569" />
                 <text x="505" y="86" fill="#94A3B8" fontSize="7" fontWeight="bold">● V0:08</text>
 
-                {/* 3. EMBEDDED 3x3 STUDENT VIDEO CALL GRID (Isometric Skewed Matrix) */}
                 <g transform="matrix(0.955, 0.114, -0.095, 0.94, 242, 60)">
-                  {/* Screen Inner Canvas */}
                   <rect x="0" y="0" width="292" height="186" rx="4" fill="#1E293B" />
-
                   {videoFaces.map((p, idx) => {
                     const col = idx % 3;
                     const row = Math.floor(idx / 3);
@@ -301,7 +272,6 @@ export const HomePage: React.FC = () => {
                           preserveAspectRatio="xMidYMid slice"
                           clipPath={`url(#vidClip${idx})`}
                         />
-                        {/* Participant Name Tag */}
                         <rect x={x + 3} y={y + 36} width="34" height="11" rx="2" fill="rgba(0,0,0,0.65)" />
                         <text x={x + 6} y={y + 44} fill="#FFFFFF" fontSize="6.5" fontWeight="600">
                           {p.name}
@@ -309,8 +279,6 @@ export const HomePage: React.FC = () => {
                       </g>
                     );
                   })}
-
-                  {/* Bottom Zoom Call Control Bar */}
                   <rect x="0" y="166" width="292" height="20" fill="#090E17" />
                   <circle cx="95" cy="176" r="4" fill="#334155" />
                   <circle cx="115" cy="176" r="4" fill="#334155" />
@@ -320,9 +288,7 @@ export const HomePage: React.FC = () => {
                   <text x="248" y="178" fill="#FFFFFF" fontSize="5.5" fontWeight="bold">End Call</text>
                 </g>
 
-                {/* 4. 3D SILVER METALLIC KEYBOARD DECK & TRACKPAD (Projecting Forward-Left) */}
                 <g filter="url(#laptopShadow)">
-                  {/* Top Aluminum Deck Surface */}
                   <polygon
                     points="213,242 511,288 386,374 72,315"
                     fill="url(#silverTop)"
@@ -330,19 +296,14 @@ export const HomePage: React.FC = () => {
                     strokeWidth="1.5"
                     strokeLinejoin="round"
                   />
-
-                  {/* Recessed Dark Keyboard Well */}
                   <polygon
                     points="212,251 482,294 420,339 144,289"
                     fill="#1E293B"
                     stroke="#475569"
                     strokeWidth="1"
                   />
-
-                  {/* Isometric Individual Keyboard Keycaps */}
                   {keyRows.map((r) =>
                     keyCols.map((c) => {
-                      // Interpolate key position inside the isometric keyboard well
                       const u = (c + 0.3) / 11.4;
                       const v = (r + 0.25) / 4.3;
                       const topX = 216 + u * 260;
@@ -360,27 +321,20 @@ export const HomePage: React.FC = () => {
                       );
                     })
                   )}
-
-                  {/* Angled Silver Trackpad */}
                   <polygon
                     points="224,312 304,327 272,349 192,334"
                     fill="#CBD5E1"
                     stroke="#94A3B8"
                     strokeWidth="1.2"
                   />
-
-                  {/* 3D Front Lip Edge of Laptop Base */}
                   <polygon
                     points="72,315 386,374 386,385 72,325"
                     fill="url(#silverEdgeFront)"
                   />
-                  {/* Front Center Thumb Notch */}
                   <polygon
                     points="205,340 248,348 246,352 203,344"
                     fill="#334155"
                   />
-
-                  {/* 3D Right Side Edge with USB-C Ports */}
                   <polygon
                     points="386,374 511,288 511,298 386,385"
                     fill="url(#silverEdgeSide)"
@@ -389,10 +343,13 @@ export const HomePage: React.FC = () => {
                   <ellipse cx="465" cy="324" rx="4" ry="1.8" transform="rotate(-34 465 324)" fill="#0F172A" />
                 </g>
 
-                {/* 5. FLOATING PILL 1: RED "Live GD Session" (Top-Left of Laptop Screen) */}
-                <g filter="url(#badgeShadow)" transform="translate(115, 70)">
+                <g
+                  filter="url(#badgeShadow)"
+                  transform="translate(115, 70)"
+                  className="cursor-pointer"
+                  onClick={() => navigate('/schedule')}
+                >
                   <rect x="0" y="0" width="148" height="36" rx="18" fill="url(#redPillGrad)" />
-                  {/* Video Camera Icon */}
                   <rect x="14" y="12" width="11" height="10" rx="2" fill="#FFFFFF" />
                   <polygon points="26,15 31,12 31,22 26,19" fill="#FFFFFF" />
                   <text x="38" y="23" fill="#FFFFFF" fontSize="13.5" fontWeight="700" fontFamily="Inter, sans-serif">
@@ -400,7 +357,6 @@ export const HomePage: React.FC = () => {
                   </text>
                 </g>
 
-                {/* 6. FLOATING PILL 2: BLUE "Join Zoom Meeting ->" (Right of Laptop Screen) */}
                 <g
                   filter="url(#badgeShadow)"
                   transform="translate(425, 205)"
@@ -414,7 +370,6 @@ export const HomePage: React.FC = () => {
                   <text x="158" y="26" fill="#FFFFFF" fontSize="15" fontWeight="800">→</text>
                 </g>
 
-                {/* 7. FLOATING CARD 3: FROSTED GLASS "zoom" BADGE (Bottom-Right) */}
                 <g filter="url(#badgeShadow)" transform="translate(465, 296)">
                   <rect
                     x="0"
@@ -437,16 +392,13 @@ export const HomePage: React.FC = () => {
               </svg>
             </div>
           </div>
-
         </div>
       </section>
 
-      {/* LIVE SESSION INDICATOR & NEXT GD COUNTDOWN BAR (Updated Navy/Royal Blue & 4-Box Glowing Timer) */}
+      {/* LIVE SESSION INDICATOR & NEXT GD COUNTDOWN BAR */}
       {(liveSessions.length > 0 || (nextGdSession && countdownText)) && (
         <section className="bg-white pt-8 pb-2">
           <div className="max-w-5xl mx-auto px-4 sm:px-8 space-y-5">
-            
-            {/* 1. Live GD Banner: Navy Blue + Royal Blue Gradient with Small Red LIVE NOW Badge */}
             {liveSessions.map((live) => (
               <div
                 key={live.id}
@@ -474,7 +426,6 @@ export const HomePage: React.FC = () => {
               </div>
             ))}
 
-            {/* 2. Next GD Countdown: Glowing Dark Blue Card with 4 Glass Boxes (days, hours, minutes, seconds) */}
             {nextGdSession && countdownText && (() => {
               const parts = countdownText.split(' : ');
               const hasDays = parts.length === 4;
@@ -485,16 +436,14 @@ export const HomePage: React.FC = () => {
 
               return (
                 <div className="relative overflow-hidden rounded-3xl bg-[#030712] border border-blue-500/40 p-6 sm:p-8 shadow-[0_0_40px_rgba(29,107,243,0.3)] text-white">
-                  {/* Live Animated Blue Glow & Curved Neon Arc (Matching Reference Image 1) */}
                   <div className="pointer-events-none absolute -top-20 -left-16 w-72 h-72 rounded-full bg-[#1D6BF3]/55 blur-3xl animate-pulse" />
                   <div className="pointer-events-none absolute -bottom-24 right-10 w-64 h-64 rounded-full bg-blue-600/25 blur-3xl animate-pulse" />
                   <div className="pointer-events-none absolute -top-36 -left-28 w-[360px] h-[360px] rounded-full border-[2px] border-blue-500/50 shadow-[0_0_20px_rgba(59,130,246,0.5)]" />
 
                   <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-6">
-                    {/* Left Info */}
                     <div className="text-center lg:text-left space-y-1.5">
                       <span className="inline-block px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/40 text-blue-200 text-[11px] font-extrabold uppercase tracking-wider">
-                        ⏱️ Next GD Countdown
+                        ⏳ Next GD Countdown
                       </span>
                       <h3 className="text-xl sm:text-2xl font-extrabold text-white">
                         {nextGdSession.title.split(':')[0]}
@@ -512,7 +461,6 @@ export const HomePage: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Right 4 Glassmorphic Countdown Boxes */}
                     <div className="grid grid-cols-4 gap-2.5 sm:gap-4 w-full sm:w-auto">
                       {[
                         { value: daysVal, label: 'days' },
@@ -537,13 +485,11 @@ export const HomePage: React.FC = () => {
                 </div>
               );
             })()}
-
           </div>
         </section>
       )}
 
-
-      {/* 1. UPCOMING VIDEO GD SESSIONS + VIEW ALL OPTION */}
+      {/* 1. UPCOMING VIDEO GD SESSIONS */}
       <section className="bg-white py-14">
         <div className="max-w-5xl mx-auto px-4 sm:px-8">
           <h2 className="text-2xl sm:text-[28px] font-extrabold text-center text-[#0A1128] mb-10">
@@ -559,9 +505,7 @@ export const HomePage: React.FC = () => {
               >
                 <div>
                   {s.status === 'Live' && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full 
-                    
-                    bg-[#DC3545] text-white text-[10px] font-extrabold mb-2">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#DC3545] text-white text-[10px] font-extrabold mb-2">
                       ● LIVE NOW
                     </span>
                   )}
@@ -571,7 +515,6 @@ export const HomePage: React.FC = () => {
                   <p className="text-xs font-medium text-slate-500 mb-4">
                     {s.scheduled_date} • {s.start_time}
                   </p>
-
                   <div className="bg-[#E9F2FF] text-[#0A1128] px-3.5 py-2.5 rounded-xl flex items-center justify-between text-xs font-bold mb-6">
                     <span className="flex items-center gap-2">
                       <span className="w-6 h-6 rounded-full bg-[#1D6BF3] text-white flex items-center justify-center">
@@ -601,7 +544,6 @@ export const HomePage: React.FC = () => {
             ))}
           </div>
 
-          {/* View All Upcoming Sessions Button */}
           <div className="mt-10 flex justify-center gap-3">
             {activeUpcomingSessions.length > 3 ? (
               <button
@@ -629,9 +571,6 @@ export const HomePage: React.FC = () => {
             <h2 className="text-2xl sm:text-[28px] font-extrabold text-[#0A1128]">
               Why Join GD Practice Hub?
             </h2>
-            <p className="text-xs sm:text-sm font-semibold text-slate-600 mt-1">
-              चार मुख्य फायदे जो आपकी तैयारी को मजबूत बनाते हैं
-            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -703,7 +642,7 @@ export const HomePage: React.FC = () => {
               How It Works
             </h2>
             <p className="text-xs sm:text-sm font-semibold text-slate-600 mt-1">
-              तीन आसान Steps
+              3 Simple Steps
             </p>
           </div>
 
@@ -740,7 +679,6 @@ export const HomePage: React.FC = () => {
                     {st.desc}
                   </p>
                 </motion.div>
-
                 {i < 2 && (
                   <div className="hidden md:flex items-center justify-center absolute top-1/2 -right-5 w-4 z-10">
                     <span className="w-full border-t-2 border-dashed border-blue-400" />
@@ -760,24 +698,16 @@ export const HomePage: React.FC = () => {
               Latest Announcements
             </h2>
             <p className="text-xs sm:text-sm font-semibold text-slate-600 mt-1">
-              Admin द्वारा प्रकाशित नवीनतम सूचनाएँ:
+              Official Updates from Admin
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {(announcements.length > 0
-              ? announcements
-              : [
-                  { id: '1', title: 'New GD Schedule', message: 'Weekly live GD schedule has been updated for upcoming evening batches.', is_important: true },
-                  { id: '2', title: 'Meeting Link Update', message: 'Zoom meeting links are activated 15 minutes prior to each scheduled session.', is_important: false },
-                  { id: '3', title: 'Special Practice Session', message: 'Join our weekend mock panel GD session with detailed evaluation feedback.', is_important: true },
-                  { id: '4', title: 'Important Instructions', message: 'Please review the 3-minute speaking limit and GD etiquette before joining.', is_important: false },
-                ]
-            ).slice(0, 4).map((ann, idx) => (
-              <motion.div
+            {announcements.slice(0, 4).map((ann, idx) => (
+              <Link
+                to="/announcements"
                 key={ann.id || idx}
-                whileHover={{ y: -3 }}
-                className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-start gap-4 relative"
+                className="bg-white border border-slate-200 hover:border-blue-300 rounded-2xl p-5 shadow-sm flex items-start gap-4 relative transition hover:-translate-y-1"
               >
                 <div className="w-14 h-14 rounded-2xl bg-[#0A1128] text-cyan-400 flex items-center justify-center shrink-0 shadow-md">
                   <Calendar className="w-6 h-6" />
@@ -797,7 +727,7 @@ export const HomePage: React.FC = () => {
                     {ann.message}
                   </p>
                 </div>
-              </motion.div>
+              </Link>
             ))}
           </div>
 
@@ -809,13 +739,10 @@ export const HomePage: React.FC = () => {
               <span>View All Announcements →</span>
             </Link>
           </div>
-
-
-
         </div>
       </section>
 
-      {/* 5. STUDENT FEEDBACK & TESTIMONIALS + WRITE FEEDBACK FORM */}
+      {/* 5. STUDENT FEEDBACK & TESTIMONIALS */}
       <section className="py-14 bg-[#F5F8FF] border-t border-slate-200/70">
         <div className="max-w-5xl mx-auto px-4 sm:px-8">
           <div className="text-center mb-10">
@@ -828,7 +755,6 @@ export const HomePage: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-            {/* Left Column: Existing Student Reviews */}
             <div className="md:col-span-6 space-y-4">
               {feedbacks.map((fb, idx) => (
                 <div
@@ -854,13 +780,12 @@ export const HomePage: React.FC = () => {
                     </div>
                   </div>
                   <p className="text-xs sm:text-sm text-slate-700 italic leading-relaxed">
-                    “{fb.message}”
+                    "{fb.message}"
                   </p>
                 </div>
               ))}
             </div>
 
-            {/* Right Column: Write Your Feedback Form */}
             <div className="md:col-span-6 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
               <h3 className="text-lg font-extrabold text-[#0A1128] mb-4">
                 Write Your Feedback
@@ -873,7 +798,6 @@ export const HomePage: React.FC = () => {
                   placeholder="Your Name"
                   className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl"
                 />
-
                 <select
                   value={fbSession}
                   onChange={(e) => setFbSession(e.target.value)}
@@ -886,7 +810,6 @@ export const HomePage: React.FC = () => {
                     </option>
                   ))}
                 </select>
-
                 <div>
                   <p className="font-bold text-slate-700 mb-1">Rating</p>
                   <div className="flex items-center gap-1.5">
@@ -908,7 +831,6 @@ export const HomePage: React.FC = () => {
                     ))}
                   </div>
                 </div>
-
                 <textarea
                   rows={3}
                   value={fbMessage}
@@ -916,7 +838,6 @@ export const HomePage: React.FC = () => {
                   placeholder="Write your feedback or review..."
                   className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl"
                 />
-
                 <button
                   type="submit"
                   className="w-full py-3 rounded-full bg-[#1D6BF3] hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-blue-500/25 transition"
@@ -929,7 +850,7 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* 6. TELEGRAM SUPPORT SECTION (Existing Design Preserved) */}
+      {/* 6. TELEGRAM SUPPORT SECTION */}
       <section className="py-14 bg-[#EBF1FA]">
         <div className="max-w-5xl mx-auto px-4 sm:px-8 grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
           <div className="md:col-span-6">
@@ -940,14 +861,13 @@ export const HomePage: React.FC = () => {
               Have a doubt? Ask Owner for Any Doubt
             </p>
           </div>
-
           <div className="md:col-span-6">
             <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-100 text-center max-w-md mx-auto">
               <div className="w-14 h-14 rounded-full bg-[#2AABEE] text-white flex items-center justify-center mx-auto mb-3.5 shadow-md">
                 <Send className="w-6 h-6 -ml-0.5" />
               </div>
               <h3 className="text-xl font-extrabold text-[#0A1128] mb-1">
-                Ask Owner for Any Doubt 👋
+                Ask Owner for Any Doubt
               </h3>
               <p className="text-xs text-slate-600 mb-6">
                 Get 1-on-1 support directly from the founder.
@@ -962,9 +882,6 @@ export const HomePage: React.FC = () => {
           </div>
         </div>
       </section>
-
-
-
     </PublicLayout>
   );
 };
@@ -973,14 +890,20 @@ export const HomePage: React.FC = () => {
    PAGE 2: GD SCHEDULE PAGE
    ============================================================================ */
 export const SchedulePage: React.FC = () => {
+  const [params] = useSearchParams();
   const [sessions, setSessions] = useState<any[]>([]);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(params.get('topic') || '');
   const [statusFilter, setStatusFilter] = useState('All Statuses');
   const [topicFilter, setTopicFilter] = useState('All Topics');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [nowMs, setNowMs] = useState(Date.now());
 
-    useEffect(() => {
+  useEffect(() => {
+    const qTopic = params.get('topic');
+    if (qTopic) setSearch(qTopic);
+  }, [params]);
+
+  useEffect(() => {
     const loadSessions = () => api.list('sessions', true).then(setSessions);
     loadSessions();
     const timer = setInterval(() => setNowMs(Date.now()), 1000);
@@ -991,25 +914,23 @@ export const SchedulePage: React.FC = () => {
     };
   }, []);
 
-  // Featured session: Sirf Live ya Future Upcoming session hi top banner mein aayega (Past session kabhi nahi)
   const featured =
     sessions.find((s) => s.status === 'Live') ||
     sessions.find((s) => s.status === 'Upcoming' && s._startMs > nowMs && s.is_featured) ||
     sessions.find((s) => s.status === 'Upcoming' && s._startMs > nowMs) ||
     null;
 
-  // Real-time countdown calculation for Featured Session
   const targetMs = featured?._startMs && featured._startMs > nowMs ? featured._startMs : nowMs;
   const secLeft = Math.max(0, Math.floor((targetMs - nowMs) / 1000));
   const hrs = String(Math.floor(secLeft / 3600)).padStart(2, '0');
   const mins = String(Math.floor((secLeft % 3600) / 60)).padStart(2, '0');
   const secs = String(secLeft % 60).padStart(2, '0');
 
-
   const filtered = sessions.filter((s) => {
     const mSearch =
       s.title.toLowerCase().includes(search.toLowerCase()) ||
-      (s.topic || '').toLowerCase().includes(search.toLowerCase());
+      (s.topic || '').toLowerCase().includes(search.toLowerCase()) ||
+      (s.category || '').toLowerCase().includes(search.toLowerCase());
     const mStatus = statusFilter === 'All Statuses' || s.status === statusFilter;
     const mTopic =
       topicFilter === 'All Topics' ||
@@ -1070,7 +991,6 @@ export const SchedulePage: React.FC = () => {
                   <rect width="1000" height="290" fill="url(#dotMask)" />
                 </mask>
               </defs>
-
               <rect width="1000" height="290" fill="url(#cardBg)" />
               <path
                 d="M 470,290 C 560,200 660,95 790,0 L 960,0 C 850,110 740,210 660,290 Z"
@@ -1096,17 +1016,14 @@ export const SchedulePage: React.FC = () => {
                     {featured.status === 'Live' ? 'LIVE NOW' : 'LIVE COUNTDOWN'}
                   </span>
                 </div>
-
                 <h2 className="text-[28px] sm:text-[36px] font-extrabold tracking-tight text-white leading-[1.12]">
                   {featured.title.split(':')[0]}
                 </h2>
-
                 <p className="text-xs sm:text-[15px] text-white/95 font-medium flex items-center gap-2 pt-0.5">
                   <span>{featured.scheduled_date}, {featured.start_time}</span>
                   <span className="text-white/60 font-light">|</span>
                   <span>{featured.platform || 'Zoom Room'}</span>
                 </p>
-
                 <p className="text-xs sm:text-[13.5px] text-slate-200/90 leading-relaxed max-w-md pt-0.5">
                   {featured.description}
                 </p>
@@ -1168,7 +1085,6 @@ export const SchedulePage: React.FC = () => {
               className="w-full pl-9 pr-3.5 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-800 outline-none focus:border-blue-500"
             />
           </div>
-
           <div className="flex items-center gap-2.5 flex-wrap">
             <select
               value={statusFilter}
@@ -1179,21 +1095,22 @@ export const SchedulePage: React.FC = () => {
               <option value="Live">Live</option>
               <option value="Upcoming">Upcoming</option>
               <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
             </select>
-
             <select
               value={topicFilter}
               onChange={(e) => setTopicFilter(e.target.value)}
-              className="px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-medium text-slate-800 outline-none min-w-[115px]"
+              className="px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-medium text-slate-800 outline-none min-w-[135px]"
             >
               <option value="All Topics">All Topics</option>
-              <option value="Tech">Tech &amp; Society</option>
+              <option value="AI">AI &amp; Tech</option>
               <option value="Business">Business &amp; Economy</option>
-              <option value="Placement">Placement Special</option>
-              <option value="AI">AI &amp; Future</option>
+              <option value="Current Affairs">Current Affairs</option>
               <option value="Social">Social Issues</option>
+              <option value="Education">Education</option>
+              <option value="Abstract">Abstract Topics</option>
+              <option value="Placement">Interview &amp; Placement</option>
             </select>
-
             <div className="flex items-center border border-slate-300 rounded-lg bg-white overflow-hidden">
               <button
                 type="button"
@@ -1213,45 +1130,50 @@ export const SchedulePage: React.FC = () => {
           </div>
         </div>
 
-        <h3 className="text-lg font-extrabold text-[#0A1128] mb-3">Other Upcoming Sessions</h3>
+        <h3 className="text-lg font-extrabold text-[#0A1128] mb-3">All Upcoming &amp; Live Sessions</h3>
         <div className={viewMode === 'grid' ? 'grid sm:grid-cols-2 gap-4 mb-8' : 'space-y-3 mb-8'}>
-          {upcoming.map((s) => (
-            <div
-              key={s.id}
-              className="bg-white border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm"
-            >
-              <div>
-                <h4 className="font-bold text-base text-[#0A1128]">{s.title}</h4>
-                <p className="text-xs text-slate-500">
-                  {s.scheduled_date}, {s.start_time} | {s.participants || '12 Participants'}
-                </p>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <span className={`px-3 py-1 rounded-full text-[11px] font-bold uppercase ${
-                  s.status === 'Live' ? 'bg-[#DC3545] text-white' : 'bg-blue-100 text-blue-700'
-                }`}>
-                  {s.status}
-                </span>
-                <Link
-                  to={`/session?id=${s.id}`}
-                  className="px-3.5 py-2 rounded-lg border border-slate-300 text-xs font-semibold hover:bg-slate-50"
-                >
-                  View Details
-                </Link>
-                <button
-                  onClick={() => joinZoomSession(s.zoom_url, s.status)}
-                  disabled={!isValidHttps(s.zoom_url)}
-                  className={`px-3.5 py-2 rounded-lg text-xs font-semibold ${
-                    isValidHttps(s.zoom_url)
-                      ? 'bg-[#1D7AFC] text-white hover:bg-blue-600'
-                      : 'bg-slate-200 text-slate-500 cursor-not-allowed'
-                  }`}
-                >
-                  Join Session
-                </button>
-              </div>
+          {upcoming.length === 0 ? (
+            <div className="bg-white border border-slate-200 rounded-xl p-6 text-center text-xs text-slate-500">
+              No upcoming sessions match your current filter.
             </div>
-          ))}
+          ) : (
+            upcoming.map((s) => (
+              <div
+                key={s.id}
+                className="bg-white border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm"
+              >
+                <div>
+                  <h4 className="font-bold text-base text-[#0A1128]">{s.title}</h4>
+                  <p className="text-xs text-slate-500">
+                    {s.scheduled_date}, {s.start_time} | {s.participants || '12 Participants'}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2.5">
+                  <span className={`px-3 py-1 rounded-full text-[11px] font-bold uppercase ${
+                    s.status === 'Live' ? 'bg-[#DC3545] text-white' : 'bg-blue-100 text-blue-700'
+                  }`}>
+                    {s.status}
+                  </span>
+                  <Link
+                    to={`/session?id=${s.id}`}
+                    className="px-3.5 py-2 rounded-lg border border-slate-300 text-xs font-semibold hover:bg-slate-50"
+                  >
+                    View Details
+                  </Link>
+                  <button
+                    onClick={() => joinZoomSession(s.zoom_url, s.status)}
+                    className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition ${
+                      isValidHttps(s.zoom_url)
+                        ? 'bg-[#1D7AFC] text-white hover:bg-blue-600'
+                        : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                    }`}
+                  >
+                    Join Session
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
         <h3 className="text-lg font-extrabold text-[#0A1128] mb-3">Past Sessions</h3>
@@ -1277,7 +1199,10 @@ export const SchedulePage: React.FC = () => {
                 >
                   View Details
                 </Link>
-                <button disabled className="px-3.5 py-2 rounded-lg bg-slate-400/60 text-slate-600 text-xs font-semibold cursor-not-allowed">
+                <button
+                  onClick={() => joinZoomSession(s.zoom_url, s.status)}
+                  className="px-3.5 py-2 rounded-lg bg-slate-400/60 text-slate-600 text-xs font-semibold cursor-not-allowed"
+                >
                   Join Session
                 </button>
               </div>
@@ -1287,7 +1212,7 @@ export const SchedulePage: React.FC = () => {
 
         <div className="bg-[#D8EAFF] border border-blue-200 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 mb-10">
           <div>
-            <h3 className="text-lg font-extrabold text-[#0A1128]">Ask Owner for Any Doubt 💬</h3>
+            <h3 className="text-lg font-extrabold text-[#0A1128]">Ask Owner for Any Doubt</h3>
             <p className="text-xs text-slate-700">
               Have a doubt? Ask Owner for Any Doubt. Get 1-on-1 support directly from the founder.
             </p>
@@ -1322,9 +1247,25 @@ export const SessionDetailsPage: React.FC = () => {
 
   const handleAddToCalendar = () => {
     const title = encodeURIComponent(session.title || 'GD Practice Session');
-    const details = encodeURIComponent(session.description || 'Join live Group Discussion session.');
+    const details = encodeURIComponent(
+      `${session.description || 'Join live Group Discussion session.'}\n\nPlatform: ${session.platform || 'Zoom Room'}${
+        session.zoom_url ? `\nZoom Link: ${session.zoom_url}` : ''
+      }`
+    );
+
+    const formatCalDate = (ms: number) =>
+      new Date(ms).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+
+    const startMs =
+      session._startMs && session._startMs !== Number.MAX_SAFE_INTEGER
+        ? session._startMs
+        : Date.now() + 3600000;
+    const endMs = startMs + 3600000;
+
     window.open(
-      `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}`,
+      `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&dates=${formatCalDate(
+        startMs
+      )}/${formatCalDate(endMs)}`,
       '_blank',
       'noopener,noreferrer'
     );
@@ -1403,9 +1344,12 @@ export const SessionDetailsPage: React.FC = () => {
               <h2 className="text-xl font-extrabold text-[#0A1128] mb-1">Preparation Points</h2>
               <p className="text-xs text-slate-500 mb-3">Article-style, structured, readable</p>
               <ul className="list-disc pl-5 space-y-2 text-sm text-slate-800">
-                {(session.preparation_points || 'Review key facts and current affairs related to the topic.').split('\n').filter(Boolean).map((pt: string, i: number) => (
-                  <li key={i}>{pt}</li>
-                ))}
+                {(session.preparation_points || 'Review key facts and current affairs related to the topic.')
+                  .split('\n')
+                  .filter(Boolean)
+                  .map((pt: string, i: number) => (
+                    <li key={i}>{pt}</li>
+                  ))}
               </ul>
             </div>
 
@@ -1414,9 +1358,12 @@ export const SessionDetailsPage: React.FC = () => {
                 <AlertCircle className="w-4 h-4 text-blue-700" /> Discussion Rules &amp; Guidelines
               </h3>
               <ul className="list-disc pl-5 space-y-1.5 text-sm text-slate-800">
-                {(session.special_instructions || 'Be respectful to all participants.\nAdhere to the 3-minute speaking time limit.').split('\n').filter(Boolean).map((r: string, i: number) => (
-                  <li key={i}>{r}</li>
-                ))}
+                {(session.special_instructions || 'Be respectful to all participants.\nAdhere to the 3-minute speaking time limit.')
+                  .split('\n')
+                  .filter(Boolean)
+                  .map((r: string, i: number) => (
+                    <li key={i}>{r}</li>
+                  ))}
               </ul>
             </div>
           </div>
@@ -1446,9 +1393,8 @@ export const SessionDetailsPage: React.FC = () => {
               </div>
               <div className="text-xs border-t border-slate-100 pt-3">
                 <p className="text-slate-500">Expected Participants</p>
-                <p className="font-bold text-slate-900 text-sm">{session.participants || '12–15'}</p>
+                <p className="font-bold text-slate-900 text-sm">{session.participants || '12-15'}</p>
               </div>
-
               <div className="bg-[#DFF0FF] rounded-xl p-4 space-y-2.5">
                 <div className="w-8 h-8 rounded-full bg-[#1D88E5] text-white flex items-center justify-center">
                   <Send className="w-4 h-4" />
@@ -1473,12 +1419,13 @@ export const SessionDetailsPage: React.FC = () => {
 };
 
 /* ============================================================================
-   PAGE 4: GD TOPICS LIBRARY
+   PAGE 4: GD TOPICS LIBRARY (Added View Prep Points Toggle & Topic Link)
    ============================================================================ */
 export const TopicsPage: React.FC = () => {
   const [topics, setTopics] = useState<any[]>([]);
   const [search, setSearch] = useState('');
   const [activeCat, setActiveCat] = useState('All Topics');
+  const [openPrepId, setOpenPrepId] = useState<string | null>(null);
 
   useEffect(() => {
     api.list('topics', true).then(setTopics);
@@ -1495,7 +1442,6 @@ export const TopicsPage: React.FC = () => {
     'Interview & Placement GD',
   ];
 
-  // Smart category matcher so both "AI & Tech" and "Artificial Intelligence and Technology" match
   const matchesTopicCategory = (topicCategory: string, chip: string) => {
     if (chip === 'All Topics') return true;
     const c = (topicCategory || '').toLowerCase();
@@ -1517,48 +1463,80 @@ export const TopicsPage: React.FC = () => {
     return mCat && mSearch;
   });
 
-  const TopicCard = ({ t }: { t: any }) => (
-    <motion.div
-      whileHover={{ y: -4 }}
-      className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm flex flex-col justify-between"
-    >
-      <div>
-        <div className="relative h-40 bg-slate-200">
-          <img src={t.image_url} alt={t.title} className="w-full h-full object-cover" />
-          <span
-            className={`absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-extrabold flex items-center gap-1 ${
-              t.badge === 'RECOMMENDED'
-                ? 'bg-[#5CA9FF] text-[#0A1628]'
-                : 'bg-[#1D63EB] text-white'
-            }`}
-          >
-            {t.badge === 'RECOMMENDED' ? <Star className="w-3 h-3" /> : <Flame className="w-3 h-3" />}
-            {t.badge || 'POPULAR'}
-          </span>
-        </div>
-        <div className="p-5">
-          <span className="inline-block px-2.5 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[11px] font-bold mb-2">
-            {t.category}
-          </span>
-          <h3 className="font-extrabold text-lg text-[#0A1128] leading-snug mb-1.5">{t.title}</h3>
-          <p className="text-xs text-slate-600 mb-3">{t.description}</p>
-        </div>
-      </div>
+  const TopicCard = ({ t, keyPrefix }: { t: any; keyPrefix: string }) => {
+    const cardKey = `${keyPrefix}-${t.id}`;
+    const isPrepOpen = openPrepId === cardKey;
 
-      <div className="px-5 pb-5">
-        <p className="text-xs font-semibold text-slate-700 mb-3">
-          Difficulty: <span className="font-bold">{t.difficulty || 'Medium'}</span> | Est. Time:{' '}
-          <span className="font-bold">{t.est_time || '45m'}</span>
-        </p>
-        <Link
-          to="/schedule"
-          className="block w-full py-2.5 rounded-lg bg-[#155EEF] hover:bg-blue-700 text-white text-center font-bold text-xs transition"
-        >
-          Practice Now
-        </Link>
-      </div>
-    </motion.div>
-  );
+    return (
+      <motion.div
+        whileHover={{ y: -4 }}
+        className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm flex flex-col justify-between"
+      >
+        <div>
+          <div className="relative h-40 bg-slate-200">
+            <img
+              src={
+                t.image_url ||
+                'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80'
+              }
+              alt={t.title}
+              className="w-full h-full object-cover"
+            />
+            <span
+              className={`absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-extrabold flex items-center gap-1 ${
+                t.badge === 'RECOMMENDED'
+                  ? 'bg-[#5CA9FF] text-[#0A1628]'
+                  : 'bg-[#1D63EB] text-white'
+              }`}
+            >
+              {t.badge === 'RECOMMENDED' ? <Star className="w-3 h-3" /> : <Flame className="w-3 h-3" />}
+              {t.badge || 'POPULAR'}
+            </span>
+          </div>
+          <div className="p-5">
+            <span className="inline-block px-2.5 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[11px] font-bold mb-2">
+              {t.category}
+            </span>
+            <h3 className="font-extrabold text-lg text-[#0A1128] leading-snug mb-1.5">{t.title}</h3>
+            <p className="text-xs text-slate-600 mb-3">{t.description}</p>
+
+            {t.preparation_points && (
+              <div className="mt-2">
+                <button
+                  type="button"
+                  onClick={() => setOpenPrepId(isPrepOpen ? null : cardKey)}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1.5 rounded-lg transition w-full justify-between"
+                >
+                  <span className="flex items-center gap-1.5">
+                    <BookOpen className="w-3.5 h-3.5" />
+                    {isPrepOpen ? 'Hide Prep Points' : 'View Preparation Points'}
+                  </span>
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isPrepOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {isPrepOpen && (
+                  <div className="mt-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 space-y-1 whitespace-pre-line">
+                    {t.preparation_points}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="px-5 pb-5">
+          <p className="text-xs font-semibold text-slate-700 mb-3">
+            Difficulty: <span className="font-bold">{t.difficulty || 'Medium'}</span> | Est. Time:{' '}
+            <span className="font-bold">{t.est_time || '45m'}</span>
+          </p>
+          <Link
+            to="/schedule"
+            className="block w-full py-2.5 rounded-lg bg-[#155EEF] hover:bg-blue-700 text-white text-center font-bold text-xs transition"
+          >
+            Practice Now
+          </Link>
+        </div>
+      </motion.div>
+    );
+  };
 
   return (
     <PublicLayout>
@@ -1573,7 +1551,7 @@ export const TopicsPage: React.FC = () => {
         </h2>
         <div className="grid md:grid-cols-3 gap-6 mb-8">
           {featured.map((t) => (
-            <TopicCard key={t.id} t={t} />
+            <TopicCard key={`feat-${t.id}`} t={t} keyPrefix="feat" />
           ))}
         </div>
 
@@ -1603,10 +1581,10 @@ export const TopicsPage: React.FC = () => {
           ))}
         </div>
 
-        <h2 className="text-lg font-extrabold text-[#0A1128] mb-4">All Topics</h2>
+        <h2 className="text-lg font-extrabold text-[#0A1128] mb-4">All Topics ({filtered.length})</h2>
         <div className="grid md:grid-cols-3 gap-6 mb-10">
           {filtered.map((t) => (
-            <TopicCard key={t.id} t={t} />
+            <TopicCard key={`all-${t.id}`} t={t} keyPrefix="all" />
           ))}
         </div>
 

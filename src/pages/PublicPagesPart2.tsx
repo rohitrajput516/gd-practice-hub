@@ -1,14 +1,35 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  ChevronDown, Send, Search, Megaphone, HelpCircle, PhoneCall
-} from 'lucide-react';
+import { ChevronDown, Send, Search } from 'lucide-react';
 import { PublicLayout, openTelegramSupport } from '../components/Layout';
 import { api } from '../lib/supabase';
 
+const ActionButtonLink: React.FC<{ url: string; text?: string; className: string }> = ({
+  url,
+  text,
+  className,
+}) => {
+  const cleanUrl = url.trim();
+  const isExternal = /^https?:\/\//i.test(cleanUrl) || cleanUrl.startsWith('www.');
+  const href = cleanUrl.startsWith('www.') ? `https://${cleanUrl}` : cleanUrl;
+
+  if (isExternal) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
+        {text || 'Open Link →'}
+      </a>
+    );
+  }
+  return (
+    <Link to={cleanUrl} className={className}>
+      {text || 'Open Link →'}
+    </Link>
+  );
+};
+
 /* ============================================================================
-   PAGE 5: RULES & GUIDELINES (Design 2 - Accordion FAQ Style - Image 5)
+   PAGE 5: RULES & GUIDELINES
    ============================================================================ */
 export const GuidelinesPage: React.FC = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
@@ -18,31 +39,33 @@ export const GuidelinesPage: React.FC = () => {
     api.list('guidelines').then((rows) => {
       if (rows && rows.length > 0) {
         setSteps(rows);
-      } else {
-        setSteps([
-          { num: '01', title: 'Start Strong (Initiation)', content: 'Take the initiative if you are well-prepared. Introduce the topic clearly, set a positive, welcoming direction, and invite others to contribute.' },
-          { num: '02', title: 'Express Opinions Clearly', content: 'Structure your points logically. Use clear language and state your stance firmly without being aggressive.' },
-          { num: '03', title: 'Provide Factual Examples', content: 'Support your arguments with real-world data, statistics, case studies, or historical references.' },
-          { num: '04', title: 'Practice Active Listening', content: 'Pay close attention to fellow speakers. Acknowledge valid points made by others before adding your perspective.' },
-          { num: '05', title: 'Disagree Respectfully', content: 'When countering an argument, attack the point, not the person.' },
-          { num: '06', title: 'Summarize & Conclude', content: 'Bring diverse viewpoints together towards the end. Deliver a balanced conclusion.' },
-          { num: '07', title: 'Common Mistakes to Avoid', content: 'Interrupting others repeatedly.\nLosing your temper.\nGoing off-topic.' },
-        ]);
       }
     });
   }, []);
+
+  const timelineRules = steps.filter(
+    (s) => !String(s.title).toLowerCase().includes('common mistakes')
+  );
+  const mistakesRule =
+    steps.find((s) => String(s.title).toLowerCase().includes('common mistakes')) || {
+      num: '07',
+      title: 'Common Mistakes to Avoid',
+      content:
+        'Interrupting others repeatedly or talking over participants.\nLosing your temper or being overly aggressive.\nGoing off-topic or drifting away from the core agenda.',
+    };
 
   return (
     <PublicLayout>
       <div className="max-w-4xl mx-auto px-4 sm:px-8 pt-8 pb-16">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-extrabold text-[#0A1128] mb-1">Group Discussion (GD) Guidelines</h1>
+          <h1 className="text-3xl font-extrabold text-[#0A1128] mb-1">
+            Group Discussion (GD) Guidelines
+          </h1>
           <p className="text-sm text-slate-600">
             A compact, on-demand guide on how to perform well in a GD, from starting to summarizing.
           </p>
         </div>
 
-        {/* Hero Banner with Photo */}
         <div className="relative rounded-2xl overflow-hidden mb-8 shadow-md h-52 bg-slate-900">
           <img
             src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80"
@@ -50,36 +73,37 @@ export const GuidelinesPage: React.FC = () => {
             className="w-full h-full object-cover opacity-60"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-6">
-            <span className="text-white font-extrabold text-lg">Essential GD Rules & Etiquette</span>
+            <span className="text-white font-extrabold text-lg">Essential GD Rules &amp; Etiquette</span>
           </div>
         </div>
 
-        {/* Vertical Timeline paired with Accordions matching Image 5 */}
         <div className="space-y-4 relative before:absolute before:left-7 before:top-4 before:bottom-4 before:w-0.5 before:bg-slate-300">
-          {steps.map((st, idx) => {
+          {timelineRules.map((st, idx) => {
             const isOpen = openIndex === idx;
             return (
-              <div key={st.num} className="flex items-start gap-4 relative">
+              <div key={st.id || st.num} className="flex items-start gap-4 relative">
                 <div className="w-14 h-12 rounded-xl bg-[#0A1128] text-white font-extrabold text-sm flex items-center justify-center shrink-0 z-10 shadow">
                   {st.num}
                 </div>
-
                 <div className="flex-1 bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
                   <button
                     onClick={() => setOpenIndex(isOpen ? null : idx)}
                     className="w-full px-6 py-4 flex items-center justify-between text-left font-bold text-[#0A1128] text-base"
                   >
                     <span>{st.num} | {st.title}</span>
-                    <ChevronDown className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180 text-blue-600' : 'text-slate-400'}`} />
+                    <ChevronDown
+                      className={`w-5 h-5 transition-transform ${
+                        isOpen ? 'rotate-180 text-blue-600' : 'text-slate-400'
+                      }`}
+                    />
                   </button>
-
                   <AnimatePresence>
                     {isOpen && (
                       <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        className="px-6 pb-5 text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-3"
+                        className="px-6 pb-5 text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-3 whitespace-pre-line"
                       >
                         {st.content}
                       </motion.div>
@@ -91,21 +115,28 @@ export const GuidelinesPage: React.FC = () => {
           })}
         </div>
 
-        {/* Highlighted Common Mistakes Box matching Image 5 */}
-        <div className="mt-8 bg-[#FFF5EB] border border-[#FCD34D] rounded-2xl p-6 text-[#9A3412]">
-          <h3 className="font-extrabold text-base mb-2">07 | Common Mistakes to Avoid</h3>
-          <ul className="list-disc pl-5 space-y-1 text-sm">
-            <li>Interrupting others repeatedly or talking over participants.</li>
-            <li>Losing your temper or being overly aggressive.</li>
-            <li>Going off-topic or drifting away from the core agenda.</li>
-          </ul>
-        </div>
+        {mistakesRule && (
+          <div className="mt-8 bg-[#FFF5EB] border border-[#FCD34D] rounded-2xl p-6 text-[#9A3412]">
+            <h3 className="font-extrabold text-base mb-2">
+              {mistakesRule.num} | {mistakesRule.title}
+            </h3>
+            <ul className="list-disc pl-5 space-y-1 text-sm">
+              {String(mistakesRule.content)
+                .split('\n')
+                .filter(Boolean)
+                .map((line, i) => (
+                  <li key={i}>{line}</li>
+                ))}
+            </ul>
+          </div>
+        )}
 
-        {/* Bottom Telegram Banner */}
         <div className="mt-12 bg-gradient-to-r from-[#0A1128] to-[#1D4ED8] text-white rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow">
           <div>
             <h3 className="text-lg font-extrabold">Ask Owner for Any Doubt</h3>
-            <p className="text-xs text-blue-200">Have a doubt? Get 1-on-1 support directly from the founder.</p>
+            <p className="text-xs text-blue-200">
+              Have a doubt? Get 1-on-1 support directly from the founder.
+            </p>
           </div>
           <button
             onClick={openTelegramSupport}
@@ -120,7 +151,7 @@ export const GuidelinesPage: React.FC = () => {
 };
 
 /* ============================================================================
-   PAGE 6: ANNOUNCEMENTS PAGE (Dynamic Admin Filters + Smooth Show More Expand)
+   PAGE 6: ANNOUNCEMENTS PAGE
    ============================================================================ */
 export const AnnouncementsPage: React.FC = () => {
   const [list, setList] = useState<any[]>([]);
@@ -144,8 +175,6 @@ export const AnnouncementsPage: React.FC = () => {
           settings.announcement_filters.length > 0
             ? settings.announcement_filters
             : ['Urgent', 'Sessions', 'Platform Updates', 'Tips'];
-
-        // Merge any custom categories assigned by Admin
         const merged = [...baseFilters];
         anns.forEach((a: any) => {
           if (
@@ -185,7 +214,6 @@ export const AnnouncementsPage: React.FC = () => {
     return mCat && mSearch;
   });
 
-  // Top Featured Notice: Admin dwara featured mark kiya gaya notice ya sabse pehla notice
   const featured = filtered.find((a) => a.is_featured) || filtered[0];
   const older = filtered.filter((a) => a.id !== featured?.id);
 
@@ -203,7 +231,6 @@ export const AnnouncementsPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Dynamic Category Pills & Search */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
           <div className="flex flex-wrap items-center gap-2">
             {categories.map((c) => (
@@ -232,7 +259,6 @@ export const AnnouncementsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* 2-Column Grid */}
         <div className="grid lg:grid-cols-12 gap-8">
           <div className="lg:col-span-8 space-y-6">
             {featured ? (
@@ -256,7 +282,6 @@ export const AnnouncementsPage: React.FC = () => {
                     </span>
                   )}
                 </div>
-
                 <p
                   className={`text-sm text-slate-700 leading-relaxed whitespace-pre-line mb-5 ${
                     featuredExpanded ? '' : 'line-clamp-3'
@@ -264,7 +289,6 @@ export const AnnouncementsPage: React.FC = () => {
                 >
                   {featured.message}
                 </p>
-
                 <div className="flex flex-wrap items-center gap-3">
                   <button
                     onClick={() => setFeaturedExpanded(!featuredExpanded)}
@@ -272,14 +296,12 @@ export const AnnouncementsPage: React.FC = () => {
                   >
                     {featuredExpanded ? 'Show Less ↑' : 'Read Full Notice'}
                   </button>
-
                   {featured.action_url && (
-                    <Link
-                      to={featured.action_url}
+                    <ActionButtonLink
+                      url={featured.action_url}
+                      text={featured.action_text}
                       className="px-5 py-2.5 rounded-xl bg-[#1D6BF3] hover:bg-blue-700 text-white font-bold text-xs shadow transition"
-                    >
-                      {featured.action_text || 'Open Link →'}
-                    </Link>
+                    />
                   )}
                 </div>
               </div>
@@ -307,12 +329,9 @@ export const AnnouncementsPage: React.FC = () => {
                               <span className="px-2.5 py-0.5 rounded bg-blue-100 text-blue-800 text-[10px] font-bold">
                                 {a.category || 'Sessions'}
                               </span>
-            
-        
                             </div>
                             <h4 className="font-bold text-base text-[#0A1128]">{a.title}</h4>
                           </div>
-
                           <button
                             onClick={() => toggleExpand(a.id)}
                             className="text-xs font-bold text-blue-600 hover:text-blue-800 shrink-0 flex items-center gap-1 bg-blue-50 px-3 py-1.5 rounded-lg transition"
@@ -333,12 +352,11 @@ export const AnnouncementsPage: React.FC = () => {
                                 {a.message}
                                 {a.action_url && (
                                   <div className="mt-3">
-                                    <Link
-                                      to={a.action_url}
+                                    <ActionButtonLink
+                                      url={a.action_url}
+                                      text={a.action_text}
                                       className="inline-flex items-center gap-1 px-4 py-2 rounded-lg bg-[#1D6BF3] hover:bg-blue-700 text-white font-bold text-xs"
-                                    >
-                                      {a.action_text || 'Open Link →'}
-                                    </Link>
+                                    />
                                   </div>
                                 )}
                               </div>
@@ -353,7 +371,6 @@ export const AnnouncementsPage: React.FC = () => {
             )}
           </div>
 
-          {/* Right Sidebar */}
           <div className="lg:col-span-4 space-y-6">
             <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
               <h3 className="font-extrabold text-base text-[#0A1128] mb-4">Quick Stats/Resources</h3>
@@ -389,9 +406,8 @@ export const AnnouncementsPage: React.FC = () => {
   );
 };
 
-
 /* ============================================================================
-   PAGE 7: CONTACT & FAQS (Design 6 - Contact Form + Telegram + FAQ - Image 7)
+   PAGE 7: CONTACT & FAQS
    ============================================================================ */
 export const ContactPage: React.FC = () => {
   const [name, setName] = useState('');
@@ -422,7 +438,6 @@ export const ContactPage: React.FC = () => {
     setMessage('');
   };
 
-
   const faqs = [
     { q: 'How do I join a live Group Discussion?', a: 'Visit the GD Schedule page, select an upcoming session, and click Join Meeting when the countdown finishes.' },
     { q: 'Are the GD practice sessions free?', a: 'Yes! All scheduled student practice sessions are 100% free of cost.' },
@@ -440,7 +455,6 @@ export const ContactPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Send Us a Message Form + Photo matching Image 7 */}
         <div className="grid md:grid-cols-12 gap-8 items-center bg-white border border-slate-200 rounded-2xl p-7 shadow-sm mb-8">
           <form onSubmit={handleSubmit} className="md:col-span-6 space-y-4">
             <h2 className="text-xl font-extrabold text-[#0A1128] mb-2">Send Us a Message</h2>
@@ -491,7 +505,6 @@ export const ContactPage: React.FC = () => {
               Send Message
             </button>
           </form>
-
           <div className="md:col-span-6 rounded-2xl overflow-hidden shadow h-72">
             <img
               src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=800&q=80"
@@ -501,7 +514,6 @@ export const ContactPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Telegram Direct Support Card matching Image 7 */}
         <div className="bg-[#D8EAFF] border border-blue-200 rounded-2xl p-7 text-center mb-10 shadow-sm">
           <div className="w-12 h-12 rounded-full bg-[#2AABEE] text-white flex items-center justify-center mx-auto mb-3 shadow">
             <Send className="w-5 h-5" />
@@ -518,7 +530,6 @@ export const ContactPage: React.FC = () => {
           </button>
         </div>
 
-        {/* Quick Answers (FAQs) Accordion matching Image 7 */}
         <div>
           <h2 className="text-xl font-extrabold text-[#0A1128] mb-4">Quick Answers (FAQs)</h2>
           <div className="space-y-3">

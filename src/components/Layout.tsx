@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutGrid, Users, BookOpen, Megaphone, MessageSquare,
-  FileText, Settings, LogOut, Menu, X, ChevronRight, ShieldCheck
+  FileText, Settings, LogOut, Menu, X, ChevronRight, ShieldCheck, ExternalLink
 } from 'lucide-react';
 import { api, isValidHttps } from '../lib/supabase';
 
@@ -33,8 +33,9 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
   const [settings, setSettings] = useState<any>({});
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     api.getSettings().then(setSettings);
-  }, []);
+  }, [pathname]);
 
   const navItems = [
     { label: 'Home', to: '/' },
@@ -47,10 +48,8 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F4F7FE] text-slate-900 font-sans">
-      {/* Top Navbar with Single Collapsible Menu Section */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between relative">
-          {/* Original Brand Logo */}
           <Link to="/" className="flex items-center gap-2.5">
             <img
               src={settings.logo_url || '/logo.png'}
@@ -62,7 +61,6 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
             </span>
           </Link>
 
-          {/* Right Side: Unified Menu Button + Admin Login */}
           <div className="flex items-center gap-2.5">
             <Link
               to="/admin/login"
@@ -81,7 +79,6 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
             </button>
           </div>
 
-          {/* Dropdown Menu Drawer containing all options */}
           {menuOpen && (
             <>
               <div
@@ -114,7 +111,6 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
                     );
                   })}
                 </div>
-
                 <div className="mt-3 pt-2.5 border-t border-slate-100">
                   <Link
                     to="/admin/login"
@@ -133,10 +129,8 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
 
       <main className="flex-1">{children}</main>
 
-      {/* Premium Dark Navy Footer (Logo + Intro, Quick Links, Important Pages, Telegram & Legal) */}
       <footer className="bg-[#070C1C] text-slate-300 pt-12 pb-8 border-t border-slate-800">
         <div className="max-w-6xl mx-auto px-4 sm:px-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-8 pb-10 border-b border-slate-800/80">
-          {/* Column 1: Logo & Website Intro */}
           <div className="md:col-span-4 space-y-3">
             <Link to="/" className="flex items-center gap-2.5">
               <img
@@ -154,7 +148,6 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
             </p>
           </div>
 
-          {/* Column 2: Quick Links */}
           <div className="md:col-span-3 space-y-2.5 text-xs">
             <h4 className="font-extrabold text-sm text-white mb-3">Quick Links</h4>
             <ul className="space-y-2 text-slate-400">
@@ -165,7 +158,6 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
             </ul>
           </div>
 
-          {/* Column 3: Important Pages */}
           <div className="md:col-span-2 space-y-2.5 text-xs">
             <h4 className="font-extrabold text-sm text-white mb-3">Important Pages</h4>
             <ul className="space-y-2 text-slate-400">
@@ -175,7 +167,6 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
             </ul>
           </div>
 
-          {/* Column 4: Telegram Contact & Legal Policies */}
           <div className="md:col-span-3 space-y-2.5 text-xs">
             <h4 className="font-extrabold text-sm text-white mb-3">Telegram Contact</h4>
             <button
@@ -185,18 +176,15 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
               Ask Owner for Any Doubt
             </button>
             <ul className="space-y-1.5 text-slate-400 pt-1">
-              <li><Link to="/guidelines" className="hover:text-white transition">Privacy Policy</Link></li>
-              <li><Link to="/guidelines" className="hover:text-white transition">Terms &amp; Conditions</Link></li>
+              <li><Link to="/guidelines?section=privacy" className="hover:text-white transition">Privacy Policy</Link></li>
+              <li><Link to="/guidelines?section=terms" className="hover:text-white transition">Terms &amp; Conditions</Link></li>
             </ul>
           </div>
         </div>
-
         <div className="max-w-6xl mx-auto px-4 sm:px-8 pt-6 text-center text-xs text-slate-500">
           {settings.footer_text || '© 2026 GD Practice Hub. All Rights Reserved.'}
         </div>
       </footer>
-
-
     </div>
   );
 };
@@ -204,12 +192,15 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
 export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [settings, setSettings] = useState<any>({});
 
   useEffect(() => {
     if (sessionStorage.getItem('gd_admin_auth') !== 'true') {
       navigate('/admin/login');
     }
-  }, [navigate]);
+    api.getSettings().then(setSettings);
+  }, [navigate, pathname]);
 
   const menu = [
     { label: 'Dashboard Overview', to: '/admin/dashboard', icon: LayoutGrid },
@@ -217,18 +208,38 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
     { label: 'GD Topics Library', to: '/admin/topics', icon: BookOpen },
     { label: 'Announcements', to: '/admin/announcements', icon: Megaphone },
     { label: 'Feedback & Testimonials', to: '/admin/feedback', icon: MessageSquare },
-       { label: 'Rules & Guidelines', to: '/admin/guidelines', icon: FileText },
-
+    { label: 'Rules & Guidelines', to: '/admin/guidelines', icon: FileText },
     { label: 'Website & Telegram Settings', to: '/admin/settings', icon: Settings },
   ];
 
   return (
-    <div className="min-h-screen flex bg-[#F4F7FC] text-slate-900">
-      <aside className="w-64 bg-[#0B1223] text-white flex flex-col justify-between shrink-0 min-h-screen">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-[#F4F7FC] text-slate-900">
+      {/* Mobile Top Bar for Admin */}
+      <div className="lg:hidden bg-[#0B1223] text-white px-4 py-3 flex items-center justify-between sticky top-0 z-40 shadow-md">
+        <div className="flex items-center gap-2.5">
+          <img src={settings.logo_url || '/logo.png'} alt="GD" className="w-8 h-8 rounded-lg object-contain bg-white p-0.5" />
+          <span className="font-bold text-sm">{settings.website_name || 'GD Practice Hub'} Admin</span>
+        </div>
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="p-2 rounded-lg bg-slate-800 text-white"
+        >
+          {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
+      </div>
+
+      {/* Sidebar (Desktop Fixed + Mobile Drawer) */}
+      <aside
+        className={`${
+          mobileMenuOpen ? 'block' : 'hidden'
+        } lg:flex w-full lg:w-64 bg-[#0B1223] text-white flex-col justify-between shrink-0 lg:min-h-screen z-30`}
+      >
         <div>
-          <div className="p-5 flex items-center gap-3 border-b border-slate-800">
-            <img src="/logo.png" alt="GD" className="w-9 h-9 rounded-lg object-contain" />
-            <span className="font-bold text-base tracking-tight">GD Practice Hub</span>
+          <div className="hidden lg:flex p-5 items-center justify-between border-b border-slate-800">
+            <div className="flex items-center gap-3">
+              <img src={settings.logo_url || '/logo.png'} alt="GD" className="w-9 h-9 rounded-lg object-contain bg-white p-0.5" />
+              <span className="font-bold text-base tracking-tight">{settings.website_name || 'GD Practice Hub'}</span>
+            </div>
           </div>
           <nav className="p-3 space-y-1.5">
             {menu.map((item) => {
@@ -238,6 +249,7 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
                 <Link
                   key={item.to}
                   to={item.to}
+                  onClick={() => setMobileMenuOpen(false)}
                   className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition ${
                     active
                       ? 'bg-[#2563EB] text-white shadow-md shadow-blue-600/30'
@@ -252,7 +264,14 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
           </nav>
         </div>
 
-        <div className="p-4 border-t border-slate-800">
+        <div className="p-4 border-t border-slate-800 space-y-2">
+          <Link
+            to="/"
+            className="w-full flex items-center gap-3 px-3.5 py-2 rounded-lg text-xs font-semibold text-blue-300 hover:bg-slate-800 transition"
+          >
+            <ExternalLink className="w-4 h-4" />
+            <span>View Public Website</span>
+          </Link>
           <button
             onClick={() => {
               sessionStorage.removeItem('gd_admin_auth');
@@ -266,7 +285,7 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
         </div>
       </aside>
 
-      <div className="flex-1 p-6 sm:p-8 overflow-y-auto">{children}</div>
+      <div className="flex-1 p-4 sm:p-8 overflow-y-auto">{children}</div>
     </div>
   );
 };

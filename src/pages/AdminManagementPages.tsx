@@ -9,14 +9,13 @@ import { AdminLayout } from '../components/Layout';
 import { api, isValidHttps } from '../lib/supabase';
 
 /* ============================================================================
-   PAGE 10: ADMIN MANAGE GD SESSIONS (Image 15 - 1000086194.png & Spec 25)
+   PAGE 10: ADMIN MANAGE GD SESSIONS
    ============================================================================ */
 export const AdminSessionsPage: React.FC = () => {
   const [sessions, setSessions] = useState<any[]>([]);
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
 
-  // Calendar (YYYY-MM-DD) aur Watch (HH:mm) ke helper functions
   const getTodayIso = () => {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -28,7 +27,7 @@ export const AdminSessionsPage: React.FC = () => {
   };
 
   const getDefaultFutureSlot = () => {
-    const d = new Date(Date.now() + 2 * 60 * 60 * 1000); // Abhi se 2 ghante aage ka default time
+    const d = new Date(Date.now() + 2 * 60 * 60 * 1000);
     d.setMinutes(0, 0, 0);
     const date_iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     const time_24 = `${String(d.getHours()).padStart(2, '0')}:00`;
@@ -98,11 +97,14 @@ export const AdminSessionsPage: React.FC = () => {
     is_published: true,
     description: '',
     preparation_points: '',
-    special_instructions: 'Be respectful to other candidates.\nNo interruptions while someone is speaking.\nSupport your opinions with factual data.\nAdhere to the 3-minute speaking limit.'
+    special_instructions:
+      'Be respectful to other candidates.\nNo interruptions while someone is speaking.\nSupport your opinions with factual data.\nAdhere to the 3-minute speaking limit.',
   });
 
   const load = () => api.list('sessions').then(setSessions);
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   const openCreate = () => {
     const slot = getDefaultFutureSlot();
@@ -124,7 +126,8 @@ export const AdminSessionsPage: React.FC = () => {
       is_published: true,
       description: '',
       preparation_points: '',
-      special_instructions: 'Be respectful to other candidates.\nNo interruptions while someone is speaking.\nSupport your opinions with factual data.\nAdhere to the 3-minute speaking limit.'
+      special_instructions:
+        'Be respectful to other candidates.\nNo interruptions while someone is speaking.\nSupport your opinions with factual data.\nAdhere to the 3-minute speaking limit.',
     });
     setModalOpen(true);
   };
@@ -153,7 +156,6 @@ export const AdminSessionsPage: React.FC = () => {
     const formattedTime = time24To12(form.time_24);
     const selectedMs = new Date(`${formattedDate} ${formattedTime}`).getTime();
 
-    // Past Date ya Past Time block check
     if (!form.id && selectedMs < Date.now()) {
       alert('Beete hue (past) date ya time par naya session create nahi ho sakta! Kripya Calendar aur Watch se aage ka time chunein.');
       return;
@@ -177,7 +179,6 @@ export const AdminSessionsPage: React.FC = () => {
     load();
   };
 
-
   const togglePublish = async (s: any) => {
     await api.save('sessions', { ...s, is_published: !s.is_published });
     load();
@@ -189,9 +190,10 @@ export const AdminSessionsPage: React.FC = () => {
     load();
   };
 
-  const filtered = sessions.filter((s) =>
-    s.title.toLowerCase().includes(search.toLowerCase()) ||
-    (s.topic || '').toLowerCase().includes(search.toLowerCase())
+  const filtered = sessions.filter(
+    (s) =>
+      s.title.toLowerCase().includes(search.toLowerCase()) ||
+      (s.topic || '').toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -202,7 +204,6 @@ export const AdminSessionsPage: React.FC = () => {
             <h1 className="text-2xl font-extrabold text-[#0A1128]">Manage GD Sessions</h1>
             <p className="text-xs text-slate-500">Create, edit, publish, and manage all GD sessions.</p>
           </div>
-
           <div className="flex items-center gap-3">
             <div className="relative">
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
@@ -223,7 +224,7 @@ export const AdminSessionsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Sessions Data Table matching Image 15 */}
+        {/* Sessions Data Table */}
         <div className="bg-white border border-slate-200 rounded-2xl overflow-x-auto shadow-sm">
           <table className="w-full text-left text-xs">
             <thead>
@@ -247,12 +248,17 @@ export const AdminSessionsPage: React.FC = () => {
                     {s.scheduled_date} at {s.start_time}
                   </td>
                   <td className="py-3.5 px-4">
-                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
-                      s.status === 'Live' ? 'bg-emerald-100 text-emerald-700' :
-                      s.status === 'Cancelled' ? 'bg-red-100 text-red-700' :
-                      s.status === 'Completed' ? 'bg-slate-200 text-slate-700' :
-                      'bg-blue-100 text-blue-700'
-                    }`}>
+                    <span
+                      className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                        s.status === 'Live'
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : s.status === 'Cancelled'
+                          ? 'bg-red-100 text-red-700'
+                          : s.status === 'Completed'
+                          ? 'bg-slate-200 text-slate-700'
+                          : 'bg-blue-100 text-blue-700'
+                      }`}
+                    >
                       {s.status}
                     </span>
                   </td>
@@ -267,21 +273,32 @@ export const AdminSessionsPage: React.FC = () => {
                     </button>
                   </td>
                   <td className="py-3.5 px-4">
-                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md font-semibold text-[11px] ${
-                      isValidHttps(s.zoom_url) ? 'bg-blue-50 text-blue-600' : 'bg-slate-100 text-slate-400'
-                    }`}>
+                    <span
+                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md font-semibold text-[11px] ${
+                        isValidHttps(s.zoom_url) ? 'bg-blue-50 text-blue-600' : 'bg-slate-100 text-slate-400'
+                      }`}
+                    >
                       <Link2 className="w-3.5 h-3.5" />
                       {isValidHttps(s.zoom_url) ? 'Added' : 'None'}
                     </span>
                   </td>
                   <td className="py-3.5 px-4 text-right space-x-1.5">
-                    <Link to={`/session?id=${s.id}`} className="px-2.5 py-1 rounded border border-slate-200 text-slate-700 font-semibold hover:bg-slate-100">
+                    <Link
+                      to={`/session?id=${s.id}`}
+                      className="px-2.5 py-1 rounded border border-slate-200 text-slate-700 font-semibold hover:bg-slate-100"
+                    >
                       View
                     </Link>
-                    <button onClick={() => openEdit(s)} className="px-2.5 py-1 rounded border border-slate-200 text-slate-700 font-semibold hover:bg-slate-100">
+                    <button
+                      onClick={() => openEdit(s)}
+                      className="px-2.5 py-1 rounded border border-slate-200 text-slate-700 font-semibold hover:bg-slate-100"
+                    >
                       Edit
                     </button>
-                    <button onClick={() => handleDelete(s.id)} className="px-2.5 py-1 rounded border border-red-200 bg-red-50 text-red-600 font-semibold hover:bg-red-100">
+                    <button
+                      onClick={() => handleDelete(s.id)}
+                      className="px-2.5 py-1 rounded border border-red-200 bg-red-50 text-red-600 font-semibold hover:bg-red-100"
+                    >
                       Delete
                     </button>
                   </td>
@@ -291,7 +308,7 @@ export const AdminSessionsPage: React.FC = () => {
           </table>
         </div>
 
-        {/* Create / Edit Session Modal matching Image 15 */}
+        {/* Create / Edit Session Modal */}
         {modalOpen && (
           <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[92vh] overflow-y-auto">
@@ -314,7 +331,9 @@ export const AdminSessionsPage: React.FC = () => {
 
               <form onSubmit={handleSave} className="space-y-3.5 text-xs">
                 <div>
-                  <label className="block font-bold text-slate-800 mb-1">Session Title <span className="text-red-500">*</span></label>
+                  <label className="block font-bold text-slate-800 mb-1">
+                    Session Title <span className="text-red-500">*</span>
+                  </label>
                   <input
                     required
                     type="text"
@@ -327,7 +346,9 @@ export const AdminSessionsPage: React.FC = () => {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-bold text-slate-800 mb-1">Topic Group / Category <span className="text-red-500">*</span></label>
+                    <label className="block font-bold text-slate-800 mb-1">
+                      Topic Group / Category <span className="text-red-500">*</span>
+                    </label>
                     <select
                       value={form.category}
                       onChange={(e) => setForm({ ...form, category: e.target.value })}
@@ -354,7 +375,7 @@ export const AdminSessionsPage: React.FC = () => {
                   </div>
                 </div>
 
-                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                   <div>
                     <label className="block font-bold text-slate-800 mb-1">
                       Date (Calendar) <span className="text-red-500">*</span>
@@ -404,9 +425,8 @@ export const AdminSessionsPage: React.FC = () => {
                   </div>
                 </div>
                 <p className="text-[11px] font-semibold text-blue-600 -mt-1">
-                  📅 Selected Schedule: {isoToDisplayDate(form.date_iso)} at {time24To12(form.time_24)}
+                  Selected Schedule: {isoToDisplayDate(form.date_iso)} at {time24To12(form.time_24)}
                 </p>
-
 
                 <div>
                   <label className="block font-bold text-slate-800 mb-1">Zoom Meeting Link (HTTPS)</label>
@@ -447,7 +467,9 @@ export const AdminSessionsPage: React.FC = () => {
 
                 <div className="grid grid-cols-2 gap-4 items-center pt-1">
                   <div>
-                    <label className="block font-bold text-slate-800 mb-1">Status <span className="text-red-500">*</span></label>
+                    <label className="block font-bold text-slate-800 mb-1">
+                      Status <span className="text-red-500">*</span>
+                    </label>
                     <select
                       value={form.status}
                       onChange={(e) => setForm({ ...form, status: e.target.value })}
@@ -459,7 +481,6 @@ export const AdminSessionsPage: React.FC = () => {
                       <option value="Cancelled">Cancelled</option>
                     </select>
                   </div>
-
                   <div>
                     <label className="block font-bold text-slate-800 mb-1">Publish Directly?</label>
                     <button
@@ -469,7 +490,7 @@ export const AdminSessionsPage: React.FC = () => {
                         form.is_published ? 'bg-blue-600' : 'bg-slate-400'
                       }`}
                     >
-                      {form.is_published ? 'ON ●' : 'OFF ○'}
+                      {form.is_published ? 'ON ✓' : 'OFF ✕'}
                     </button>
                   </div>
                 </div>
@@ -484,21 +505,24 @@ export const AdminSessionsPage: React.FC = () => {
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg"
                   />
                 </div>
-                
-                             <div>
-               <label className="block font-bold text-slate-800 mb-1">Preparation Points (Har line ek bullet point banegi)</label>
-               <textarea
-                 rows={3}
-                 value={form.preparation_points || ''}
-                 onChange={(e) => setForm({ ...form, preparation_points: e.target.value })}
-                 placeholder="Point 1&#10;Point 2&#10;Point 3"
-                 className="w-full px-3 py-2 border border-slate-300 rounded-lg"
-               />
-             </div>
-
 
                 <div>
-                  <label className="block font-bold text-slate-800 mb-1">Session Cover Image (Upload ya Image Link)</label>
+                  <label className="block font-bold text-slate-800 mb-1">
+                    Preparation Points (Har line ek bullet point banegi)
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={form.preparation_points || ''}
+                    onChange={(e) => setForm({ ...form, preparation_points: e.target.value })}
+                    placeholder="Point 1&#10;Point 2&#10;Point 3"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-800 mb-1">
+                    Session Cover Image (Upload ya Image Link)
+                  </label>
                   <div className="flex items-center gap-2">
                     <input
                       type="text"
@@ -529,7 +553,6 @@ export const AdminSessionsPage: React.FC = () => {
                   </div>
                 </div>
 
-
                 <div className="flex justify-end gap-2.5 pt-2">
                   <button
                     type="button"
@@ -542,7 +565,7 @@ export const AdminSessionsPage: React.FC = () => {
                     type="submit"
                     className="px-5 py-2 rounded-lg bg-[#0F172A] hover:bg-blue-600 text-white font-bold shadow"
                   >
-                    Create Session
+                    {form.id ? 'Save Changes' : 'Create Session'}
                   </button>
                 </div>
               </form>
@@ -555,7 +578,7 @@ export const AdminSessionsPage: React.FC = () => {
 };
 
 /* ============================================================================
-   PAGE 11: ADMIN MANAGE GD TOPICS (Image 11 - 1000086161.png & Spec 26)
+   PAGE 11: ADMIN MANAGE GD TOPICS
    ============================================================================ */
 export const AdminTopicsPage: React.FC = () => {
   const [topics, setTopics] = useState<any[]>([]);
@@ -566,11 +589,13 @@ export const AdminTopicsPage: React.FC = () => {
     category: 'Artificial Intelligence and Technology',
     description: '',
     preparation_points: '',
-    is_published: true
+    is_published: true,
   });
 
   const load = () => api.list('topics').then(setTopics);
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   const openCreate = () => {
     setForm({
@@ -578,8 +603,9 @@ export const AdminTopicsPage: React.FC = () => {
       title: '',
       category: 'Artificial Intelligence and Technology',
       description: '',
-      preparation_points: '• Understand the timeline of AI automation.\n• Discuss industries most affected.\n• Synthesize solutions for workforce reskilling.',
-      is_published: true
+      preparation_points:
+        '• Understand the timeline of AI automation.\n• Discuss industries most affected.\n• Synthesize solutions for workforce reskilling.',
+      is_published: true,
     });
     setModalOpen(true);
   };
@@ -591,7 +617,7 @@ export const AdminTopicsPage: React.FC = () => {
       difficulty: form.difficulty || 'Medium',
       est_time: form.est_time || '45m',
       badge: form.badge || 'POPULAR',
-      is_featured: true
+      is_featured: true,
     });
     setModalOpen(false);
     load();
@@ -624,7 +650,7 @@ export const AdminTopicsPage: React.FC = () => {
           </button>
         </div>
 
-        {/* Topics Table matching Image 11 */}
+        {/* Topics Table */}
         <div className="bg-white border border-slate-200 rounded-2xl overflow-x-auto shadow-sm">
           <table className="w-full text-left text-xs">
             <thead>
@@ -651,9 +677,24 @@ export const AdminTopicsPage: React.FC = () => {
                     </button>
                   </td>
                   <td className="py-3.5 px-4 text-right space-x-1.5">
-                    <Link to="/topics" className="px-2.5 py-1 rounded border border-slate-200 font-semibold">View</Link>
-                    <button onClick={() => { setForm(t); setModalOpen(true); }} className="px-2.5 py-1 rounded border border-slate-200 font-semibold">Edit</button>
-                    <button onClick={() => removeTopic(t.id)} className="px-2.5 py-1 rounded border border-red-200 bg-red-50 text-red-600 font-semibold">Delete</button>
+                    <Link to="/topics" className="px-2.5 py-1 rounded border border-slate-200 font-semibold">
+                      View
+                    </Link>
+                    <button
+                      onClick={() => {
+                        setForm(t);
+                        setModalOpen(true);
+                      }}
+                      className="px-2.5 py-1 rounded border border-slate-200 font-semibold"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => removeTopic(t.id)}
+                      className="px-2.5 py-1 rounded border border-red-200 bg-red-50 text-red-600 font-semibold"
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -661,18 +702,20 @@ export const AdminTopicsPage: React.FC = () => {
           </table>
         </div>
 
-        {/* Create / Edit Topic Modal matching Image 11 */}
+        {/* Create / Edit Topic Modal */}
         {modalOpen && (
           <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl">
+            <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[92vh] overflow-y-auto">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-11 h-11 rounded-xl bg-[#2563EB] text-white flex items-center justify-center shadow-md">
                     <BookmarkPlus className="w-6 h-6" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-extrabold text-[#0A1128]">Create New Topic</h2>
-                    <p className="text-xs text-slate-500">Fill in the details to add a new GD topic.</p>
+                    <h2 className="text-lg font-extrabold text-[#0A1128]">
+                      {form.id ? 'Edit GD Topic' : 'Create New Topic'}
+                    </h2>
+                    <p className="text-xs text-slate-500">Fill in the details to save this GD topic.</p>
                   </div>
                 </div>
                 <button onClick={() => setModalOpen(false)} className="text-slate-400 hover:text-slate-600">
@@ -682,7 +725,9 @@ export const AdminTopicsPage: React.FC = () => {
 
               <form onSubmit={handleSave} className="space-y-3.5 text-xs">
                 <div>
-                  <label className="block font-bold text-slate-800 mb-1">Topic Title <span className="text-red-500">*</span></label>
+                  <label className="block font-bold text-slate-800 mb-1">
+                    Topic Title <span className="text-red-500">*</span>
+                  </label>
                   <input
                     required
                     type="text"
@@ -692,9 +737,10 @@ export const AdminTopicsPage: React.FC = () => {
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg"
                   />
                 </div>
-
                 <div>
-                  <label className="block font-bold text-slate-800 mb-1">Category <span className="text-red-500">*</span></label>
+                  <label className="block font-bold text-slate-800 mb-1">
+                    Category <span className="text-red-500">*</span>
+                  </label>
                   <select
                     value={form.category}
                     onChange={(e) => setForm({ ...form, category: e.target.value })}
@@ -709,7 +755,6 @@ export const AdminTopicsPage: React.FC = () => {
                     <option>Interview and Placement GD</option>
                   </select>
                 </div>
-
                 <div>
                   <label className="block font-bold text-slate-800 mb-1">Description</label>
                   <textarea
@@ -720,8 +765,6 @@ export const AdminTopicsPage: React.FC = () => {
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg"
                   />
                 </div>
-
-
                 <div>
                   <label className="block font-bold text-slate-800 mb-1">Preparation Points</label>
                   <textarea
@@ -731,7 +774,6 @@ export const AdminTopicsPage: React.FC = () => {
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg"
                   />
                 </div>
-
                 <div>
                   <label className="block font-bold text-slate-800 mb-1">Topic Image (Upload ya Image Link)</label>
                   <div className="flex items-center gap-2">
@@ -763,8 +805,6 @@ export const AdminTopicsPage: React.FC = () => {
                     </label>
                   </div>
                 </div>
-
-
                 <div>
                   <label className="block font-bold text-slate-800 mb-1">Publish Directly?</label>
                   <button
@@ -774,16 +814,22 @@ export const AdminTopicsPage: React.FC = () => {
                       form.is_published ? 'bg-blue-600' : 'bg-slate-400'
                     }`}
                   >
-                    {form.is_published ? 'ON ●' : 'OFF ○'}
+                    {form.is_published ? 'ON ✓' : 'OFF ✕'}
                   </button>
                 </div>
-
                 <div className="flex justify-end gap-2.5 pt-2">
-                  <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 rounded-lg bg-slate-100 font-bold">
+                  <button
+                    type="button"
+                    onClick={() => setModalOpen(false)}
+                    className="px-4 py-2 rounded-lg bg-slate-100 font-bold"
+                  >
                     Cancel
                   </button>
-                  <button type="submit" className="px-5 py-2 rounded-lg bg-[#0F172A] hover:bg-blue-600 text-white font-bold">
-                    Create Topic
+                  <button
+                    type="submit"
+                    className="px-5 py-2 rounded-lg bg-[#0F172A] hover:bg-blue-600 text-white font-bold"
+                  >
+                    {form.id ? 'Save Changes' : 'Create Topic'}
                   </button>
                 </div>
               </form>
@@ -796,7 +842,7 @@ export const AdminTopicsPage: React.FC = () => {
 };
 
 /* ============================================================================
-   PAGE 12: ADMIN MANAGE ANNOUNCEMENTS (With Full Filter & Show-More Control)
+   PAGE 12: ADMIN MANAGE ANNOUNCEMENTS
    ============================================================================ */
 const DEFAULT_ANNOUNCEMENT_FILTERS = ['Urgent', 'Sessions', 'Platform Updates', 'Tips'];
 
@@ -808,7 +854,6 @@ export const AdminAnnouncementsPage: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [customCategoryMode, setCustomCategoryMode] = useState(false);
   const [customCategoryName, setCustomCategoryName] = useState('');
-
   const [form, setForm] = useState<any>({
     id: '',
     title: '',
@@ -827,12 +872,11 @@ export const AdminAnnouncementsPage: React.FC = () => {
       api.getSettings(),
     ]);
     setList(anns);
+    const savedFilters: string[] =
+      Array.isArray(settings?.announcement_filters) && settings.announcement_filters.length > 0
+        ? settings.announcement_filters
+        : DEFAULT_ANNOUNCEMENT_FILTERS;
 
-    const savedFilters: string[] = Array.isArray(settings?.announcement_filters) && settings.announcement_filters.length > 0
-      ? settings.announcement_filters
-      : DEFAULT_ANNOUNCEMENT_FILTERS;
-
-    // Merge any custom categories already used in announcements
     const merged = [...savedFilters];
     anns.forEach((a: any) => {
       if (a.category && !merged.some((f) => f.toLowerCase() === String(a.category).toLowerCase())) {
@@ -911,7 +955,6 @@ export const AdminAnnouncementsPage: React.FC = () => {
       ? customCategoryName.trim() || 'General'
       : form.category || 'Sessions';
 
-    // Agar Admin ne modal ke andar naya filter type kiya hai, to use Filter Bar mein bhi jod do
     if (
       finalCategory &&
       !filters.some((f) => f.toLowerCase() === finalCategory.toLowerCase())
@@ -919,7 +962,6 @@ export const AdminAnnouncementsPage: React.FC = () => {
       await saveFilterList([...filters, finalCategory]);
     }
 
-    // Agar is announcement ko Top Featured banaya hai, to baki par se featured hata do
     if (form.is_featured) {
       for (const item of list) {
         if (item.id !== form.id && item.is_featured) {
@@ -939,7 +981,11 @@ export const AdminAnnouncementsPage: React.FC = () => {
   const filteredList = list.filter((a) => {
     if (activeAdminFilter === 'All') return true;
     if (activeAdminFilter === 'Urgent') {
-      return a.is_important || String(a.category).toLowerCase() === 'urgent' || String(a.category).toLowerCase() === 'priority';
+      return (
+        a.is_important ||
+        String(a.category).toLowerCase() === 'urgent' ||
+        String(a.category).toLowerCase() === 'priority'
+      );
     }
     return String(a.category || '').toLowerCase() === activeAdminFilter.toLowerCase();
   });
@@ -962,7 +1008,7 @@ export const AdminAnnouncementsPage: React.FC = () => {
           </button>
         </div>
 
-        {/* FILTER TABS MANAGER CARD (Add / Remove Public Page Filters) */}
+        {/* FILTER TABS MANAGER CARD */}
         <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -1002,7 +1048,6 @@ export const AdminAnnouncementsPage: React.FC = () => {
             >
               All ({list.length})
             </button>
-
             {filters.map((f) => {
               const active = activeAdminFilter === f;
               return (
@@ -1025,7 +1070,7 @@ export const AdminAnnouncementsPage: React.FC = () => {
                       active ? 'hover:bg-blue-800 text-white' : 'hover:bg-red-100 text-slate-400 hover:text-red-600'
                     }`}
                   >
-                    ×
+                    <X className="w-3 h-3" />
                   </button>
                 </div>
               );
@@ -1062,9 +1107,7 @@ export const AdminAnnouncementsPage: React.FC = () => {
                   <td className="py-3.5 px-4 space-x-1.5">
                     <span
                       className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                        a.is_important
-                          ? 'bg-[#DC3545] text-white'
-                          : 'bg-slate-100 text-slate-600'
+                        a.is_important ? 'bg-[#DC3545] text-white' : 'bg-slate-100 text-slate-600'
                       }`}
                     >
                       {a.is_important ? 'Priority' : 'Normal'}
@@ -1119,7 +1162,7 @@ export const AdminAnnouncementsPage: React.FC = () => {
           </table>
         </div>
 
-        {/* Create / Edit Announcement Modal with Filter Selector & Custom Filter Input */}
+        {/* Create / Edit Announcement Modal */}
         {modalOpen && (
           <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[92vh] overflow-y-auto">
@@ -1157,7 +1200,6 @@ export const AdminAnnouncementsPage: React.FC = () => {
                   />
                 </div>
 
-                {/* Filter / Category Selector + Create New Filter Option */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="font-bold text-slate-800">
@@ -1171,7 +1213,6 @@ export const AdminAnnouncementsPage: React.FC = () => {
                       {customCategoryMode ? '← Choose Existing Filter' : '+ Create New Filter'}
                     </button>
                   </div>
-
                   {customCategoryMode ? (
                     <input
                       required
@@ -1210,7 +1251,6 @@ export const AdminAnnouncementsPage: React.FC = () => {
                   />
                 </div>
 
-                {/* Optional Action Button inside Show More */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block font-bold text-slate-800 mb-1">
@@ -1248,10 +1288,9 @@ export const AdminAnnouncementsPage: React.FC = () => {
                         form.is_important ? 'bg-[#DC3545]' : 'bg-slate-400'
                       }`}
                     >
-                      {form.is_important ? 'ON ●' : 'OFF'}
+                      {form.is_important ? 'ON ✓' : 'OFF'}
                     </button>
                   </div>
-
                   <div>
                     <label className="block font-bold text-slate-800 mb-1">Featured Top Box?</label>
                     <button
@@ -1264,7 +1303,6 @@ export const AdminAnnouncementsPage: React.FC = () => {
                       {form.is_featured ? 'YES ★' : 'NO'}
                     </button>
                   </div>
-
                   <div>
                     <label className="block font-bold text-slate-800 mb-1">Publish Directly?</label>
                     <button
@@ -1274,7 +1312,7 @@ export const AdminAnnouncementsPage: React.FC = () => {
                         form.is_published ? 'bg-blue-600' : 'bg-slate-400'
                       }`}
                     >
-                      {form.is_published ? 'ON ●' : 'OFF'}
+                      {form.is_published ? 'ON ✓' : 'OFF'}
                     </button>
                   </div>
                 </div>
@@ -1313,9 +1351,10 @@ export const AdminFeedbackPage: React.FC = () => {
   const [expandedId, setExpandedId] = useState<string>('');
 
   const load = () => api.list('feedback').then(setItems);
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
-  // Helper: Check if record came from "Send Us a Message" (Contact Page)
   const isPrivateMessage = (i: any) => !i.session_title || i.session_title === 'CONTACT_MESSAGE';
 
   const msgCount = items.filter((i) => isPrivateMessage(i)).length;
@@ -1323,7 +1362,7 @@ export const AdminFeedbackPage: React.FC = () => {
   const unreadCount = items.filter((i) => !i.is_reviewed).length;
   const reviewedCount = items.filter((i) => i.is_reviewed).length;
 
-    const filtered = items.filter((i) => {
+  const filtered = items.filter((i) => {
     const mTab =
       tab === 'All' ||
       (tab === 'Messages' && isPrivateMessage(i)) ||
@@ -1337,14 +1376,12 @@ export const AdminFeedbackPage: React.FC = () => {
     return mTab && mSearch;
   });
 
-  // Fixed order sorting: Purane aur naye messages apni jagah par sthir rahein
   filtered.sort((a, b) => {
     const timeA = Number(a.id) || 0;
     const timeB = Number(b.id) || 0;
     if (timeA && timeB) return timeB - timeA;
     return String(b.created_at || '').localeCompare(String(a.created_at || ''));
   });
-
 
   return (
     <AdminLayout>
@@ -1357,7 +1394,6 @@ export const AdminFeedbackPage: React.FC = () => {
         </div>
 
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-          {/* Filter Bar */}
           <div className="p-3.5 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-1.5">
               <button onClick={load} className="p-1.5 rounded hover:bg-slate-200 text-slate-600">
@@ -1377,7 +1413,7 @@ export const AdminFeedbackPage: React.FC = () => {
                   tab === 'Messages' ? 'bg-[#2563EB] text-white' : 'text-slate-700 hover:bg-slate-200'
                 }`}
               >
-                🔒 Contact Messages ({msgCount})
+                Contact Messages ({msgCount})
               </button>
               <button
                 onClick={() => setTab('Feedback')}
@@ -1385,7 +1421,7 @@ export const AdminFeedbackPage: React.FC = () => {
                   tab === 'Feedback' ? 'bg-[#2563EB] text-white' : 'text-slate-700 hover:bg-slate-200'
                 }`}
               >
-                ⭐ Public Feedback ({fbCount})
+                Public Feedback ({fbCount})
               </button>
               <button
                 onClick={() => setTab('Unread')}
@@ -1404,7 +1440,6 @@ export const AdminFeedbackPage: React.FC = () => {
                 Reviewed ({reviewedCount})
               </button>
             </div>
-
             <div className="relative w-full sm:w-60">
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2" />
               <input
@@ -1417,7 +1452,6 @@ export const AdminFeedbackPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Inbox Rows */}
           <div className="divide-y divide-slate-200 text-xs">
             {filtered.map((f) => {
               const isOpen = expandedId === f.id;
@@ -1446,7 +1480,7 @@ export const AdminFeedbackPage: React.FC = () => {
                       <div>
                         <p className="font-bold text-[#0A1128] flex items-center gap-1.5">
                           {f.name}
-                          {!f.is_reviewed && <span className="text-blue-600 text-[11px] font-semibold">● Unread</span>}
+                          {!f.is_reviewed && <span className="text-blue-600 text-[11px] font-semibold">• Unread</span>}
                         </p>
                         <p className="text-slate-500 text-[11px]">{f.email || 'No email provided'}</p>
                       </div>
@@ -1461,7 +1495,7 @@ export const AdminFeedbackPage: React.FC = () => {
                               : 'bg-amber-100 text-amber-800'
                           }`}
                         >
-                          {isPrivate ? '🔒 Private Contact Message' : `⭐ Public Feedback (${f.rating || 5}★)`}
+                          {isPrivate ? 'Private Contact Message' : `Public Feedback (${f.rating || 5}★)`}
                         </span>
                         <p className={`${!f.is_reviewed ? 'font-extrabold text-[#0A1128]' : 'font-semibold text-slate-800'}`}>
                           {f.subject}
@@ -1520,9 +1554,8 @@ export const AdminFeedbackPage: React.FC = () => {
   );
 };
 
-
 /* ============================================================================
-   PAGE 14: WEBSITE & TELEGRAM SETTINGS (Image 14 - 1000086179.png & Spec 29)
+   PAGE 14: WEBSITE & TELEGRAM SETTINGS
    ============================================================================ */
 export const AdminSettingsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'General' | 'Contact' | 'Session' | 'Footer'>('General');
@@ -1535,7 +1568,7 @@ export const AdminSettingsPage: React.FC = () => {
     contact_email: 'admin@gdpractice.com',
     default_timezone: 'IST (UTC+5:30)',
     session_policy: '',
-    footer_text: '© 2026 GD Practice Hub'
+    footer_text: '© 2026 GD Practice Hub. All Rights Reserved.',
   });
 
   useEffect(() => {
@@ -1569,14 +1602,13 @@ export const AdminSettingsPage: React.FC = () => {
       <div className="space-y-5 max-w-4xl">
         <div>
           <h1 className="text-2xl font-extrabold text-[#0A1128] flex items-center gap-2">
-            ⚙ Website &amp; Telegram Settings
+            Website &amp; Telegram Settings
           </h1>
           <p className="text-xs text-slate-600 mt-0.5">
-            🔒 Manage global settings for GD Practice Hub including branding, contact info, and policies.
+            Manage global settings for GD Practice Hub including branding, contact info, and policies.
           </p>
         </div>
 
-        {/* 4 Settings Tabs matching Image 14 */}
         <div className="flex flex-wrap gap-6 border-b border-slate-200 text-xs font-bold">
           {[
             { id: 'General', label: 'General', icon: Globe },
@@ -1605,12 +1637,13 @@ export const AdminSettingsPage: React.FC = () => {
             <>
               <div>
                 <h2 className="text-base font-extrabold text-[#0A1128]">General Website Settings</h2>
-                <p className="text-slate-500">Manage your platform’s primary branding and messaging.</p>
+                <p className="text-slate-500">Manage your platform's primary branding and messaging.</p>
               </div>
-
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-bold text-slate-800 mb-1">Website Name <span className="text-red-500">*</span></label>
+                  <label className="block font-bold text-slate-800 mb-1">
+                    Website Name <span className="text-red-500">*</span>
+                  </label>
                   <input
                     required
                     type="text"
@@ -1620,7 +1653,9 @@ export const AdminSettingsPage: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-800 mb-1">Website Tagline <span className="text-red-500">*</span></label>
+                  <label className="block font-bold text-slate-800 mb-1">
+                    Website Tagline <span className="text-red-500">*</span>
+                  </label>
                   <input
                     required
                     type="text"
@@ -1630,7 +1665,6 @@ export const AdminSettingsPage: React.FC = () => {
                   />
                 </div>
               </div>
-
               <div>
                 <label className="block font-bold text-slate-800 mb-1">About / Mission Statement</label>
                 <textarea
@@ -1640,9 +1674,10 @@ export const AdminSettingsPage: React.FC = () => {
                   className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg"
                 />
               </div>
-
               <div>
-                <label className="block font-bold text-slate-800 mb-2">Website Logo <span className="text-red-500">*</span></label>
+                <label className="block font-bold text-slate-800 mb-2">
+                  Website Logo <span className="text-red-500">*</span>
+                </label>
                 <div className="flex items-center gap-4">
                   <div className="w-20 h-20 rounded-xl border border-slate-200 bg-slate-50 p-2 flex items-center justify-center">
                     <img src={settings.logo_url || '/logo.png'} alt="Brand Logo" className="max-h-full object-contain" />
@@ -1672,7 +1707,7 @@ export const AdminSettingsPage: React.FC = () => {
             <>
               <div>
                 <h2 className="text-base font-extrabold text-[#0A1128]">Contact &amp; Telegram Settings</h2>
-                <p className="text-slate-500">Configure the destination for all &quot;Ask Owner for Any Doubt&quot; buttons.</p>
+                <p className="text-slate-500">Configure the destination for all "Ask Owner for Any Doubt" buttons.</p>
               </div>
               <div>
                 <label className="block font-bold text-slate-800 mb-1">Telegram URL (HTTPS)</label>
@@ -1762,38 +1797,22 @@ export const AdminSettingsPage: React.FC = () => {
   );
 };
 
-
 /* ============================================================================
-   PAGE 15: ADMIN RULES & GUIDELINES EDITOR
+   PAGE 15: ADMIN RULES & GUIDELINES EDITOR (Added Delete Rule Option)
    ============================================================================ */
 export const AdminGuidelinesEditorPage: React.FC = () => {
   const [guidelines, setGuidelines] = useState<any[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState<any>({ id: '', num: '01', title: '', content: '' });
 
-  const DEFAULT_GUIDELINES = [
-    { id: '1', num: '01', title: 'Start Strong (Initiation)', content: 'Take the initiative if you are well-prepared. Introduce the topic clearly, set a positive, welcoming direction, and invite others to contribute. Tip: If you are unsure of the topic, wait, listen, and then initiate after gathering thoughts.' },
-    { id: '2', num: '02', title: 'Express Opinions Clearly', content: 'Structure your points logically. Use clear language and state your stance firmly without being aggressive.' },
-    { id: '3', num: '03', title: 'Provide Factual Examples', content: 'Support your arguments with real-world data, statistics, case studies, or historical references to boost credibility.' },
-    { id: '4', num: '04', title: 'Practice Active Listening', content: 'Pay close attention to fellow speakers. Acknowledge valid points made by others before adding your perspective.' },
-    { id: '5', num: '05', title: 'Disagree Respectfully', content: 'When countering an argument, attack the point, not the person. Use phrases like "I see it slightly differently..."' },
-    { id: '6', num: '06', title: 'Summarize & Conclude', content: 'Bring diverse viewpoints together towards the end. Deliver a balanced conclusion that captures the essence of the group discussion.' },
-    { id: '7', num: '07', title: 'Common Mistakes to Avoid', content: 'Interrupting others repeatedly or talking over participants.\nLosing your temper or being overly aggressive.\nGoing off-topic or drifting away from the core agenda.' },
-  ];
-
   const loadRules = async () => {
     const saved = await api.list('guidelines');
-    if (saved && saved.length > 0) {
-      setGuidelines(saved);
-    } else {
-      setGuidelines(DEFAULT_GUIDELINES);
-      for (const r of DEFAULT_GUIDELINES) {
-        await api.save('guidelines', r);
-      }
-    }
+    setGuidelines(saved || []);
   };
 
-  useEffect(() => { loadRules(); }, []);
+  useEffect(() => {
+    loadRules();
+  }, []);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1803,17 +1822,30 @@ export const AdminGuidelinesEditorPage: React.FC = () => {
     alert('Guidelines successfully update ho gayi hain!');
   };
 
+  const handleDeleteRule = async (id: string) => {
+    if (!confirm('Kya aap is rule ko delete karna chahte hain?')) return;
+    await api.remove('guidelines', id);
+    loadRules();
+  };
+
   return (
     <AdminLayout>
       <div className="space-y-6 max-w-4xl">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-extrabold text-[#0A1128]">Manage Rules &amp; Guidelines</h1>
-            <p className="text-xs text-slate-500">Edit, update, and manage student GD rules displayed on the public guidelines page.</p>
+            <p className="text-xs text-slate-500">
+              Edit, update, and manage student GD rules displayed on the public guidelines page.
+            </p>
           </div>
           <button
             onClick={() => {
-              setForm({ id: '', num: `0${guidelines.length + 1}`, title: '', content: '' });
+              setForm({
+                id: '',
+                num: String(guidelines.length + 1).padStart(2, '0'),
+                title: '',
+                content: '',
+              });
               setModalOpen(true);
             }}
             className="px-4 py-2 rounded-lg bg-[#0F172A] hover:bg-blue-600 text-white font-bold text-xs flex items-center gap-1.5 shadow transition"
@@ -1824,7 +1856,10 @@ export const AdminGuidelinesEditorPage: React.FC = () => {
 
         <div className="space-y-3">
           {guidelines.map((rule) => (
-            <div key={rule.id || rule.num} className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-start justify-between gap-4">
+            <div
+              key={rule.id || rule.num}
+              className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-start justify-between gap-4"
+            >
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-xl bg-[#0A1128] text-white font-extrabold text-sm flex items-center justify-center shrink-0">
                   {rule.num}
@@ -1834,26 +1869,39 @@ export const AdminGuidelinesEditorPage: React.FC = () => {
                   <p className="text-xs text-slate-600 whitespace-pre-line leading-relaxed">{rule.content}</p>
                 </div>
               </div>
-              <button
-                onClick={() => { setForm(rule); setModalOpen(true); }}
-                className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 shrink-0"
-              >
-                Edit Rule
-              </button>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => {
+                    setForm(rule);
+                    setModalOpen(true);
+                  }}
+                  className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDeleteRule(rule.id)}
+                  className="px-3 py-1.5 rounded-lg border border-red-200 bg-red-50 text-xs font-bold text-red-600 hover:bg-red-100"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           ))}
         </div>
 
-             {modalOpen && (
+        {modalOpen && (
           <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl">
               <div className="flex items-start justify-between mb-4">
-                <h2 className="text-lg font-extrabold text-[#0A1128]">Edit Rule / Guideline</h2>
+                <h2 className="text-lg font-extrabold text-[#0A1128]">
+                  {form.id ? 'Edit Rule / Guideline' : 'Add New Rule / Guideline'}
+                </h2>
                 <button onClick={() => setModalOpen(false)} className="text-slate-400 hover:text-slate-600">
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              
+
               <form onSubmit={handleSave} className="space-y-4 text-xs">
                 <div className="grid grid-cols-3 gap-3">
                   <div>
@@ -1887,10 +1935,17 @@ export const AdminGuidelinesEditorPage: React.FC = () => {
                   />
                 </div>
                 <div className="flex justify-end gap-2.5 pt-2">
-                  <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 rounded-lg bg-slate-100 font-bold">
+                  <button
+                    type="button"
+                    onClick={() => setModalOpen(false)}
+                    className="px-4 py-2 rounded-lg bg-slate-100 font-bold"
+                  >
                     Cancel
                   </button>
-                  <button type="submit" className="px-5 py-2 rounded-lg bg-[#0F172A] hover:bg-blue-600 text-white font-bold shadow">
+                  <button
+                    type="submit"
+                    className="px-5 py-2 rounded-lg bg-[#0F172A] hover:bg-blue-600 text-white font-bold shadow"
+                  >
                     Save Rule
                   </button>
                 </div>
@@ -1902,4 +1957,3 @@ export const AdminGuidelinesEditorPage: React.FC = () => {
     </AdminLayout>
   );
 };
-          
