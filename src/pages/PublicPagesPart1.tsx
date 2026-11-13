@@ -108,10 +108,10 @@ export const HomePage: React.FC = () => {
   };
 
   const videoFaces = [
-    { name: 'Aarav', img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&q=80' },
-    { name: 'Rohan', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&q=80' },
-    { name: 'Ananya', img: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300&q=80' },
-    { name: 'Priya', img: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&q=80' },
+    { name: 'Aarav', img: 'https://media.istockphoto.com/id/1661100026/video/webcam-view-vertical-video-smiling-bearded-man-in-glasses-talking-on-a-video-call-using-a.jpg?s=640x640&k=20&c=FATCPKk3N0_TQHSb56jTZouNx8zpszhT8TwK5ANvMOs=' },
+    { name: 'Rohan', img: 'https://elements-resized.envatousercontent.com/elements-video-cover-images/361cb3a4-226c-4e57-8cf3-b39ebe7fbb46/video_preview/video_preview_0000.jpg?w=500&cf_fit=cover&q=85&format=auto&s=def4beb620cecb15ed988f6c5390ebea7361ef09ec388097734eb93394e6cc5e' },
+    { name: 'Ananya', img: 'https://static.vecteezy.com/system/resources/thumbnails/070/801/299/small_2x/pov-of-young-businesswoman-working-from-home-office-looking-at-camera-making-webcam-conference-call-with-client-or-boss-enjoying-pleasant-conversation-girl-remote-job-online-showing-thumb-up-video.jpg' },
+    { name: 'Priya', img: 'https://img.magnific.com/free-photo/pov-smiling-african-american-woman-waving-hello-camera-working-remote-from-home-living-room-friendly-student-with-glasses-video-call-conference-talking-with-teacher-online-class_482257-43369.jpg?semt=ais_hybrid&w=740&q=80' },
     { name: 'Neha', img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&q=80' },
     { name: 'Sneha', img: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=300&q=80' },
     { name: 'Vikram', img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&q=80' },
